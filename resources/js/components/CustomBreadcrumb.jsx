@@ -1,7 +1,7 @@
 import React from "react";
 import { ChevronRight } from "@mui/icons-material"; // Import icons
 import PropTypes from "prop-types"; // Optional: for type checking
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 const CustomBreadcrumb = ({ items }) => {
   return (
@@ -21,7 +21,7 @@ const CustomBreadcrumb = ({ items }) => {
             </div>
           )
           : (
-            <Link href={item.href} key={index} className="flex items-center gap-2 hover:text-blue-500">
+            <Link to={item.href} key={index} className="flex items-center gap-2 hover:text-blue-500">
     
               {item.icon && <item.icon fontSize="small" />}
     

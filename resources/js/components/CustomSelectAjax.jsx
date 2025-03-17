@@ -1,8 +1,6 @@
-'use client';
-
 import { Autocomplete, CircularProgress, InputAdornment, TextField } from '@mui/material';
 import { useState, useEffect } from 'react';
-import { server_api_get } from '../server_api';
+import api_handler from '../libs/api_handler';
 
 export default function CustomSelectAjax({
     optionLabel = '',
@@ -44,7 +42,7 @@ export default function CustomSelectAjax({
 
                 setLoading(true)
 
-                const response = await server_api_get({
+                const response = await api_handler.get({
                     url: ajax.url,
                     withCredentials: true
                 })

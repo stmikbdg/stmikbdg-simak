@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MahasiswaController;
+use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -17,11 +19,16 @@ Route::controller(AuthController::class)
  * ! Jadikan route di bawah sebagai halaman utama dari web
  * ! harap tidak mengubah nilai pada name();
  */
-Route::middleware('auth.token')
+Route::middleware(['auth.token', 'auth.mahasiswa'])
     ->group(function () {
-        Route::get('/home', function () {
-            return view('welcome');
-        })->name('home');
+        Route::get('/home', [MahasiswaController::class, 'index'])->name('home');
+        Route::get('/absenqr', [MahasiswaController::class, 'absenqr'])->name('absenqr');
+        Route::get('/khs', [MahasiswaController::class, 'khs'])->name('khs');
+        Route::get('/khs/semester/{semester}', [MahasiswaController::class, 'khs_per_semester'])->name('khs_per_semester');
+        Route::get('/profil', [MahasiswaController::class, 'profil'])->name('profil');
+        Route::get('/jadwal', [MahasiswaController::class, 'jadwal'])->name('jadwal');
+        Route::get('/notfound', [MahasiswaController::class, 'index'])->name('notfound');
+        Route::get('/krs', [MahasiswaController::class, 'krs'])->name('krs');
     });
 
 /**

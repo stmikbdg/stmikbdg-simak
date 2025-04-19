@@ -27,8 +27,8 @@ export default function Modal({
     }
 
     return (
-        <dialog id={modalId} className={`modal ${modalClassname} z-[990]`}>
-            <div className={`modal-box ${modalBoxClassname} rounded-lg bg-white border-2 p-0 border-zinc-400`}>
+        <dialog id={modalId} className={`modal ${modalClassname} z-[990] `}>
+            <div className={`modal-box ${modalBoxClassname} rounded-lg bg-white p-0 border-zinc-300`}>
                 <div className="bg-zinc-100 px-5 py-3 flex items-center justify-between">
                     {showTitle && (
                         <>
@@ -75,7 +75,7 @@ export function ModalForm({
 
     return (
         <dialog id={modalId} className={`modal ${modalClassname} z-[990]`}>
-            <div className={`modal-box ${modalBoxClassname} rounded-lg bg-white border-2 p-0 border-zinc-400`}>
+            <div className={`modal-box ${modalBoxClassname} rounded-lg bg-white border-2 p-0 border-zinc-300`}>
                 <div className="bg-zinc-100 px-5 py-3 flex items-center justify-between">
                     {showTitle && (
                         <>
@@ -92,12 +92,12 @@ export function ModalForm({
                         </>
                     )}
                 </div>
-                <hr className="border-zinc-400" />
+                <hr className="border-zinc-300" />
                 <form onSubmit={onSubmit}>
                     {error && (
                         <>
                             <div className="px-5 py-3">
-                                <div className="px-3 py-2 bg-red-500 rounded shadow-md text-white">
+                                <div className="px-3 py-2 bg-red-700/80 rounded shadow-md text-white">
                                     <p className="font-medium">
                                         Oops, Terdapat Kesalahan!
                                     </p>
@@ -107,13 +107,13 @@ export function ModalForm({
                                     </p>
                                 </div>
                             </div>
-                            <hr />
+                            <hr className="border-zinc-300" />
                         </>
                     )}
                     {children}
                     {showSubmitButton && (
                         <>
-                            <hr />
+                            <hr className="border-zinc-300" />
                             <div className="p-5">
                                 <Button 
                                     type="submit" 

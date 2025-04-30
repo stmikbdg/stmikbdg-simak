@@ -194,13 +194,13 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                                 <button onClick={() => goTo('/krs')} disabled={pathname === '/krs'} className={`p-2 w-full rounded-md ${pathname === '/krs' ? 'border border-zinc-300 bg-white' : 'hover:bg-zinc-200 ease-out duration-100'} flex items-center gap-3 `}>
                                     <EventNoteOutlined color={pathname === '/krs' ? 'primary' : ''} fontSize="small" />
                                     <p className="font-medium">
-                                        Kartu Rencana Studi
+                                        KRS
                                     </p>
                                 </button>
                             </div>
                         </div>
                     )}
-                    {menuFor('Mahasiswa') && (
+                    {/* {menuFor('Mahasiswa') && (
                         <div className="relative overflow-visible w-full">
                             <div className={`absolute top-0 left-0 w-2 rounded-md h-full bg-blue-500 ${pathname.startsWith('/khs') ? 'opacity-100' : 'opacity-0'}`}></div>
                             <div className="px-5">
@@ -212,21 +212,21 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                                 </button>
                             </div>
                         </div>
-                    )}
-                    {menuFor('Mahasiswa') && (
+                    )} */}
+                    {menuFor('Mahasiswa', 'Dosen') && (
                         <div className="relative overflow-visible w-full">
                             <div className={`absolute top-0 left-0 w-2 rounded-md h-full bg-blue-500 ${pathname === '/jadwal' ? 'opacity-100' : 'opacity-0'}`}></div>
                             <div className="px-5">
                                 <button onClick={() => goTo('/jadwal')} disabled={pathname === '/jadwal'} className={`p-2 w-full rounded-md ${pathname === '/jadwal' ? 'border border-zinc-300 bg-white' : 'hover:bg-zinc-200 ease-out duration-100'} flex items-center gap-3 `}>
                                     <CalendarMonthOutlined color={pathname === '/jadwal' ? 'primary' : ''} fontSize="small" />
                                     <p className="font-medium">
-                                        Jadwal Kuliah
+                                        Jadwal
                                     </p>
                                 </button>
                             </div>
                         </div>
                     )}
-                    {menuFor('Admin', 'Dosen', 'Dosen Wali') && (
+                    {menuFor('Admin', 'Dosen', 'Prodi') && (
                         <div className="relative overflow-visible w-full">
                             <div className={`absolute top-0 left-0 w-2 rounded-md h-full bg-blue-500 ${pathname === '/berita' ? 'opacity-100' : 'opacity-0'}`}></div>
                             <div className="px-5">

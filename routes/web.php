@@ -1,8 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\MahasiswaController;
-use App\Http\Controllers\TestController;
+use App\Http\Controllers\WebController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -19,16 +18,17 @@ Route::controller(AuthController::class)
  * ! Jadikan route di bawah sebagai halaman utama dari web
  * ! harap tidak mengubah nilai pada name();
  */
-Route::middleware(['auth.token', 'auth.mahasiswa'])
+Route::middleware(['auth.token'])
     ->group(function () {
-        Route::get('/home', [MahasiswaController::class, 'index'])->name('home');
-        Route::get('/absenqr', [MahasiswaController::class, 'absenqr'])->name('absenqr');
-        Route::get('/khs', [MahasiswaController::class, 'khs'])->name('khs');
-        Route::get('/khs/semester/{semester}', [MahasiswaController::class, 'khs_per_semester'])->name('khs_per_semester');
-        Route::get('/profil', [MahasiswaController::class, 'profil'])->name('profil');
-        Route::get('/jadwal', [MahasiswaController::class, 'jadwal'])->name('jadwal');
-        Route::get('/notfound', [MahasiswaController::class, 'index'])->name('notfound');
-        Route::get('/krs', [MahasiswaController::class, 'krs'])->name('krs');
+        Route::get('/home', [WebController::class, 'index'])->name('home');
+        Route::get('/absenqr', [WebController::class, 'absenqr'])->name('absenqr');
+        // Route::get('/khs', [WebController::class, 'khs'])->name('khs');
+        Route::get('/khs/semester/{semester}', [WebController::class, 'khs_per_semester'])->name('khs_per_semester');
+        Route::get('/profil', [WebController::class, 'profil'])->name('profil');
+        Route::get('/jadwal', [WebController::class, 'jadwal'])->name('jadwal');
+        Route::get('/notfound', [WebController::class, 'index'])->name('notfound');
+        Route::get('/krs', [WebController::class, 'krs'])->name('krs');
+        Route::get('/krs/approve/{mhs_id}/{krs_id}', [WebController::class, 'krs_approve_by_dosen_wali'])->name('krs_approve_by_dosen_wali');
     });
 
 /**

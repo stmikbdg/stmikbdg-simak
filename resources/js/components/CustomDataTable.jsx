@@ -110,51 +110,53 @@ const CustomDataTable = ({
     getRowId = (row) => row.id
 }) => {
     return (
-        <DataGrid
-            getRowId={getRowId}
-            rows={rows}
-            columns={columns}
-            pageSizeOptions={[5, 10, 25, 50, 100]}
-            pagination
-            autosizeOnMount={loading}
-            disableColumnMenu
-            disableRowSelectionOnClick
-            checkboxSelection={checkbox}
-            loading={loading}
-            isRowSelectable={isRowSelectable}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize
-                }
-              }
-            }}
-            slots={{
-                toolbar: () => (
-                    <GridToolbarContainer className='w-full'>
-                        {toolbar.search && (
-                            <GridToolbarQuickFilter />
-                        )}
-                        {toolbar.column && (
-                            <GridToolbarColumnsButton />
-                        )}
-                        {toolbar.density && (
-                            <GridToolbarDensitySelector />
-                        )}
-                    </GridToolbarContainer>
-                ),
-                noRowsOverlay: CustomNoRowsOverlay,
-                noResultsOverlay: CustomNoRowsOverlay
-            }}
-            slotProps={{
-                loadingOverlay: {
-                    variant: 'skeleton',
-                    noRowsVariant: 'skeleton'
-                }
-            }}
-            onRowSelectionModelChange={rowSelect.onChange}
-            rowSelectionModel={rowSelect.value}
-        />
+      <DataGrid
+        getRowId={getRowId}
+        rows={rows}
+        columns={columns}
+        pageSizeOptions={[5, 10, 25, 50, 100]}
+        pagination
+        autosizeOnMount={loading}
+        disableColumnMenu
+        disableRowSelectionOnClick
+        checkboxSelection={checkbox}
+        loading={loading}
+        isRowSelectable={isRowSelectable}
+        initialState={{
+          pagination: {
+            paginationModel: {
+              pageSize
+            }
+          }
+        }}
+        
+        slots={{
+            toolbar: () => (
+                <GridToolbarContainer className='w-full'>
+                    {toolbar.search && (
+                        <GridToolbarQuickFilter variant='outlined' size={'small'} color={'primary'} placeholder='Cari disini' />
+                    )}
+                    {toolbar.column && (
+                        <GridToolbarColumnsButton  />
+                    )}
+                    {toolbar.density && (
+                        <GridToolbarDensitySelector />
+                    )}
+                </GridToolbarContainer>
+            ),
+            noRowsOverlay: CustomNoRowsOverlay,
+            noResultsOverlay: CustomNoRowsOverlay
+        }}
+        slotProps={{
+            loadingOverlay: {
+                variant: 'skeleton',
+                noRowsVariant: 'skeleton'
+            }
+        }}
+        
+        onRowSelectionModelChange={rowSelect.onChange}
+        rowSelectionModel={rowSelect.value}
+      />
     )
 }
 

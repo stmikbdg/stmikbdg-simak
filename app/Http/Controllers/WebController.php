@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Session;
 
-class MahasiswaController extends Controller {
+class WebController extends Controller {
 
     private function render(string $component, array $props = []) {
         $token = Session::get('token');
@@ -15,7 +15,7 @@ class MahasiswaController extends Controller {
         $props['token'] = $token ?? null;
         $props['role'] = [
             'dosen' => [
-                'enable' => $role['is_dsn'] ?? false,
+                'enable' => $role['is_dosen'] ?? false,
                 'label' => 'Dosen'
             ],
             'admin' => [
@@ -49,29 +49,36 @@ class MahasiswaController extends Controller {
     }
 
     public function absenqr() {
-        return $this->render('mahasiswa/absenqr');
+        return $this->render('absenqr');
     }
 
     public function khs() {
-        return $this->render('mahasiswa/khs');
+        return $this->render('khs');
     }
 
     public function khs_per_semester(string $semester) {
-        return $this->render('mahasiswa/khs_per_semester', [
+        return $this->render('khs_per_semester', [
             'semester' => $semester
         ]);
     }
 
     public function profil() {
-        return $this->render('mahasiswa/profil');
+        return $this->render('profil');
     }
 
     public function jadwal() {
-        return $this->render('mahasiswa/jadwal');
+        return $this->render('jadwal');
     }
 
     public function krs() {
-        return $this->render('mahasiswa/krs');
+        return $this->render('krs');
+    }
+
+    public function krs_approve_by_dosen_wali(Int $mhs_id, Int $krs_id) {
+        return $this->render('krs_approve_by_dosen_wali', [
+            'mhs_id' => $mhs_id,
+            'krs_id' => $krs_id
+        ]);
     }
 }
 

@@ -2,6 +2,7 @@
 
 import { Html5QrcodeScanner } from "html5-qrcode"
 import { useEffect, useState } from "react"
+import QRCode from "react-qr-code"
 import QrReader from "react-qr-reader"
 
 
@@ -67,5 +68,17 @@ export const QRScanner2 = ({
 
     return (
         <div id="qr-reader"></div>
+    )
+}
+
+export const QRMaker = ({
+    value = "Test 123"
+}) => {
+    return (
+        <QRCode 
+            size={256}
+            viewBox={`0 0 256 256`}
+            value={value}
+        />
     )
 }

@@ -35,7 +35,7 @@ CustomTabItem.propTypes = {
   children: PropTypes.node,
 };
 
-export function CustomTabs({ children }) {
+export function CustomTabs({ children, centered = false }) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
@@ -55,6 +55,7 @@ export function CustomTabs({ children }) {
           aria-label="custom tabs"
           variant="scrollable"
           scrollButtons="auto"
+          centered={centered}
         >
           {tabs.map((tab, index) => (
             <Tab

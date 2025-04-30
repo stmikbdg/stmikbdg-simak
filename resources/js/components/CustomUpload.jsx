@@ -1,5 +1,3 @@
-'use client'
-
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
@@ -18,18 +16,18 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
-export default function FileUploadComponent({
+export default function CustomUpload({
     fullWidth = false,
     variant = 'text',
     startIcon = <CloudUploadIcon />,
     text = 'Import',
     accept = [], // Dynamically set accepted file types
     multiple = false, // Toggle multiple file selection
-    onChange = (event) => console.log(event.target.files), // Handle file change events
     buttonProps = {}, // Additional props for the button
     inputProps = {}, // Additional props for the input
     loading = false,
-    size = 'small'
+    size = 'small',
+    onUploaded = async (files) => console.log(files)
   }) {
     return text !== '' ? (
       <Button
@@ -40,14 +38,14 @@ export default function FileUploadComponent({
         startIcon={loading ? <CircularProgress size={15} className='grayscale' /> : startIcon}
         {...buttonProps} // Spread additional button props
       >
-        <p className='font-jakarta'>
+        <p className='font-jakarta text-xs font-semibold'>
           {loading ? 'Loading' : text}
         </p>
         <VisuallyHiddenInput
           type="file"
           accept={accept.length < 1 ? '*' : accept.join(',')}
           multiple={multiple}
-          onChange={onChange}
+          onChange={(e) => onUploaded(e.target.files)}
           {...inputProps} // Spread additional input props
         />
       </Button>
@@ -58,7 +56,7 @@ export default function FileUploadComponent({
           type="file"
           accept={accept.length < 1 ? '*' : accept.join(',')}
           multiple={multiple}
-          onChange={onChange}
+          onChange={(e) => onUploaded(e.target.files)}
           {...inputProps} // Spread additional input props
         />
       </IconButton>

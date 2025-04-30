@@ -1,7 +1,7 @@
-import { Avatar, Button, Checkbox, CircularProgress, Collapse, Fade, IconButton, Tab, Tabs, TextField, Tooltip } from "@mui/material"
+import { Avatar, Button, Checkbox, CircularProgress, Collapse, Fade, IconButton, Link, Tab, Tabs, TextField, Tooltip } from "@mui/material"
 import { useSidebar } from "../context/SidebarContext"
 import MainLayout from "../layouts/MainLayout"
-import { AccessTimeOutlined, Check, CheckBox, CheckBoxOutlineBlankTwoTone, CheckBoxTwoTone, Close, CollectionsBookmarkOutlined, CropSquareOutlined, Delete, IndeterminateCheckBoxTwoTone, InfoOutlined, LocationOnOutlined, MenuOutlined, PersonOutline, Pin, QrCode, RefreshOutlined, Remove, SendOutlined, Star, SubjectOutlined, Warning } from "@mui/icons-material"
+import { AccessTimeOutlined, Check, CheckBox, CheckBoxOutlineBlankTwoTone, CheckBoxTwoTone, Close, CollectionsBookmarkOutlined, CropSquareOutlined, Delete, Download, DownloadOutlined, IndeterminateCheckBoxTwoTone, InfoOutlined, LocationOnOutlined, MenuOutlined, PersonOutline, Pin, QrCode, RefreshOutlined, Remove, SendOutlined, Star, SubjectOutlined, Upload, VisibilityOutlined, Warning } from "@mui/icons-material"
 import { CustomTabItem, CustomTabs } from "../components/CustomTabs"
 import CustomDropdown, { CustomDropdown2 } from "../components/CustomDropdown"
 import { useUser } from "../context/UserContext"
@@ -14,6 +14,7 @@ import dayjs from "dayjs"
 import 'dayjs/locale/id'
 import { QRMaker } from "../components/CustomQRCode"
 import CustomDataTable from "../components/CustomDataTable"
+import CustomUpload from "../components/CustomUpload"
 
 export default function Jadwal({ token, base_url, role }) {
 
@@ -36,7 +37,8 @@ function JadwalDosen({ token, base_url, role }) {
             loading: {
                 fetch: false,
                 absen_pin: false,
-                tutup: false
+                tutup: false,
+                upload_kontrak: false
             },
             fetched: false
         },
@@ -727,14 +729,23 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                     {item['matakuliah']['nm_mk']}
                                                                                 </h1>
                                                                             </div>
-                                                                            {item['dosen'] && (
-                                                                                <div className="flex items-center gap-3 opacity-70">
-                                                                                    <SubjectOutlined sx={{ fontSize: 16 }} />
-                                                                                    <p className="text-xs font-medium">
-                                                                                        Semester {item['matakuliah']['semester']}
-                                                                                    </p>
+                                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                                                {item['dosen'] && (
+                                                                                    <div className="flex items-center gap-3 opacity-70">
+                                                                                        <SubjectOutlined sx={{ fontSize: 16 }} />
+                                                                                        <p className="text-xs font-medium">
+                                                                                            Semester {item['matakuliah']['semester']}
+                                                                                        </p>
+                                                                                    </div>
+                                                                                )}
+                                                                                <div className="flex items-center">
+                                                                                    <Button startIcon={<Download fontSize="small" />} size="small" disabled={!item['kontrak_kuliah']}>
+                                                                                        <p className="text-xs font-semibold font-jakarta">
+                                                                                            Kontrak/silabus Kuliah
+                                                                                        </p>
+                                                                                    </Button>
                                                                                 </div>
-                                                                            )}
+                                                                            </div>
                                                                             <div className="flex items-center flex-wrap">
                                                                                 {item['riwayat_pertemuan'].map((absen, index) => (
                                                                                     <Tooltip key={index} arrow title={`${absen['jns_pert']} - ${dayjs(absen['create_time']).locale('id').format('HH:mm:ss, DD MMMM YYYY')}`}>
@@ -774,7 +785,8 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                 )}
                                                                             </div>
                                                                             <div className="flex justify-end w-full sm:w-fit">
-                                                                                {item['kelas_dibuka']
+                                                                                {item['kontrak_kuliah']
+                                                                                    ? item['kelas_dibuka']
                                                                                     ? (
                                                                                         <div className="flex items-center gap-4 w-full sm:w-fit">
                                                                                             <Button variant="outlined" size="small" onClick={() => aksi.kelas.absen.init(item['data_kelas']['kelas_kuliah_id'])} disabled={listData.kelas.loading.buka || listData.kelas.absen.loading.refresh} className="text-xs w-full sm:w-fit">
@@ -804,6 +816,9 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                                 }
                                                                                             </p>
                                                                                         </Button>
+                                                                                    )
+                                                                                    : (
+                                                                                        <CustomUpload buttonProps={{ size: 'small', variant: 'contained' }} text="upload kontrak/silabus" startIcon={<Upload />} />
                                                                                     )
                                                                                 }
                                                                             </div>
@@ -1212,15 +1227,26 @@ function JadwalMahasiswa({ token, base_url, role }) {
                                                                                     {item['matakuliah']['nm_mk']}
                                                                                 </h1>
                                                                             </div>
-                                                                            {item['dosen'] && (
-                                                                                <div className="flex items-center gap-3 opacity-70">
-                                                                                    <PersonOutline sx={{ fontSize: 16 }} />
-                                                                                    <p className="text-xs font-medium">
-                                                                                        {item['dosen']['nm_dosen']}
-                                                                                    </p>
-                                                                                </div>
-                                                                            )}
-                                                                            <div className="flex items-center justify-center w-full flex-wrap">
+                                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                                                {item['dosen'] && (
+                                                                                    <div className="flex items-center gap-3 opacity-70">
+                                                                                        <PersonOutline sx={{ fontSize: 16 }} />
+                                                                                        <p className="text-xs font-medium">
+                                                                                            {item['dosen']['nm_dosen']}
+                                                                                        </p>
+                                                                                    </div>
+                                                                                )}
+                                                                                {item['kontrak_kuliah'] && (
+                                                                                    <div className="flex items-center gap-3 opacity-70">
+                                                                                        <Button variant="text" size="small" href={`${item['kontrak_kuliah']['file_link']}`} target="_blank" loading={false} loadingPosition="start" startIcon={<VisibilityOutlined />}>
+                                                                                            <p className="text-xs font-bold font-jakarta">
+                                                                                                Silabus
+                                                                                            </p>
+                                                                                        </Button>
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="flex items-center w-full flex-wrap">
                                                                                 {item['riwayat_presensi'].map((absen, index) => absen['masuk']
                                                                                     ? (
                                                                                         <Tooltip key={index} arrow title={dayjs(absen['masuk']).locale('id').format('HH:mm:ss, DD MMMM YYYY')}>

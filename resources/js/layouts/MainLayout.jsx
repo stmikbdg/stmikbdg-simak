@@ -82,15 +82,17 @@ export default function MainLayout({ children, token, base_url, role }) {
     return (
         <div className={`min-h-screen bg-zinc-100 jakarta text-zinc-700 text-xs sm:text-sm font-jakarta`}>
             <div className="w-full flex gap-3">
-                <div className="fixed bottom-5 right-5 sm:hidden items-center justify-center z-[40]">
-                    <Fade in={showFab} timeout={200}>
-                        <Tooltip arrow title='Absen'>
-                            <Fab onClick={() => window.location.href = '/absenqr'} aria-label="absen" color="primary">
-                                <QrCodeOutlined />
-                            </Fab>
-                        </Tooltip>
-                    </Fade>
-                </div>
+                {aksi.menu.for('Mahasiswa') && (
+                    <div className="fixed bottom-5 right-5 sm:hidden items-center justify-center z-[40]">
+                        <Fade in={showFab} timeout={200}>
+                            <Tooltip arrow title='Absen'>
+                                <Fab onClick={() => window.location.href = '/absenqr'} aria-label="absen" color="primary">
+                                    <QrCodeOutlined />
+                                </Fab>
+                            </Tooltip>
+                        </Fade>
+                    </div>
+                )}
                 {/* Sidebar */}
                 <div className="hidden lg:block lg:w-2/12 min-w-60 sticky top-3 h-fit pl-4 overflow-auto">
                     <SidebarContent showSidebar={showSidebar} setShowSidebar={setShowSidebar} role={role} menuFor={aksi.menu.for} />
@@ -136,7 +138,7 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
 
     return (
         <>
-            <div className={`${mobile ? 'py-4' : 'py-4'} font-jakarta `}>
+            {/* <div className={`${mobile ? 'py-4' : 'py-4'} font-jakarta `}>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <img src="/images/stmik.png" alt="Logo STMIK" className="w-12" />
@@ -154,6 +156,29 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                             <MenuOutlined fontSize="small" />
                         </IconButton>
                     )}
+                </div>
+            </div> */}
+            <hr className="my-2 opacity-0" />
+            <div className="space-y-4">
+                <div className="space-y-1">
+                    <div className="flex gap-4 justify-between">
+                        <div className="">
+                            <p className="text-xs font-semibold opacity-50">
+                                Selamat Datang,
+                            </p>
+                            <p className="font-semibold text-blue-600 text-sm">
+                                Ziyad Jahizh Kartiwa
+                            </p>
+                        </div>
+                        {mobile && (
+                            <IconButton onClick={() => setShowSidebar(state => !state)}>
+                                <MenuOutlined fontSize="small" />
+                            </IconButton>
+                        )}
+                    </div>
+                    <div className="px-2 py-0.5 rounded w-fit bg-blue-700/80 text-white text-xs font-medium tracking-tighter">
+                        Dosen
+                    </div>
                 </div>
             </div>
             <hr className="my-5 border-zinc-400" />
@@ -200,19 +225,6 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                             </div>
                         </div>
                     )}
-                    {/* {menuFor('Mahasiswa') && (
-                        <div className="relative overflow-visible w-full">
-                            <div className={`absolute top-0 left-0 w-2 rounded-md h-full bg-blue-500 ${pathname.startsWith('/khs') ? 'opacity-100' : 'opacity-0'}`}></div>
-                            <div className="px-5">
-                                <button onClick={() => goTo('/khs')} disabled={pathname.startsWith('/khs')} className={`p-2 w-full rounded-md ${pathname.startsWith('/khs') ? 'border border-zinc-300 bg-white' : 'hover:bg-zinc-200 ease-out duration-100'} flex items-center gap-3 `}>
-                                    <EventAvailableOutlined color={pathname.startsWith('/khs') ? 'primary' : ''} fontSize="small" />
-                                    <p className="font-medium">
-                                        Kartu Hasil Studi
-                                    </p>
-                                </button>
-                            </div>
-                        </div>
-                    )} */}
                     {menuFor('Mahasiswa', 'Dosen') && (
                         <div className="relative overflow-visible w-full">
                             <div className={`absolute top-0 left-0 w-2 rounded-md h-full bg-blue-500 ${pathname === '/jadwal' ? 'opacity-100' : 'opacity-0'}`}></div>
@@ -243,7 +255,7 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
             </CustomLoading>
             <hr className="my-5 border-zinc-400" />
             <p className="font-medium opacity-60 text-xs px-5">
-                Profil dan Pengaturan
+                Pengaturan
             </p>
             <hr className="my-1 opacity-0" />
             <CustomLoading loading={loadingUserdata} renderIf={userdata}>
@@ -300,22 +312,6 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                     </button>
                 </div>
             </div>
-            {/* <div className="flex justify-between items-center w-full pt-1">
-                <p className="font-medium pl-8">
-                    Ubah Tema
-                </p>
-                <div className="flex justify-center items-center rounded-full border border-zinc-300 bg-white w-fit">
-                    <div className="w-6 h-6 rounded-full border border-zinc-300 flex items-center justify-center bg-zinc-700 text-white">
-                        <ComputerOutlined sx={{ fontSize: 12 }} />
-                    </div>
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center">
-                        <DarkModeOutlined sx={{ fontSize: 12 }} />
-                    </div>
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center">
-                        <LightModeOutlined sx={{ fontSize: 12 }} />
-                    </div>
-                </div>
-            </div> */}
         </>
     )
 }

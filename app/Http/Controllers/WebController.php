@@ -41,6 +41,8 @@ class WebController extends Controller {
         ];
         $props['base_url'] = config('myconfig.api.base_url');
 
+        $props['app'] = config('myconfig.app');
+
         return Inertia::render($component, $props);
     }
 

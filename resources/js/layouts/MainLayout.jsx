@@ -80,7 +80,7 @@ export default function MainLayout({ children, token, base_url, role }) {
     }, [])
 
     return (
-        <div className={`min-h-screen bg-zinc-100 jakarta text-zinc-700 text-xs sm:text-sm font-jakarta`}>
+        <div className={`min-h-screen bg-zinc-100 jakarta text-zinc-700 text-xs sm:text-sm font-jakarta flex flex-col justify-between`}>
             <div className="w-full flex gap-3">
                 {aksi.menu.for('Mahasiswa') && (
                     <div className="fixed bottom-5 right-5 sm:hidden items-center justify-center z-[40]">
@@ -114,8 +114,10 @@ export default function MainLayout({ children, token, base_url, role }) {
             </div>
             
             {/* Footer */}
-            <div className="p-20">
-                Footer disini
+            <div className="p-4 flex justify-center items-center gap-5 italic text-xs opacity-50">
+                <p>
+                    © Since 2024 - STMIK Bandung
+                </p>
             </div>
         </div>
     )
@@ -166,9 +168,11 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                             <p className="text-xs font-semibold opacity-50">
                                 Selamat Datang,
                             </p>
-                            <p className="font-semibold text-blue-600 text-sm">
-                                Ziyad Jahizh Kartiwa
-                            </p>
+                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
+                                <p className="font-semibold text-blue-600 text-sm">
+                                    {userdata?.profile?.nama || 'Loading..'}
+                                </p>
+                            </CustomLoading>
                         </div>
                         {mobile && (
                             <IconButton onClick={() => setShowSidebar(state => !state)}>
@@ -176,9 +180,22 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                             </IconButton>
                         )}
                     </div>
-                    <div className="px-2 py-0.5 rounded w-fit bg-blue-700/80 text-white text-xs font-medium tracking-tighter">
-                        Dosen
-                    </div>
+                    <CustomLoading loading={loadingUserdata} renderIf={userdata}>
+                        <p className="px-2 py-0.5 rounded w-fit bg-blue-700/80 text-white text-xs font-medium tracking-tighter">
+                            {role?.admin?.enable 
+                                ? 'Admin' 
+                                : role?.dosen?.enable
+                                    ? 'Dosen' 
+                                    : role?.dosen_wali?.enable
+                                        ? 'Dosen Wali' 
+                                        : role?.prodi?.enable
+                                            ? 'Prodi' 
+                                            : role?.developer?.enable
+                                                ? 'Developer' 
+                                                : 'Mahasiswa'
+                            }
+                        </p>
+                    </CustomLoading>
                 </div>
             </div>
             <hr className="my-5 border-zinc-400" />
@@ -238,7 +255,7 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                             </div>
                         </div>
                     )}
-                    {menuFor('Admin', 'Dosen', 'Prodi') && (
+                    {menuFor('Prodi') && (
                         <div className="relative overflow-visible w-full">
                             <div className={`absolute top-0 left-0 w-2 rounded-md h-full bg-blue-500 ${pathname === '/berita' ? 'opacity-100' : 'opacity-0'}`}></div>
                             <div className="px-5">
@@ -257,38 +274,6 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
             <p className="font-medium opacity-60 text-xs px-5">
                 Pengaturan
             </p>
-            <hr className="my-1 opacity-0" />
-            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                <div className="flex w-full text-start items-center justify-between px-3 py-2 rounded-md border border-zinc-300 bg-blue-600 text-white">
-                    <div className="flex items-center gap-3">
-                        <Avatar 
-                            sx={{
-                                width: 27,
-                                height: 27
-                            }}
-                        />
-                        <div className="">
-                            <p className="text-xs">
-                                {role?.admin?.enable 
-                                    ? 'Admin' 
-                                    : role?.dosen?.enable
-                                        ? 'Dosen' 
-                                        : role?.dosen_wali?.enable
-                                            ? 'Dosen Wali' 
-                                            : role?.prodi?.enable
-                                                ? 'Prodi' 
-                                                : role?.developer?.enable
-                                                    ? 'Developer' 
-                                                    : 'Mahasiswa'
-                                }
-                            </p>
-                            <p className="font-medium">
-                                {userdata?.profile?.nama}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </CustomLoading>
             <hr className="my-1 opacity-0" />
             
             <div className="relative overflow-visible w-full">

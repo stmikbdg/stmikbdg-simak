@@ -1,6 +1,7 @@
 import {
     AccessTimeOutlined,
     AccountBalanceWalletTwoTone,
+    Add,
     ArrowRight,
     ArrowRightAlt,
     AssignmentOutlined,
@@ -22,6 +23,7 @@ import {
     EastOutlined,
     FingerprintOutlined,
     HowToRegTwoTone,
+    Image,
     IndeterminateCheckBoxTwoTone,
     InfoOutlined,
     KeyboardDoubleArrowRightOutlined,
@@ -30,8 +32,11 @@ import {
     MenuOutlined,
     PeopleAltTwoTone,
     PersonOutline,
+    Refresh,
     RefreshOutlined,
     Remove,
+    Save,
+    SaveOutlined,
     SchoolTwoTone,
     SendOutlined,
     SubjectOutlined,
@@ -52,7 +57,7 @@ import {
 } from "@mui/material";
 import MainLayout from "../layouts/MainLayout";
 import { useSidebar } from "../context/SidebarContext";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUser } from "../context/UserContext";
 import { customSwal } from "../components/CustomSwal";
 import api_handler from "../libs/api_handler";
@@ -65,6 +70,8 @@ import Modal, { modal, ModalForm } from "../components/Modal";
 import { QRMaker } from "../components/CustomQRCode";
 import CustomDataTable from "../components/CustomDataTable";
 import CustomUpload from "../components/CustomUpload";
+import { CustomControlledTextEditor, CustomTextEditor } from "../components/CustomTextEditor";
+import DOMPurify from "isomorphic-dompurify";
 
 export default function Home({ token, base_url, role, app }) {
     if (role.mahasiswa.enable) {
@@ -2469,128 +2476,239 @@ function DosenPage({ token, base_url, role }) {
     );
 }
 
-function AdminPage({ token, base_url, role }) {
+function AdminPage({ token, base_url, role, app }) {
     const { setShowSidebar } = useSidebar();
 
     const { userdata, loadingUserdata } = useUser();
 
     const [listData, setListData] = useState({
-        khs: {
-            data: null,
-            loading: false,
-        },
-        jadwal: {
+        pengumuman: {
             data: [],
+            meta: null,
             loading: {
                 fetch: false,
-                absen_pin: false,
-            },
-            fetched: false,
-        },
-    });
+                refresh: false
+            }
+        }
+    })
+
+    const editorRef = useRef(null)
+
+    const [formData, setFormData] = useState({
+        tambah_pengumuman: {
+            target: 0,
+            image: null,
+            message: '',
+            error: null,
+            loading: false,
+            enable: false,
+            with_image: false,
+            image_source: null
+        }
+    })
 
     const aksi = {
-        khs: {
-            get: async () => {
-                try {
-                    aksi.khs.set("loading", true);
+        formData: {
+            tambah_pengumuman: {
+                enable: (enable = true) => {
+                    setFormData(state => ({
+                        ...state,
+                        tambah_pengumuman: {
+                            ...state.tambah_pengumuman,
+                            enable
+                        }
+                    }))
+                },
+                submit: async () => {
+                    try {
+                        const message = formData.tambah_pengumuman.message
 
-                    const response = await api_handler.get({
-                        base_url,
-                        token,
-                        url: "krs/ip/semester",
-                    });
+                        if(message.length < 1) {
+                            return customSwal.toast.error({
+                                message: 'Anda perlu memberikan pernyataan pengumuman terlebih dahulu!'
+                            })
+                        }
 
-                    aksi.khs.set("loading", false);
+                        aksi.formData.tambah_pengumuman.set('loading', true)
 
-                    if (response.success) {
-                        aksi.khs.set("data", response?.data);
-                    } else {
-                        aksi.khs.set("data", null);
+                        let response = {
+                            success: false,
+                            message: 'Terjadi kesalahan disaat membuat pengumuman baru!'
+                        }
+
+                        let response_image = {
+                            success: false,
+                            message: 'Terjadi kesalahan disaat membuat pengumuman baru!'
+                        }
+
+                        if(formData.tambah_pengumuman.with_image) {
+                            response_image = await api_handler.postForm({
+                                token,
+                                base_url,
+                                url: 'file/image/add?to=pengumuman',
+                                payload: {
+                                    image: formData.tambah_pengumuman.image
+                                }
+                            })
+
+                            if(!response_image?.success) {
+                                aksi.formData.tambah_pengumuman.set('loading', false)
+                                return customSwal.toast.error({
+                                    message: response_image?.message
+                                })
+                            }
+                        }
+
+                        let payload = {
+                            target: 0,
+                            message
+                        }
+
+                        if(response_image?.success) {
+                            payload = {
+                                ...payload,
+                                image: response_image?.data?.imageName
+                            }
+                        }
+
+                        response = await api_handler.post({
+                            token,
+                            base_url,
+                            url: 'pengumuman/add',
+                            payload
+                        })
+
+                        aksi.formData.tambah_pengumuman.set('loading', false)
+
+                        if(response?.success) {
+                            aksi.formData.tambah_pengumuman.set('message', '')
+                            aksi.formData.tambah_pengumuman.set('with_image', false)
+                            aksi.formData.tambah_pengumuman.set('image', null)
+                            aksi.formData.tambah_pengumuman.set('image_source', null)
+                            customSwal.toast.success({
+                                message: 'Berhasil menambahkan pengumuman baru!'
+                            })
+                            aksi.formData.tambah_pengumuman.enable(false)
+                            aksi.pengumuman.refresh()
+                        }else{
+                            customSwal.toast.error({
+                                message: response?.message
+                            })
+                        }
+                    } catch (error) {
                         customSwal.toast.error({
-                            message: response?.message,
-                        });
+                            message: error?.message
+                        })
                     }
-                } catch (error) {
-                    customSwal.toast.error({
-                        message: error?.message,
-                    });
+                },
+                set: (column, value) => {
+                    setFormData(state => ({
+                        ...state,
+                        tambah_pengumuman: {
+                            ...state.tambah_pengumuman,
+                            [column]: value
+                        }
+                    }))
+                },
+                set_image: (image) => {
+                    if(image && image.type.startsWith('image/')) {
+                        aksi.formData.tambah_pengumuman.set('image', image)
+                        const reader = new FileReader()
+                        reader.onload = () => {
+                            aksi.formData.tambah_pengumuman.set('image_source', reader.result)
+                        }
+                        reader.readAsDataURL(image)
+                    }else{
+                        aksi.formData.tambah_pengumuman.set('image', null)
+                        customSwal.toast.error({
+                            message: 'Anda hanya diperbolehkan untuk mengunggah sebuah foto / gambar!'
+                        })
+                    }
+                },
+                clear_image: () => {
+                    aksi.formData.tambah_pengumuman.set('image', null)
+                    aksi.formData.tambah_pengumuman.set('image_source', null)
                 }
-            },
-            set: (column, value) => {
-                setListData((state) => ({
-                    ...state,
-                    khs: {
-                        ...state.khs,
-                        [column]: value,
-                    },
-                }));
-            },
+            }
         },
-        jadwal: {
+        pengumuman: {
             get: async () => {
                 try {
-                    aksi.jadwal.loading("fetch");
+                    aksi.pengumuman.loading('fetch')
 
                     const response = await api_handler.get({
                         base_url,
                         token,
-                        url: "kelas-kuliah/mahasiswa",
-                    });
+                        url: 'pengumuman/admin/list'
+                    })
 
-                    aksi.jadwal.loading("fetch");
+                    aksi.pengumuman.loading('fetch')
 
-                    if (response.success) {
-                        aksi.jadwal.set("data", response?.data?.kelas_kuliah);
-                        aksi.jadwal.set("fetched", true);
-                    } else {
+                    if(response?.success) {
+                        aksi.pengumuman.set('data', response?.data?.list_pengumuman)
+                    }else{
                         customSwal.toast.error({
-                            message: response?.message,
-                        });
+                            message: response?.message
+                        })
                     }
                 } catch (error) {
                     customSwal.toast.error({
-                        message: error?.message,
-                    });
+                        message: error?.message
+                    })
                 }
             },
             set: (column, value) => {
-                setListData((state) => ({
+                setListData(state => ({
                     ...state,
-                    jadwal: {
-                        ...state.jadwal,
-                        [column]: value,
-                    },
-                }));
+                    pengumuman: {
+                        ...state.pengumuman,
+                        [column]: value
+                    }
+                }))
             },
             loading: (column) => {
-                setListData((state) => ({
+                setListData(state => ({
                     ...state,
-                    jadwal: {
-                        ...state.jadwal,
+                    pengumuman: {
+                        ...state.pengumuman,
                         loading: {
-                            ...state.jadwal.loading,
-                            [column]: !state.jadwal.loading[column],
-                        },
-                    },
-                }));
+                            ...state.pengumuman.loading,
+                            [column]: !state.pengumuman.loading[column]
+                        }
+                    }
+                }))
             },
-            hari: {
-                get: (hari) => {
-                    return listData.jadwal.data.find((item) => item[hari])
-                        ? listData.jadwal.data.find((item) => item[hari])[hari]
-                        : [];
-                },
-            },
-        },
-    };
+            refresh: async () => {
+                try {
+                    aksi.pengumuman.loading('refresh')
+
+                    const response = await api_handler.get({
+                        base_url,
+                        token,
+                        url: 'pengumuman/admin/list'
+                    })
+
+                    aksi.pengumuman.loading('refresh')
+
+                    if(response?.success) {
+                        aksi.pengumuman.set('data', response?.data?.list_pengumuman)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            }
+        }
+    }
 
     useEffect(() => {
         (async () => {
-            // await Promise.allSettled([
-            //   aksi.khs.get(),
-            //   aksi.jadwal.get()
-            // ])
+            aksi.pengumuman.get()
         })();
     }, []);
 
@@ -2598,6 +2716,7 @@ function AdminPage({ token, base_url, role }) {
         <MainLayout token={token} base_url={base_url} role={role}>
             <div className="bg-white w-full rounded-lg border border-zinc-300 shadow-md">
                 <div className="divide-y divide-zinc-300">
+
                     <div className="p-2 lg:p-4">
                         <div className="flex justify-between items-center ">
                             <div className="flex items-center lg:gap-3">
@@ -2616,6 +2735,163 @@ function AdminPage({ token, base_url, role }) {
                             </div>
                         </div>
                     </div>
+
+                    <ApplicationSection app={app} />
+
+                    <CustomTabs>
+                        <CustomTabItem label="Pengumuman">
+                            <div className="divide-y divide-zinc-300">
+                                {formData.tambah_pengumuman.enable
+                                    ? (
+                                        <div className="p-4">
+                                            <div className="rounded-md border border-zinc-300 shadow-md">
+                                                <div className="p-4 space-y-4">
+                                                    <CustomControlledTextEditor editorRef={editorRef} value={formData.tambah_pengumuman.message} onChange={(newValue) => aksi.formData.tambah_pengumuman.set('message', newValue)} />
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center">
+                                                            <Checkbox size="small" checked={formData.tambah_pengumuman.with_image} onChange={(e) => setFormData(state => ({
+                                                                ...state,
+                                                                tambah_pengumuman: {
+                                                                    ...state.tambah_pengumuman,
+                                                                    with_image: e.target.checked
+                                                                }
+                                                            }))} />
+                                                            <p className="font-jakarta font-semibold">
+                                                                Tambahkan Gambar / Foto
+                                                            </p>
+                                                        </div>
+                                                        {formData.tambah_pengumuman.with_image && (
+                                                            <div className="flex items-center justify-center">
+                                                                {formData.tambah_pengumuman.image 
+                                                                    ? (
+                                                                        <div className="w-full border-dotted border-4 p-4 border-zinc-300 flex flex-col gap-4 items-center justify-center">
+                                                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-4">
+                                                                                <CustomUpload text="Ganti Gambar / Foto" startIcon={<Image />} accept={['image/*']} onUploaded={(files) => aksi.formData.tambah_pengumuman.set_image(files[0])} />
+                                                                                <Button onClick={() => aksi.formData.tambah_pengumuman.clear_image()} size="small" color="error" startIcon={<Close />}>
+                                                                                    <p className='font-jakarta text-xs font-medium'>
+                                                                                        Hapus
+                                                                                    </p>
+                                                                                </Button>
+                                                                            </div>
+                                                                            <img src={formData.tambah_pengumuman.image_source} alt="Uploaded Preview" className="w-full h-full rounded-md" />
+                                                                        </div>
+                                                                    )
+                                                                    : (
+                                                                        <div className="w-full h-60 border-dotted border-4 border-zinc-300 flex items-center justify-center">
+                                                                            <CustomUpload text="Pilih Gambar / Foto" startIcon={<Image />} accept={['image/*']} onUploaded={(files) => aksi.formData.tambah_pengumuman.set_image(files[0])} />
+                                                                        </div>
+                                                                    )
+                                                                }
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <Button variant="contained" loading={formData.tambah_pengumuman.loading} loadingPosition="start" size="small" onClick={() => aksi.formData.tambah_pengumuman.submit()} startIcon={<SaveOutlined />} className="w-full sm:w-fit" >
+                                                                <p className="font-jakarta font-semibold text-xs">
+                                                                    Simpan
+                                                                </p>
+                                                            </Button>
+                                                            <Button variant="text" disabled={formData.tambah_pengumuman.loading} size="small" startIcon={<Close />} onClick={() => aksi.formData.tambah_pengumuman.enable(false)} className="w-full sm:w-fit" color="error" >
+                                                                <p className="font-jakarta font-semibold text-xs">
+                                                                    Batal
+                                                                </p>
+                                                            </Button>
+                                                        </div>
+                                                        <Button variant="text" size="small" startIcon={<Refresh />} className="w-full sm:w-fit" >
+                                                            <p className="font-jakarta font-semibold text-xs">
+                                                                Refresh
+                                                            </p>
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) 
+                                    : (
+                                        <div className="p-4">
+                                            <div className="flex sm:justify-between items-center gap-4">
+                                                <Button variant="contained" size="small" onClick={() => aksi.formData.tambah_pengumuman.enable()} startIcon={<Add />} className="w-full sm:w-fit" >
+                                                    <p className="font-jakarta font-semibold text-xs">
+                                                        Pengumuman
+                                                    </p>
+                                                </Button>
+                                                <Button variant="text" size="small" startIcon={<Refresh />} className="w-full sm:w-fit" >
+                                                    <p className="font-jakarta font-semibold text-xs">
+                                                        Refresh
+                                                    </p>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )
+                                }
+                                <div className="p-4">
+                                    <div className="flex justify-center">
+                                        <div className="max-w-5xl w-full space-y-4 flex flex-col items-center">
+
+                                            {listData.pengumuman.loading.fetch || listData.pengumuman.loading.refresh
+                                                ? (
+                                                    <div className="w-full h-80 flex items-center justify-center">
+                                                        <CircularProgress size={45} color="primary" />
+                                                    </div>
+                                                )
+                                                : listData.pengumuman.data.length < 1 
+                                                    ? (
+                                                        <div className="w-full h-80 flex items-center justify-center">
+                                                            <div className="flex flex-col items-center gap-4">
+                                                                <p className="italic opacity-50">
+                                                                    Tampaknya belum ada pengumuman
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                    : (
+                                                        <>
+                                                            {listData.pengumuman.data.map(pengumuman => (
+                                                                <div key={pengumuman['pengumuman_id']} className="relative overflow-hidden rounded-md border border-zinc-300 w-fit shadow-md">
+                                                                    <div className="space-y-1">
+                                                                        <div className="p-4">
+                                                                            <div className="flex items-center gap-4">
+                                                                                <Avatar 
+                                                                                    sx={{
+                                                                                        width: 40,
+                                                                                        height: 40
+                                                                                    }}
+                                                                                    className="w-80 h-80"
+                                                                                    src={pengumuman['avatar_pengirim']}
+                                                                                    alt="Foto Profil"
+                                                                                />
+                                                                                <div className="space-y-1">
+                                                                                    <p className="font-bold">
+                                                                                        {pengumuman['nm_pengirim']}
+                                                                                    </p>
+                                                                                    <p className="text-xs font-light italic opacity-70">
+                                                                                        {dayjs(pengumuman['tgl_dikirim']).locale('id').format('dddd, DD MMMM YYYY, HH:mm:ss')}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+        
+                                                                        </div>
+                                                                        <div className="p-4">
+                                                                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pengumuman['message'])}}></div>
+                                                                        </div>
+                                                                        {pengumuman['image'] && (
+                                                                            <img className="w-full h-full" src={pengumuman['image']} alt="Foto Pengumuman" />
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </>
+                                                    )
+                                            }
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CustomTabItem>
+                    </CustomTabs>
+
                 </div>
             </div>
         </MainLayout>

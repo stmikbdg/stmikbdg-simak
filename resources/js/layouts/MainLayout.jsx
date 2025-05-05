@@ -1,6 +1,6 @@
 'use client'
 
-import { AssignmentOutlined, CalendarMonthOutlined, CameraOutlined, ChevronLeft, ComputerOutlined, DarkModeOutlined, EventAvailableOutlined, EventNoteOutlined, Home, HomeOutlined, LightModeOutlined, LogoDev, Logout, LogoutOutlined, MenuOutlined, NewspaperOutlined, Person, PersonOutline, QrCode2Outlined, QrCodeOutlined, VerifiedOutlined } from "@mui/icons-material"
+import { AssignmentOutlined, CalendarMonthOutlined, CameraOutlined, ChangeCircleOutlined, ChevronLeft, ComputerOutlined, DarkModeOutlined, EventAvailableOutlined, EventNoteOutlined, Home, HomeOutlined, LightModeOutlined, LogoDev, Logout, LogoutOutlined, MenuOutlined, NewspaperOutlined, Person, PersonOutline, QrCode2Outlined, QrCodeOutlined, VerifiedOutlined } from "@mui/icons-material"
 import { Avatar, Button, Fab, Fade, IconButton, Slide, SpeedDial, SpeedDialAction, SpeedDialIcon, Tooltip } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useSidebar } from "../context/SidebarContext"
@@ -11,6 +11,7 @@ import { customSwal } from "../components/CustomSwal"
 import api_handler from "../libs/api_handler"
 import CustomLoading from "../components/CustomLoading"
 import { useBackdrop } from "../context/BackdropContext"
+import CustomDropdown from "../components/CustomDropdown"
 
 export default function MainLayout({ children, token, base_url, role }) {
     const { showSidebar, setShowSidebar } = useSidebar()
@@ -95,13 +96,13 @@ export default function MainLayout({ children, token, base_url, role }) {
                 )}
                 {/* Sidebar */}
                 <div className="hidden lg:block lg:w-2/12 min-w-60 sticky top-3 h-fit pl-4 overflow-auto">
-                    <SidebarContent showSidebar={showSidebar} setShowSidebar={setShowSidebar} role={role} menuFor={aksi.menu.for} />
+                    <SidebarContent showSidebar={showSidebar} setShowSidebar={setShowSidebar} role={role} menuFor={aksi.menu.for} token={token} />
                 </div>
 
                 {/* Mobile Sidebar */}
                 <Slide direction="right" in={showSidebar} mountOnEnter unmountOnExit>
                     <div className="fixed inset-0 min-h-screen bg-white shadow-lg z-50 md:hidden p-4 overflow-auto">
-                        <SidebarContent showSidebar={showSidebar} setShowSidebar={setShowSidebar} role={role} menuFor={aksi.menu.for} mobile />
+                        <SidebarContent showSidebar={showSidebar} setShowSidebar={setShowSidebar} role={role} menuFor={aksi.menu.for} token={token} mobile />
                     </div>
                 </Slide>
 
@@ -123,7 +124,7 @@ export default function MainLayout({ children, token, base_url, role }) {
     )
 }
 
-function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, menuFor = (...args) => {} }) {
+function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, menuFor = (...args) => {}, token }) {
     
     const { pathname } = useLocation()
 
@@ -135,6 +136,10 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
         logout: () => {
             setShowBackdrop(true)
             goTo('/logout')
+        },
+        changeRole: (target_role) => {
+            setShowBackdrop(true)
+            goTo(`/?token=${token}&role=${target_role}`)
         }
     }
 
@@ -197,6 +202,41 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                         </p>
                     </CustomLoading>
                 </div>
+                {!role?.mahasiswa?.enable && (
+                    <CustomLoading loading={loadingUserdata} renderIf={userdata}>
+                        <CustomDropdown 
+                            buttonComponent={(
+                                <Button startIcon={<ChangeCircleOutlined />} variant="contained" size="small" fullWidth>
+                                    <p className="font-jakarta text-xs font-bold">
+                                        ubah role
+                                    </p>
+                                </Button>
+                            )}
+                            menuItems={[
+                                {
+                                    label: 'Admin',
+                                    render: userdata?.account?.is_admin,
+                                    onClick: () => aksi.changeRole('is_admin')
+                                },
+                                {
+                                    label: 'Prodi',
+                                    render: userdata?.account?.is_prodi,
+                                    onClick: () => aksi.changeRole('is_prodi')
+                                },
+                                {
+                                    label: 'Dosen Wali',
+                                    render: userdata?.account?.is_doswal,
+                                    onClick: () => aksi.changeRole('is_doswal')
+                                },
+                                {
+                                    label: 'Dosen',
+                                    render: userdata?.account?.is_dosen,
+                                    onClick: () => aksi.changeRole('is_dosen')
+                                }
+                            ]}
+                        />
+                    </CustomLoading>
+                )}
             </div>
             <hr className="my-5 border-zinc-400" />
             <CustomLoading loading={loadingUserdata} renderIf={userdata}>

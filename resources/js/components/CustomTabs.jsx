@@ -55,7 +55,7 @@ export function CustomTabs({ children, centered = false }) {
           aria-label="custom tabs"
           variant="scrollable"
           scrollButtons="auto"
-          centered={centered}
+          // centered={centered}
         >
           {tabs.map((tab, index) => (
             <Tab

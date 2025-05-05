@@ -56,7 +56,7 @@ export default function CustomDropdown({
             {children}
         </div>
         {children ? <hr className='my-2' /> : ''}
-        {menuItems.map((item, index) => (
+        {menuItems.map((item, index) => item?.render && (
           <MenuItem className={`font-jakarta`} key={index} onClick={() => {
             handleClose();
             item.onClick?.();

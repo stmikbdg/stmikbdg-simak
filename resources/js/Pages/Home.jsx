@@ -10,6 +10,7 @@ import {
     BookmarksTwoTone,
     BookTwoTone,
     CalendarMonthOutlined,
+    CampaignTwoTone,
     ChatBubbleTwoTone,
     ChatTwoTone,
     Check,
@@ -72,6 +73,8 @@ import CustomDataTable from "../components/CustomDataTable";
 import CustomUpload from "../components/CustomUpload";
 import { CustomControlledTextEditor, CustomTextEditor } from "../components/CustomTextEditor";
 import DOMPurify from "isomorphic-dompurify";
+import CustomSelectAjax from "../components/CustomSelectAjax";
+import CustomSelect from "../components/CustomSelect";
 
 export default function Home({ token, base_url, role, app }) {
     if (role.mahasiswa.enable) {
@@ -982,13 +985,444 @@ function MahasiswaPage({ token, base_url, role, app }) {
                             </CustomLoading>
                         </CustomTabItem>
                         <CustomTabItem label="Pengumuman">
-                            <div className="p-4"></div>
+                            <CustomTabs>
+                                <CustomTabItem label="Umum / Semua">
+                                    <MahasiswaPagePengumumanUmum base_url={base_url} token={token} role={role} />
+                                </CustomTabItem>
+                                <CustomTabItem label="Kelas">
+                                    <MahasiswaPagePengumumanKelas base_url={base_url} token={token} role={role} />
+                                </CustomTabItem>
+                            </CustomTabs>
                         </CustomTabItem>
                     </CustomTabs>
                 </div>
             </div>
         </MainLayout>
     );
+}
+
+function MahasiswaPagePengumumanUmum({ token, base_url, role }) {
+    const { userdata, loadingUserdata } = useUser();
+    
+    const [listData, setListData] = useState({
+        pengumuman: {
+            data: [],
+            meta: null,
+            loading: {
+                fetch: false,
+                refresh: false
+            }
+        }
+    })
+
+    const aksi = {
+        pengumuman: {
+            get: async () => {
+                try {
+                    aksi.pengumuman.loading('fetch')
+
+                    const response = await api_handler.get({
+                        base_url,
+                        token,
+                        url: 'pengumuman/mahasiswa/list'
+                    })
+
+                    aksi.pengumuman.loading('fetch')
+
+                    if(response?.success) {
+                        aksi.pengumuman.set('data', response?.data?.list_pengumuman)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    pengumuman: {
+                        ...state.pengumuman,
+                        [column]: value
+                    }
+                }))
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    pengumuman: {
+                        ...state.pengumuman,
+                        loading: {
+                            ...state.pengumuman.loading,
+                            [column]: !state.pengumuman.loading[column]
+                        }
+                    }
+                }))
+            },
+            refresh: async () => {
+                try {
+                    aksi.pengumuman.loading('refresh')
+
+                    const response = await api_handler.get({
+                        base_url,
+                        token,
+                        url: 'pengumuman/dosen/list'
+                    })
+
+                    aksi.pengumuman.loading('refresh')
+
+                    if(response?.success) {
+                        aksi.pengumuman.set('data', response?.data?.list_pengumuman)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            aksi.pengumuman.get()
+        })();
+    }, []);
+
+    return (
+        <div className="p-4">
+            <div className="flex justify-center">
+                <div className="max-w-5xl w-full space-y-4 flex flex-col items-center">
+
+                    {listData.pengumuman.loading.fetch || listData.pengumuman.loading.refresh
+                        ? (
+                            <div className="w-full h-80 flex items-center justify-center">
+                                <CircularProgress size={45} color="primary" />
+                            </div>
+                        )
+                        : listData.pengumuman.data.length < 1 
+                            ? (
+                                <div className="w-full h-80 flex items-center justify-center">
+                                    <div className="flex flex-col items-center gap-4">
+                                        <p className="italic opacity-50">
+                                            Tampaknya belum ada pengumuman
+                                        </p>
+                                    </div>
+                                </div>
+                            )
+                            : (
+                                <>
+                                    {listData.pengumuman.data.map(pengumuman => (
+                                        <div key={pengumuman['pengumuman_id']} className={`relative overflow-hidden rounded-md ${pengumuman['target'] === 0 ? 'border-2 border-blue-500' : 'border border-zinc-300'} w-full shadow-md`}>
+                                            <div className="space-y-1">
+                                                {pengumuman['target'] === 0
+                                                    ? (
+                                                        <div className="bg-blue-800/80 p-4 border-b border-zinc-300 text-white font-semibold">
+                                                            <div className="flex items-center gap-4">
+                                                                <CampaignTwoTone fontSize="small" />
+                                                                <p>
+                                                                    {pengumuman['keterangan_target']}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                    : (
+                                                        <div className="bg-zinc-50 p-4 border-b border-zinc-300">
+                                                            <div className="flex items-center gap-4">
+                                                                <CampaignTwoTone fontSize="small" />
+                                                                <p>
+                                                                    {pengumuman['keterangan_target']}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }
+                                                <div className="p-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <Avatar 
+                                                            sx={{
+                                                                width: 40,
+                                                                height: 40
+                                                            }}
+                                                            className="w-80 h-80"
+                                                            src={pengumuman['avatar_pengirim']}
+                                                            alt="Foto Profil"
+                                                        />
+                                                        <div className="space-y-1">
+                                                            <p className="font-bold">
+                                                                {pengumuman['nm_pengirim']}
+                                                            </p>
+                                                            <p className="text-xs font-light italic opacity-70">
+                                                                {dayjs(pengumuman['tgl_dikirim']).locale('id').format('dddd, DD MMMM YYYY, HH:mm:ss')}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div className="p-4">
+                                                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pengumuman['message'])}}></div>
+                                                </div>
+                                                {pengumuman['image'] && (
+                                                    <img className="w-full h-full" src={pengumuman['image']} alt="Foto Pengumuman" />
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </>
+                            )
+                    }
+
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function MahasiswaPagePengumumanKelas({ token, base_url, role }) {
+    const [listData, setListData] = useState({
+        kelas: {
+            data: [],
+            loading: {
+                fetch: false,
+                refresh: false
+            },
+            selected_target: null
+        },
+        pengumuman: {
+            data: [],
+            meta: null,
+            loading: {
+                fetch: false,
+                refresh: false
+            }
+        }
+    })
+
+    const [formData, setFormData] = useState({
+        pengumuman: {
+            message: '',
+            selected_target: null,
+            error: null,
+            loading: false,
+            image: null,
+            image_source: null
+        }
+    })
+
+    const aksi = {
+        kelas: {
+            get: async () => {
+                try {
+                    aksi.kelas.loading('fetch')
+
+                    const response = await api_handler.get({
+                        base_url,
+                        token,
+                        url: 'pengumuman/mahasiswa/kelas-kuliah'
+                    })
+                    
+                    aksi.kelas.loading('fetch')   
+                    
+                    if(response?.success) {
+                        aksi.kelas.set('data', response?.data?.list_kelas)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    kelas: {
+                        ...state.kelas,
+                        [column]: value
+                    }
+                }))
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    kelas: {
+                        ...state.kelas,
+                        loading: {
+                            ...state.kelas.loading,
+                            [column]: !state.kelas.loading[column]
+                        }
+                    }
+                }))
+            },
+            select: async (selected) => {
+                aksi.kelas.set('selected_target', selected)
+                aksi.pengumuman.set('data', [])
+
+                if(selected) {
+                    await aksi.pengumuman.get(selected)
+                }
+            }
+        },
+        pengumuman: {
+            get: async (target) => {
+                try {
+                    aksi.pengumuman.loading('fetch')
+                    
+                    const response = await api_handler.get({
+                        base_url,
+                        url: `pengumuman/mahasiswa/list?kelas_kuliah_id=${target['value']}`,
+                        token
+                    })
+
+                    aksi.pengumuman.loading('fetch')      
+                    
+                    if(response?.success) {
+                        aksi.pengumuman.set('data', response?.data?.list_pengumuman)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    pengumuman: {
+                        ...state.pengumuman,
+                        [column]: value
+                    }
+                }))
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    pengumuman: {
+                        ...state.pengumuman,
+                        loading: {
+                            ...state.pengumuman.loading,
+                            [column]: !state.pengumuman.loading[column]
+                        }
+                    }
+                }))
+            }
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            await aksi.kelas.get()
+        })()
+    }, [])
+
+    return (
+        <div className="divide-y divide-zinc-300">
+
+            
+
+            <div className="p-4">
+                <div className="w-full">
+                    <CustomLoading loading={listData.kelas.loading.fetch} renderIf={!listData.kelas.loading.fetch}>
+                        <div className="flex gap-4 flex-col-reverse sm:flex-row sm:items-center sm:justify-between">
+                            <div className="w-full sm:w-2/3 lg:w-1/2">
+                                <CustomSelect 
+                                    placeholder="Nama atau Kode Mata Kuliah"
+                                    label="Cari dan Pilih Mata Kuliah"  
+                                    options={listData.kelas.data.map(kelas => ({
+                                        label: kelas['mata_kuliah']['nm_mk'],
+                                        value: kelas['kelas_kuliah_id']
+                                    }))}
+                                    optionLabel={'label'}
+                                    value={listData.kelas.selected_target}
+                                    onChange={(e, value) => aksi.kelas.select(value)}
+                                />
+                            </div>
+                        </div>
+                    </CustomLoading>
+                </div>
+            </div>
+            <div className="p-4">
+                {!listData.kelas.selected_target
+                    ? (
+                        <div className="flex items-center justify-center h-80">
+                            <p className="italic opacity-50">
+                                Anda perlu memilih mata kuliah terlebih dahulu!
+                            </p>
+                        </div>
+                    )
+                    : listData.pengumuman.loading.fetch
+                        ? (
+                            <div className="flex items-center justify-center h-80">
+                                <CircularProgress size={30} />
+                            </div>
+                        )
+                        : listData.pengumuman.data.length < 1
+                            ? (
+                                <div className="flex items-center justify-center h-80">
+                                    <p className="italic opacity-50">
+                                        Tampaknya di Kelas ini belum ada pengumuman kelas!
+                                    </p>
+                                </div>
+                            )
+                            : (
+                                <div className="flex justify-center">
+                                    <div className="max-w-5xl w-full space-y-4 flex flex-col items-center">
+                                        {listData.pengumuman.data.map(pengumuman => (
+                                            <div key={pengumuman['pengumuman_id']} className="relative overflow-hidden rounded-md border border-zinc-300 w-full shadow-md">
+                                                <div className="space-y-1">
+                                                    <div className="p-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <Avatar 
+                                                                sx={{
+                                                                    width: 40,
+                                                                    height: 40
+                                                                }}
+                                                                className="w-80 h-80"
+                                                                src={pengumuman['avatar_pengirim']}
+                                                                alt="Foto Profil"
+                                                            />
+                                                            <div className="space-y-1">
+                                                                <p className="font-bold">
+                                                                    {pengumuman['nm_pengirim']}
+                                                                </p>
+                                                                <p className="text-xs font-light italic opacity-70">
+                                                                    {dayjs(pengumuman['tgl_dikirim']).locale('id').format('dddd, DD MMMM YYYY, HH:mm:ss')}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div className="p-4">
+                                                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pengumuman['message'])}}></div>
+                                                    </div>
+                                                    {pengumuman['image'] && (
+                                                        <img className="w-full h-full" src={pengumuman['image']} alt="Foto Pengumuman" />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )
+                }
+            </div>
+        </div>
+    )
 }
 
 function DosenWaliPage({ token, base_url, role }) {
@@ -1024,7 +1458,7 @@ function DosenWaliPage({ token, base_url, role }) {
     );
 }
 
-function DosenPage({ token, base_url, role }) {
+function DosenPage({ token, base_url, role, app }) {
     const { setShowSidebar } = useSidebar();
 
     const { userdata, loadingUserdata } = useUser();
@@ -1585,6 +2019,8 @@ function DosenPage({ token, base_url, role }) {
                             </div>
                         </div>
                     </div>
+
+                    <ApplicationSection app={app} />
 
                     <CustomTabs centered>
                         <CustomTabItem label="Jadwal Hari ini">
@@ -2467,13 +2903,640 @@ function DosenPage({ token, base_url, role }) {
                             </CustomLoading>
                         </CustomTabItem>
                         <CustomTabItem label="Pengumuman">
-                            <div className="p-4"></div>
+                            <CustomTabs>
+                                <CustomTabItem label="umum">
+                                    <DosenPagePengumumanUmum token={token} base_url={base_url} role={role} />
+                                </CustomTabItem>
+                                <CustomTabItem label="Kelas">
+                                    <DosenPagePengumumanKelas token={token} base_url={base_url} role={role} />
+                                </CustomTabItem>
+                            </CustomTabs>
                         </CustomTabItem>
                     </CustomTabs>
                 </div>
             </div>
         </MainLayout>
     );
+}
+
+function DosenPagePengumumanUmum({ token, base_url, role }) {
+
+    const { userdata, loadingUserdata } = useUser();
+    
+    const [listData, setListData] = useState({
+        pengumuman: {
+            data: [],
+            meta: null,
+            loading: {
+                fetch: false,
+                refresh: false
+            }
+        }
+    })
+
+    const aksi = {
+        pengumuman: {
+            get: async () => {
+                try {
+                    aksi.pengumuman.loading('fetch')
+
+                    const response = await api_handler.get({
+                        base_url,
+                        token,
+                        url: 'pengumuman/dosen/list'
+                    })
+
+                    aksi.pengumuman.loading('fetch')
+
+                    if(response?.success) {
+                        aksi.pengumuman.set('data', response?.data?.list_pengumuman)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    pengumuman: {
+                        ...state.pengumuman,
+                        [column]: value
+                    }
+                }))
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    pengumuman: {
+                        ...state.pengumuman,
+                        loading: {
+                            ...state.pengumuman.loading,
+                            [column]: !state.pengumuman.loading[column]
+                        }
+                    }
+                }))
+            },
+            refresh: async () => {
+                try {
+                    aksi.pengumuman.loading('refresh')
+
+                    const response = await api_handler.get({
+                        base_url,
+                        token,
+                        url: 'pengumuman/dosen/list'
+                    })
+
+                    aksi.pengumuman.loading('refresh')
+
+                    if(response?.success) {
+                        aksi.pengumuman.set('data', response?.data?.list_pengumuman)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            aksi.pengumuman.get()
+        })();
+    }, []);
+
+    return (
+        <div className="p-4">
+            <div className="flex justify-center">
+                <div className="max-w-5xl w-full space-y-4 flex flex-col items-center">
+
+                    {listData.pengumuman.loading.fetch || listData.pengumuman.loading.refresh
+                        ? (
+                            <div className="w-full h-80 flex items-center justify-center">
+                                <CircularProgress size={45} color="primary" />
+                            </div>
+                        )
+                        : listData.pengumuman.data.length < 1 
+                            ? (
+                                <div className="w-full h-80 flex items-center justify-center">
+                                    <div className="flex flex-col items-center gap-4">
+                                        <p className="italic opacity-50">
+                                            Tampaknya belum ada pengumuman
+                                        </p>
+                                    </div>
+                                </div>
+                            )
+                            : (
+                                <>
+                                    {listData.pengumuman.data.map(pengumuman => (
+                                        <div key={pengumuman['pengumuman_id']} className={`relative overflow-hidden rounded-md ${pengumuman['target'] === 0 ? 'border-2 border-blue-500' : 'border border-zinc-300'} w-full shadow-md`}>
+                                            <div className="space-y-1">
+                                                {pengumuman['target'] === 0
+                                                    ? (
+                                                        <div className="bg-blue-800/80 p-4 border-b border-zinc-300 text-white font-semibold">
+                                                            <div className="flex items-center gap-4">
+                                                                <CampaignTwoTone fontSize="small" />
+                                                                <p>
+                                                                    {pengumuman['keterangan_target']}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                    : (
+                                                        <div className="bg-zinc-50 p-4 border-b border-zinc-300">
+                                                            <div className="flex items-center gap-4">
+                                                                <CampaignTwoTone fontSize="small" />
+                                                                <p>
+                                                                    {pengumuman['keterangan_target']}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }
+                                                <div className="p-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <Avatar 
+                                                            sx={{
+                                                                width: 40,
+                                                                height: 40
+                                                            }}
+                                                            className="w-80 h-80"
+                                                            src={pengumuman['avatar_pengirim']}
+                                                            alt="Foto Profil"
+                                                        />
+                                                        <div className="space-y-1">
+                                                            <p className="font-bold">
+                                                                {pengumuman['nm_pengirim']}
+                                                            </p>
+                                                            <p className="text-xs font-light italic opacity-70">
+                                                                {dayjs(pengumuman['tgl_dikirim']).locale('id').format('dddd, DD MMMM YYYY, HH:mm:ss')}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div className="p-4">
+                                                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pengumuman['message'])}}></div>
+                                                </div>
+                                                {pengumuman['image'] && (
+                                                    <img className="w-full h-full" src={pengumuman['image']} alt="Foto Pengumuman" />
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </>
+                            )
+                    }
+
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function DosenPagePengumumanKelas({ token, base_url, role }) {
+    const [listData, setListData] = useState({
+        kelas: {
+            data: [],
+            loading: {
+                fetch: false,
+                refresh: false
+            },
+            selected_target: null
+        },
+        pengumuman: {
+            data: [],
+            meta: null,
+            loading: {
+                fetch: false,
+                refresh: false
+            }
+        }
+    })
+
+    const [formData, setFormData] = useState({
+        pengumuman: {
+            message: '',
+            selected_target: null,
+            error: null,
+            loading: false,
+            image: null,
+            image_source: null
+        }
+    })
+
+    const aksi = {
+        kelas: {
+            get: async () => {
+                try {
+                    aksi.kelas.loading('fetch')
+
+                    const response = await api_handler.get({
+                        base_url,
+                        token,
+                        url: 'pengumuman/dosen/kelas-kuliah'
+                    })
+                    
+                    aksi.kelas.loading('fetch')   
+                    
+                    if(response?.success) {
+                        aksi.kelas.set('data', response?.data?.targets)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    kelas: {
+                        ...state.kelas,
+                        [column]: value
+                    }
+                }))
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    kelas: {
+                        ...state.kelas,
+                        loading: {
+                            ...state.kelas.loading,
+                            [column]: !state.kelas.loading[column]
+                        }
+                    }
+                }))
+            },
+            select: async (selected) => {
+                aksi.kelas.set('selected_target', selected)
+                aksi.pengumuman.set('data', [])
+
+                if(selected) {
+                    await aksi.pengumuman.get(selected)
+                }
+            }
+        },
+        pengumuman: {
+            get: async (target) => {
+                try {
+                    aksi.pengumuman.loading('fetch')
+                    
+                    const response = await api_handler.get({
+                        base_url,
+                        url: `pengumuman/dosen/list?kelas_kuliah_id=${target['value']}`,
+                        token
+                    })
+
+                    aksi.pengumuman.loading('fetch')      
+                    
+                    if(response?.success) {
+                        aksi.pengumuman.set('data', response?.data?.list_pengumuman)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    pengumuman: {
+                        ...state.pengumuman,
+                        [column]: value
+                    }
+                }))
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    pengumuman: {
+                        ...state.pengumuman,
+                        loading: {
+                            ...state.pengumuman.loading,
+                            [column]: !state.pengumuman.loading[column]
+                        }
+                    }
+                }))
+            }
+        },
+        formData: {
+            pengumuman: {
+                clear: () => {
+                    setFormData({
+                        pengumuman: {
+                            message: '',
+                            selected_target: null,
+                            error: null,
+                            loading: false,
+                            image: null,
+                            image_source: null
+                        }
+                    })
+                },
+                set: (column, value) => {
+                    setFormData(state => ({
+                        ...state,
+                        pengumuman: {
+                            ...state.pengumuman,
+                            [column]: value
+                        }
+                    }))
+                },
+                set_image: (image) => {
+                    if(image && image.type.startsWith('image/')) {
+                        aksi.formData.pengumuman.set('image', image)
+                        const reader = new FileReader()
+                        reader.onload = () => {
+                            aksi.formData.pengumuman.set('image_source', reader.result)
+                        }
+                        reader.readAsDataURL(image)
+                    }else{
+                        aksi.formData.pengumuman.set('image', null)
+                        customSwal.toast.error({
+                            message: 'Anda hanya diperbolehkan untuk mengunggah sebuah foto / gambar!'
+                        })
+                    }
+                },
+                clear_image: () => {
+                    aksi.formData.pengumuman.set('image', null)
+                    aksi.formData.pengumuman.set('image_source', null)
+                },
+                submit: async (e) => {
+                    try {
+                        e.preventDefault()
+
+                        aksi.formData.pengumuman.set('error', null)
+
+                        let response_image = {
+                            success: false,
+                            message: 'Gagal mengunggah foto / gambar'
+                        }
+
+                        let response = {
+                            success: false,
+                            message: 'Gagal untuk membuat pengumuman'
+                        }
+
+                        let payload = {
+                            target: formData.pengumuman.selected_target?.value,
+                            message: formData.pengumuman.message,
+                            image: null
+                        }
+                        
+                        console.log(payload)
+
+                        if(!payload.target) {
+                            aksi.formData.pengumuman.set('error', 'Kelas belum dipilih!')
+                            return
+                        }
+
+
+                        aksi.formData.pengumuman.set('loading', true)
+
+                        if(formData.pengumuman.image) {
+                            response_image = await api_handler.postForm({
+                                url: 'file/image/add?to=pengumuman',
+                                base_url,
+                                token,
+                                payload: {
+                                    image: formData.pengumuman.image
+                                }
+                            })
+
+                            if(!response_image?.success) {
+                                aksi.formData.pengumuman.set('loading', false)
+                                aksi.formData.pengumuman.set('error', response_image?.message)
+                                return
+                            }
+                        }
+
+                        if(formData.pengumuman.image) {
+                            payload.image = response_image?.data?.imageName
+                        }
+
+                        response = await api_handler.post({
+                            base_url,
+                            token,
+                            url: 'pengumuman/dosen/add',
+                            payload
+                        })
+
+                        aksi.formData.pengumuman.set('loading', false)
+
+                        if(response?.success) {
+                            modal.close('buat_pengumuman')
+                            aksi.kelas.select(formData.pengumuman.selected_target)
+                            aksi.pengumuman.get(formData.pengumuman.selected_target)
+                            aksi.formData.pengumuman.clear()
+                            customSwal.toast.success({
+                                message: 'Berhasil membuat pengumuman baru!'
+                            })
+                        }else{
+                            aksi.formData.pengumuman.set('error', response?.message)
+                        }
+                    } catch (error) {
+                        aksi.formData.pengumuman.set('error', error?.message)
+                    }
+                },
+                init: () => {
+                    if(listData.kelas.selected_target) {
+                        aksi.formData.pengumuman.set('selected_target', listData.kelas.selected_target)
+                    }else{
+                        aksi.formData.pengumuman.set('selected_target', null)
+                    }
+
+                    modal.show('buat_pengumuman')
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            await aksi.kelas.get()
+        })()
+    }, [])
+
+    return (
+        <div className="divide-y divide-zinc-300">
+
+            <ModalForm modalId="buat_pengumuman" onSubmit={(e) => aksi.formData.pengumuman.submit(e)} error={formData.pengumuman.error} loading={formData.pengumuman.loading} title="Buat Pengumuman Baru" modalBoxClassname="max-w-3xl">
+                <div className="divide-y divide-zinc-300">
+                    <div className="p-4">
+                        <CustomSelect 
+                            placeholder="Nama Kelas"
+                            label="Cari dan Pilih Kelas"  
+                            options={listData.kelas.data.map(kelas => 
+                                kelas['target'] === 0
+                                    ? ({
+                                        label: 'Semua Kelas',
+                                        value: kelas['target']
+                                    })
+                                    : ({
+                                        label: kelas['nm_mk'],
+                                        value: kelas['target']
+                                    })
+                            )}
+                            optionLabel={'label'}
+                            value={formData.pengumuman.selected_target}
+                            onChange={(e, value) => aksi.formData.pengumuman.set('selected_target', value)}
+                            onModal="buat_pengumuman"
+                            disabled={formData.pengumuman.loading}
+                        />
+                    </div>
+                    <div className="p-4">
+                        <TextField 
+                            fullWidth
+                            label="Pesan"
+                            placeholder="Berikan Pesan anda disini"
+                            multiline
+                            rows={4}
+                            value={formData.pengumuman.message}
+                            onChange={(e) => aksi.formData.pengumuman.set('message', e.target.value)}
+                            disabled={formData.pengumuman.loading}
+                            required
+                        />
+                    </div>
+                    <div className="p-4 space-y-2">
+                        {formData.pengumuman.image 
+                            ? (
+                                <div className="w-full border-dotted border-4 p-4 border-zinc-300 flex flex-col gap-4 items-center justify-center">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-4">
+                                        <CustomUpload disabled={formData.pengumuman.loading} text="Ganti Gambar / Foto" startIcon={<Image />} accept={['image/*']} onUploaded={(files) => aksi.formData.pengumuman.set_image(files[0])} />
+                                        <Button disabled={formData.pengumuman.loading} onClick={() => aksi.formData.pengumuman.clear_image()} size="small" color="error" startIcon={<Close />}>
+                                            <p className='font-jakarta text-xs font-medium'>
+                                                Hapus
+                                            </p>
+                                        </Button>
+                                    </div>
+                                    <img src={formData.pengumuman.image_source} alt="Uploaded Preview" className="w-full h-full rounded-md" />
+                                </div>
+                            )
+                            : (
+                                <div className="w-full h-40 border-dotted border-4 border-zinc-300 flex items-center justify-center">
+                                    <CustomUpload disabled={formData.pengumuman.loading} text="Pilih Gambar / Foto" startIcon={<Image />} accept={['image/*']} onUploaded={(files) => aksi.formData.pengumuman.set_image(files[0])} />
+                                </div>
+                            )
+                        }
+                    </div>
+                </div>
+            </ModalForm>
+
+            <div className="p-4">
+                <div className="w-full">
+                    <CustomLoading loading={listData.kelas.loading.fetch} renderIf={!listData.kelas.loading.fetch}>
+                        <div className="flex gap-4 flex-col-reverse sm:flex-row sm:items-center sm:justify-between">
+                            <div className="w-full sm:w-2/3 lg:w-1/2">
+                                <CustomSelect 
+                                    placeholder="Nama atau Kode Mata Kuliah"
+                                    label="Cari dan Pilih Mata Kuliah"  
+                                    options={listData.kelas.data.filter(kelas => kelas['target'] !== 0).map(kelas => ({
+                                        label: kelas['nm_mk'],
+                                        value: kelas['target']
+                                    }))}
+                                    optionLabel={'label'}
+                                    value={listData.kelas.selected_target}
+                                    onChange={(e, value) => aksi.kelas.select(value)}
+                                />
+                            </div>
+                            <Button variant="contained" onClick={() => aksi.formData.pengumuman.init()} size="small" startIcon={<Add />}>
+                                <p className="font-jakarta font-semibold">
+                                    Buat Pengumuman
+                                </p>
+                            </Button>
+                        </div>
+                    </CustomLoading>
+                </div>
+            </div>
+            <div className="p-4">
+                {!listData.kelas.selected_target
+                    ? (
+                        <div className="flex items-center justify-center h-80">
+                            <p className="italic opacity-50">
+                                Anda perlu memilih mata kuliah terlebih dahulu!
+                            </p>
+                        </div>
+                    )
+                    : listData.pengumuman.loading.fetch
+                        ? (
+                            <div className="flex items-center justify-center h-80">
+                                <CircularProgress size={30} />
+                            </div>
+                        )
+                        : listData.pengumuman.data.length < 1
+                            ? (
+                                <div className="flex items-center justify-center h-80">
+                                    <p className="italic opacity-50">
+                                        Tampaknya di Kelas ini belum ada pengumuman kelas!
+                                    </p>
+                                </div>
+                            )
+                            : (
+                                <div className="flex justify-center">
+                                    <div className="max-w-5xl w-full space-y-4 flex flex-col items-center">
+                                        {listData.pengumuman.data.map(pengumuman => (
+                                            <div key={pengumuman['pengumuman_id']} className="relative overflow-hidden rounded-md border border-zinc-300 w-full shadow-md">
+                                                <div className="space-y-1">
+                                                    <div className="p-4">
+                                                        <div className="flex items-center gap-4">
+                                                            <Avatar 
+                                                                sx={{
+                                                                    width: 40,
+                                                                    height: 40
+                                                                }}
+                                                                className="w-80 h-80"
+                                                                src={pengumuman['avatar_pengirim']}
+                                                                alt="Foto Profil"
+                                                            />
+                                                            <div className="space-y-1">
+                                                                <p className="font-bold">
+                                                                    {pengumuman['nm_pengirim']}
+                                                                </p>
+                                                                <p className="text-xs font-light italic opacity-70">
+                                                                    {dayjs(pengumuman['tgl_dikirim']).locale('id').format('dddd, DD MMMM YYYY, HH:mm:ss')}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div className="p-4">
+                                                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pengumuman['message'])}}></div>
+                                                    </div>
+                                                    {pengumuman['image'] && (
+                                                        <img className="w-full h-full" src={pengumuman['image']} alt="Foto Pengumuman" />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )
+                }
+            </div>
+        </div>
+    )
 }
 
 function AdminPage({ token, base_url, role, app }) {
@@ -2574,7 +3637,7 @@ function AdminPage({ token, base_url, role, app }) {
                         response = await api_handler.post({
                             token,
                             base_url,
-                            url: 'pengumuman/add',
+                            url: 'pengumuman/admin/add',
                             payload
                         })
 
@@ -2816,7 +3879,7 @@ function AdminPage({ token, base_url, role, app }) {
                                                         Pengumuman
                                                     </p>
                                                 </Button>
-                                                <Button variant="text" size="small" startIcon={<Refresh />} className="w-full sm:w-fit" >
+                                                <Button variant="text" size="small" loading={listData.pengumuman.loading.refresh} loadingPosition="start" startIcon={<Refresh />} onClick={() => aksi.pengumuman.refresh()} className="w-full sm:w-fit" >
                                                     <p className="font-jakarta font-semibold text-xs">
                                                         Refresh
                                                     </p>

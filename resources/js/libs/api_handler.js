@@ -18,7 +18,7 @@ const api_handler = {
                         ...headers
                     },
                     data: payload,
-                    timeout: 15000,
+                    timeout: 60000,
                     timeoutErrorMessage: 'Tampaknya ada masalah di server, silahkan coba lagi'
                 })
                 : await axios.get(`${base_url}${url}`, {
@@ -26,7 +26,7 @@ const api_handler = {
                         'Authorization': `Bearer ${token}`,
                         ...headers
                     },
-                    timeout: 15000,
+                    timeout: 60000,
                     timeoutErrorMessage: 'Tampaknya ada masalah di server, silahkan coba lagi'
                 })
 
@@ -76,7 +76,7 @@ const api_handler = {
                     'Authorization': `Bearer ${token}`,
                     ...headers
                 },
-                timeout: 15000,
+                timeout: 60000,
                 timeoutErrorMessage: 'Tampaknya ada masalah di server, silahkan coba lagi'
             })
 
@@ -126,7 +126,7 @@ const api_handler = {
                     'Authorization': `Bearer ${token}`,
                     ...headers
                 },
-                timeout: 15000,
+                timeout: 60000,
                 timeoutErrorMessage: 'Tampaknya ada masalah di server, silahkan coba lagi'
             })
 
@@ -176,7 +176,7 @@ const api_handler = {
                     'Authorization': `Bearer ${token}`,
                     ...headers
                 },
-                timeout: 15000,
+                timeout: 60000,
                 timeoutErrorMessage: 'Tampaknya ada masalah di server, silahkan coba lagi'
             })
 
@@ -227,7 +227,7 @@ const api_handler = {
                 method: 'DELETE',
                 url: `${base_url}${url}`,
                 data: payload,
-                timeout: 15000,
+                timeout: 60000,
                 timeoutErrorMessage: 'Tampaknya ada masalah di server, silahkan coba lagi',
                 headers: {
                     'Authorization': `Bearer ${token}`,

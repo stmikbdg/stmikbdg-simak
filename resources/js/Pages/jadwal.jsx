@@ -15,6 +15,7 @@ import 'dayjs/locale/id'
 import { QRMaker } from "../components/CustomQRCode"
 import CustomDataTable from "../components/CustomDataTable"
 import CustomUpload from "../components/CustomUpload"
+import { CustomControlledTabItem, CustomControlledTabs } from "../components/CustomControlledTabs"
 
 export default function Jadwal({ token, base_url, role }) {
 
@@ -73,6 +74,10 @@ function JadwalDosen({ token, base_url, role }) {
             berita_acara: '',
             error: null
         }
+    })
+
+    const [tabs, setTabs] = useState({
+        jadwal: 'Senin'
     })
 
     const aksi = {
@@ -482,6 +487,42 @@ function JadwalDosen({ token, base_url, role }) {
                         }
                     }
                 }
+            },
+            kontrak: {
+                upload: async (file) => {
+                    try {
+                        aksi.kelas.loading('upload_kontrak')
+
+                        const response = await api_handler.postForm({
+                            base_url,
+                            url: 'kelas-kuliah/dosen/kontrak',
+                            token,
+                            payload: {
+                                file
+                            }
+                        })
+
+                        aksi.kelas.loading('upload_kontrak')
+
+                        if(response?.success) {
+
+                        }else{
+                            
+                        }
+                    } catch (error) {
+                        customSwal.toast.erorr({
+                            message: error?.message
+                        })
+                    }
+                }
+            }
+        },
+        tabs: {
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    [column]: value
+                }))
             }
         }
     }
@@ -703,7 +744,9 @@ function JadwalDosen({ token, base_url, role }) {
                                             loading={listData.jadwal.loading.fetch} 
                                             renderIf={listData.jadwal.fetched} 
                                             sketch={(
-                                                <div className="p-4"></div>
+                                                <div className="p-4">
+                                                    
+                                                </div>
                                             )}
                                         >
                                             
@@ -785,7 +828,7 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                 )}
                                                                             </div>
                                                                             <div className="flex justify-end w-full sm:w-fit">
-                                                                                {item['kontrak_kuliah']
+                                                                                {!item['kontrak_kuliah']
                                                                                     ? item['kelas_dibuka']
                                                                                     ? (
                                                                                         <div className="flex items-center gap-4 w-full sm:w-fit">
@@ -979,6 +1022,162 @@ function JadwalDosen({ token, base_url, role }) {
                             </CustomLoading>
                         </CustomTabItem>
                     </CustomTabs>
+
+                    {/* <CustomControlledTabs value={tabs.jadwal} onChange={(event, value) => aksi.tabs.set('jadwal', value)}>
+                        {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map(hari => (
+                            <CustomControlledTabItem key={hari} label={hari} value={hari}>
+                                <CustomLoading loading={loadingUserdata} renderIf={userdata}>
+                                    <div className="p-4">
+                                        <CustomLoading 
+                                            loading={listData.jadwal.loading.fetch} 
+                                            renderIf={listData.jadwal.fetched} 
+                                            sketch={(
+                                                <div className="p-4">
+                                                    
+                                                </div>
+                                            )}
+                                        >
+                                            
+                                                {aksi.jadwal.hari.get(hari).length > 0 
+                                                    ? <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                                        {aksi.jadwal.hari.get(hari).map(item => (
+                                                            <div key={item['data_kelas']['kelas_kuliah_id']} className={`rounded-md shadow border-l-4 ${item['kelas_dibuka'] ? 'border-blue-500' : 'border-zinc-500'}`}>
+                                                                <div className="flex flex-col justify-between">
+                                                                    <div className="flex gap-4 p-4">
+                                                                        <div className="">
+                                                                            <div className={`w-7 sm:w-8 lg:w-10 aspect-square rounded-md flex items-center justify-center ${item['kelas_dibuka'] ? 'bg-blue-100 text-blue-500' : 'bg-zinc-100 text-zinc-500'}`}>
+                                                                                <CollectionsBookmarkOutlined fontSize="small" />
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className=" space-y-4 w-full">
+                                                                            <div className="space-y-2">
+                                                                                {item['matakuliah']['kd_mk'] && (
+                                                                                    <p className="text-xs font-medium opacity-70">
+                                                                                        {item['matakuliah']['kd_mk']}
+                                                                                    </p>
+                                                                                )}
+                                                                                <h1 className="font-bold text-lg">
+                                                                                    {item['matakuliah']['nm_mk']}
+                                                                                </h1>
+                                                                            </div>
+                                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                                                {item['dosen'] && (
+                                                                                    <div className="flex items-center gap-3 opacity-70">
+                                                                                        <SubjectOutlined sx={{ fontSize: 16 }} />
+                                                                                        <p className="text-xs font-medium">
+                                                                                            Semester {item['matakuliah']['semester']}
+                                                                                        </p>
+                                                                                    </div>
+                                                                                )}
+                                                                                <div className="flex items-center">
+                                                                                    <Button startIcon={<Download fontSize="small" />} size="small" disabled={!item['kontrak_kuliah']}>
+                                                                                        <p className="text-xs font-semibold font-jakarta">
+                                                                                            Kontrak/silabus Kuliah
+                                                                                        </p>
+                                                                                    </Button>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="flex items-center flex-wrap">
+                                                                                {item['riwayat_pertemuan'].map((absen, index) => (
+                                                                                    <Tooltip key={index} arrow title={`${absen['jns_pert']} - ${dayjs(absen['create_time']).locale('id').format('HH:mm:ss, DD MMMM YYYY')}`}>
+                                                                                        <CheckBoxTwoTone fontSize="small" color="primary" />
+                                                                                    </Tooltip>
+                                                                                ))}
+                                                                                {Array.from({ length: parseInt(item['riwayat_pertemuan_maks'] - item['riwayat_pertemuan'].length) }).map((_, index) => (
+                                                                                    <Tooltip key={index} arrow title="">
+                                                                                        <CheckBoxOutlineBlankTwoTone fontSize="small" />
+                                                                                    </Tooltip>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className={`${item['kelas_dibuka'] ? 'bg-blue-50/50' : 'bg-zinc-50'} p-4`}>
+                                                                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                                                                            <div className="flex items-center justify-between sm:justify-start gap-6">
+                                                                                {item['jadwal'] && (
+                                                                                    <>
+                                                                                        {item['jadwal']['jam'] && (
+                                                                                            <div className="flex items-center gap-3">
+                                                                                                <AccessTimeOutlined sx={{ fontSize: 16 }} className={`${item['kelas_dibuka'] ? 'text-blue-700' : 'text-zinc-700'}`} />
+                                                                                                <p className="text-xs font-semibold opacity-70">
+                                                                                                    {item['jadwal']['jam']}
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        )}
+                                                                                        {item['jadwal']['kd_ruang'] && (
+                                                                                            <div className="flex items-center gap-3">
+                                                                                                <LocationOnOutlined sx={{ fontSize: 16 }} className={`${item['kelas_dibuka'] ? 'text-blue-700' : 'text-zinc-700'}`} />
+                                                                                                <p className="text-xs font-semibold opacity-70">
+                                                                                                    Ruang {item['jadwal']['kd_ruang']}
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="flex justify-end w-full sm:w-fit">
+                                                                                {!item['kontrak_kuliah']
+                                                                                    ? item['kelas_dibuka']
+                                                                                    ? (
+                                                                                        <div className="flex items-center gap-4 w-full sm:w-fit">
+                                                                                            <Button variant="outlined" size="small" onClick={() => aksi.kelas.absen.init(item['data_kelas']['kelas_kuliah_id'])} disabled={listData.kelas.loading.buka || listData.kelas.absen.loading.refresh} className="text-xs w-full sm:w-fit">
+                                                                                                <p className="font-jakarta text-xs">
+                                                                                                    {(listData.kelas.loading.buka || listData.kelas.absen.loading.refresh)
+                                                                                                        ? 'Loading...'
+                                                                                                        : 'Absensi'
+                                                                                                    }
+                                                                                                </p>
+                                                                                            </Button>
+                                                                                            <Button variant="contained" disabled={listData.kelas.loading.buka || listData.kelas.absen.loading.refresh} onClick={() => modal.show('modal_tutup_kelas')} size="small" className="text-xs w-full sm:w-fit">
+                                                                                            <p className="font-jakarta text-xs">
+                                                                                                    {(listData.kelas.loading.buka || listData.kelas.absen.loading.refresh)
+                                                                                                        ? 'Loading...'
+                                                                                                        : 'Tutup Kelas'
+                                                                                                    }
+                                                                                                </p>
+                                                                                            </Button>
+                                                                                        </div>
+                                                                                    )
+                                                                                    : (
+                                                                                        <Button variant="contained" disabled={listData.jadwal.loading.fetch || aksi.jadwal.kelas_lain_dibuka()} onClick={() => aksi.kelas.buka(item['data_kelas']['kelas_kuliah_id'])} size="small" className="text-xs w-full sm:w-fit">
+                                                                                            <p className="font-jakarta text-xs">
+                                                                                                {aksi.jadwal.kelas_lain_dibuka()
+                                                                                                    ? 'Kelas lain sedang dibuka'
+                                                                                                    : 'Buka kelas'
+                                                                                                }
+                                                                                            </p>
+                                                                                        </Button>
+                                                                                    )
+                                                                                    : (
+                                                                                        <CustomUpload buttonProps={{ size: 'small', variant: 'contained' }} text="upload kontrak/silabus" startIcon={<Upload />} />
+                                                                                    )
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    : (
+                                                        <div className="flex items-center justify-center min-h-screen">
+                                                            <div className="space-y-4">
+                                                                <img src="/images/empty.png" alt="Logo Not Found" className="w-80" />
+                                                                <p className="text-center text-lg sm:text-xl lg:text-2xl font-medium">
+                                                                    Anda tidak memiliki jadwal di hari ini
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }
+                                                
+                                            
+                                        </CustomLoading>
+                                    </div>
+                                </CustomLoading>
+                            </CustomControlledTabItem>
+                        ))}
+                    </CustomControlledTabs> */}
 
                 </div>
             </div>

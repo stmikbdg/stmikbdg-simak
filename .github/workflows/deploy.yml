@@ -17,6 +17,7 @@ jobs:
           git pull origin Master
           composer install
           npm install --legacy-peer-deps
+          npm run build
           php artisan cache:clear
           php artisan route:clear
           php artisan config:clear

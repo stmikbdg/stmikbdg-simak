@@ -1,0 +1,27 @@
+name: Self-Hosted Runner | CI CD
+
+on:
+  push:
+    branches: [Master]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Run deployment script
+        run: |
+          cd /var/www/stmikbdg-simak
+          git pull origin main
+          composer install
+          npm install --legacy-peer-deps
+          php artisan cache:clear
+          php artisan route:clear
+          php artisan config:clear
+          php artisan view:clear
+          php artisan config:cache
+          php artisan route:cache
+          php artisan config:cache
+          php artisan optimize

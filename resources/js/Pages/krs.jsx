@@ -722,8 +722,6 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                     <CustomLoading loading={loadingUserdata} renderIf={userdata}>
                         <CustomTabs>
                             <CustomTabItem label="KRS">
-
-
                                 <div className="p-4">
                                     <CustomLoading loading={listData.krs.loading.fetch} renderIf={listData.krs.fetched}>
                                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -757,17 +755,38 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                                         </div>
                                     </CustomLoading>
                                 </div>
-                                <CustomControlledTabs value={listData.tabs.current} onChange={aksi.tabs.set}>
-                                    <CustomControlledTabItem label="Semester 1" value={1}></CustomControlledTabItem>
-                                    <CustomControlledTabItem label="Semester 2" value={2}></CustomControlledTabItem>
-                                    <CustomControlledTabItem label="Semester 3" value={3}></CustomControlledTabItem>
-                                    <CustomControlledTabItem label="Semester 4" value={4}></CustomControlledTabItem>
-                                    <CustomControlledTabItem label="Semester 5" value={5}></CustomControlledTabItem>
-                                    <CustomControlledTabItem label="Semester 6" value={6}></CustomControlledTabItem>
-                                    <CustomControlledTabItem label="Semester 7" value={7}></CustomControlledTabItem>
-                                    <CustomControlledTabItem label="Semester 8" value={8}></CustomControlledTabItem>
-                                </CustomControlledTabs>
-                                <TabSemester semester={listData.tabs.current} maksimal_sks={21} total_sks={21} loading={listData.matakuliah.loading.fetch} matakuliah={listData.matakuliah.data} krs_disabled={aksi.krs.pengajuan.is_disabled()} status_krs={listData.krs.data?.krs?.sts_krs} selected_matakuliah={formData.pengajuan_krs.mata_kuliah} onSelect_matakuliah={(value) => aksi.formData.pengajuan_krs.matakuliah.set(listData.tabs.current, value)} />
+                                <CustomTabs>
+                                    <CustomTabItem label="Semua Semester">
+                                        {listData.krs.loading.fetch 
+                                            ? (
+                                                <div className="flex items-center justify-center w-full h-80">
+                                                    <CircularProgress size={30} color="primary" />
+                                                </div>
+                                            )
+                                            : (
+                                                <div className="divide-y divide-zinc-300">
+                                                    {Array.from({ length: 8 }).map((_, index) => index + 1).map(semester => (
+                                                        
+                                                        <TabSemester semester={semester} maksimal_sks={21} total_sks={21} loading={listData.matakuliah.loading.fetch} matakuliah={listData.matakuliah.data} krs_disabled={aksi.krs.pengajuan.is_disabled()} status_krs={listData.krs.data?.krs?.sts_krs} selected_matakuliah={formData.pengajuan_krs.mata_kuliah} onSelect_matakuliah={(value) => aksi.formData.pengajuan_krs.matakuliah.set(semester, value)} />
+                                                    ))}
+                                                </div>
+                                            )
+                                        }
+                                    </CustomTabItem>
+                                    <CustomTabItem label="Per Semester">
+                                        <CustomControlledTabs value={listData.tabs.current} onChange={aksi.tabs.set}>
+                                            <CustomControlledTabItem label="1" value={1}></CustomControlledTabItem>
+                                            <CustomControlledTabItem label="2" value={2}></CustomControlledTabItem>
+                                            <CustomControlledTabItem label="3" value={3}></CustomControlledTabItem>
+                                            <CustomControlledTabItem label="4" value={4}></CustomControlledTabItem>
+                                            <CustomControlledTabItem label="5" value={5}></CustomControlledTabItem>
+                                            <CustomControlledTabItem label="6" value={6}></CustomControlledTabItem>
+                                            <CustomControlledTabItem label="7" value={7}></CustomControlledTabItem>
+                                            <CustomControlledTabItem label="8" value={8}></CustomControlledTabItem>
+                                        </CustomControlledTabs>
+                                        <TabSemester semester={listData.tabs.current} maksimal_sks={21} total_sks={21} loading={listData.matakuliah.loading.fetch} matakuliah={listData.matakuliah.data} krs_disabled={aksi.krs.pengajuan.is_disabled()} status_krs={listData.krs.data?.krs?.sts_krs} selected_matakuliah={formData.pengajuan_krs.mata_kuliah} onSelect_matakuliah={(value) => aksi.formData.pengajuan_krs.matakuliah.set(listData.tabs.current, value)} />
+                                    </CustomTabItem>
+                                </CustomTabs>
                             </CustomTabItem>
                             <CustomTabItem label="KHS">
                                 <KHSPage token={token} base_url={base_url} role={role} />

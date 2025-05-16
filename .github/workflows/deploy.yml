@@ -14,7 +14,7 @@ jobs:
       - name: Run deployment script
         run: |
           cd /var/www/stmikbdg-simak
-          git pull origin main
+          git pull 
           composer install
           npm install --legacy-peer-deps
           php artisan cache:clear

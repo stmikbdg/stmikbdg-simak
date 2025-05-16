@@ -140,6 +140,9 @@ function JadwalDosen({ token, base_url, role }) {
                     const hari = Object.keys(hariObj)[0]
                     return hariObj[hari].some(kelas => kelas.kelas_dibuka === true)
                 })
+            },
+            get_current: () => {
+                aksi.tabs.set(event, dayjs().locale('id').format('dddd'))
             }
         },
         kelas: {
@@ -518,16 +521,17 @@ function JadwalDosen({ token, base_url, role }) {
             }
         },
         tabs: {
-            set: (column, value) => {
-                setListData(state => ({
+            set: (event, value) => {
+                setTabs(state => ({
                     ...state,
-                    [column]: value
+                    jadwal: value
                 }))
             }
         }
     }
 
     useEffect(() => {
+        aksi.jadwal.get_current()
         aksi.jadwal.get()
     }, [])
 
@@ -735,7 +739,7 @@ function JadwalDosen({ token, base_url, role }) {
                         </div>
                     </ModalForm>
 
-                    <CustomTabs>
+                    {/* <CustomTabs>
                         {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map(hari => (
                             <CustomTabItem key={hari} label={hari}>
                                 <CustomLoading loading={loadingUserdata} renderIf={userdata}>
@@ -1021,9 +1025,9 @@ function JadwalDosen({ token, base_url, role }) {
                                 </div>
                             </CustomLoading>
                         </CustomTabItem>
-                    </CustomTabs>
+                    </CustomTabs> */}
 
-                    {/* <CustomControlledTabs value={tabs.jadwal} onChange={(event, value) => aksi.tabs.set('jadwal', value)}>
+                    <CustomControlledTabs value={tabs.jadwal} onChange={aksi.tabs.set}>
                         {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map(hari => (
                             <CustomControlledTabItem key={hari} label={hari} value={hari}>
                                 <CustomLoading loading={loadingUserdata} renderIf={userdata}>
@@ -1177,7 +1181,7 @@ function JadwalDosen({ token, base_url, role }) {
                                 </CustomLoading>
                             </CustomControlledTabItem>
                         ))}
-                    </CustomControlledTabs> */}
+                    </CustomControlledTabs>
 
                 </div>
             </div>
@@ -1207,6 +1211,10 @@ function JadwalMahasiswa({ token, base_url, role }) {
             kelas_kuliah_id: '',
             error: null
         }
+    })
+
+    const [tabs, setTabs] = useState({
+        jadwal: 'Senin'
     })
 
     const aksi = {
@@ -1268,6 +1276,9 @@ function JadwalMahasiswa({ token, base_url, role }) {
                 get: (absen = [], maks) => {
 
                 }
+            },
+            get_current: () => {
+                aksi.tabs.set(event, dayjs().locale('id').format('dddd'))
             }
         },
         formData: {
@@ -1323,10 +1334,19 @@ function JadwalMahasiswa({ token, base_url, role }) {
                     }
                 }
             }
+        },
+        tabs: {
+            set: (event, value) => {
+                setTabs(state => ({
+                    ...state,
+                    jadwal: value
+                }))
+            }
         }
     }
 
     useEffect(() => {
+        aksi.jadwal.get_current()
         aksi.jadwal.get()
     }, [])
 
@@ -1391,9 +1411,9 @@ function JadwalMahasiswa({ token, base_url, role }) {
                         </div>
                     </ModalForm>
 
-                    <CustomTabs>
+                    <CustomControlledTabs value={tabs.jadwal} onChange={aksi.tabs.set}>
                         {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map(hari => (
-                            <CustomTabItem key={hari} label={hari}>
+                            <CustomControlledTabItem key={hari} label={hari} value={hari}>
                                 <CustomLoading loading={loadingUserdata} renderIf={userdata}>
                                     <div className="p-4">
                                         <CustomLoading 
@@ -1528,7 +1548,7 @@ function JadwalMahasiswa({ token, base_url, role }) {
                                         </CustomLoading>
                                     </div>
                                 </CustomLoading>
-                            </CustomTabItem>
+                            </CustomControlledTabItem>
                         ))}
                         <CustomTabItem label={'Belum ada'}>
                             <CustomLoading loading={loadingUserdata} renderIf={userdata}>
@@ -1662,7 +1682,7 @@ function JadwalMahasiswa({ token, base_url, role }) {
                                 </div>
                             </CustomLoading>
                         </CustomTabItem>
-                    </CustomTabs>
+                    </CustomControlledTabs>
 
                 </div>
             </div>

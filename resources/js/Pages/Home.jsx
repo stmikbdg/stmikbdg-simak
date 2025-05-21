@@ -39,6 +39,7 @@ import {
     Save,
     SaveOutlined,
     SchoolTwoTone,
+    SearchOutlined,
     SendOutlined,
     SubjectOutlined,
     Upload,
@@ -56,7 +57,7 @@ import {
     TextField,
     Tooltip,
 } from "@mui/material";
-import MainLayout from "../layouts/MainLayout";
+import MainLayout, { MainLayout2 } from "../layouts/MainLayout";
 import { useSidebar } from "../context/SidebarContext";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "../context/UserContext";
@@ -77,6 +78,7 @@ import CustomSelectAjax from "../components/CustomSelectAjax";
 import CustomSelect from "../components/CustomSelect";
 
 export default function Home({ token, base_url, role, app }) {
+
     if (role.mahasiswa.enable) {
         return <MahasiswaPage token={token} base_url={base_url} role={role} app={app} />;
     }
@@ -92,6 +94,440 @@ export default function Home({ token, base_url, role, app }) {
     if (role.admin.enable) {
         return <AdminPage token={token} base_url={base_url} role={role} app={app} />;
     }
+
+    if(role?.prodi?.enable) {
+        return <ProdiPage token={token} base_url={base_url} role={role} />
+    }
+}
+
+function ProdiPage_Rekap_Presensi_Dosen({ token, base_url, role }) {
+    return (
+        <div className="divide-y divide-zinc-300">
+            <div className="p-4 ">
+                <div className="max-w-1/2 space-y-4">
+                    <CustomSelect 
+                        label="Cari dan Pilih Tahun Ajaran"
+                        placeholder="2024/2025"
+                    />
+                    <CustomSelect 
+                        label="Cari dan Pilih Dosen Pengajar"
+                        placeholder="Nama Dosen Pengajar disini"
+                    />
+                </div>
+            </div>
+            {/* <div className="p-4">
+                Daftar Mata Kuliah / Kelas yang Terdaftar
+            </div> */}
+            <CustomDataTable />
+        </div>
+    )
+}
+
+function ProdiPage_Rekap_Presensi_Mahasiswa({ token, base_url, role }) {
+    return (
+        <div className="divide-y divide-zinc-300">
+            <div className="p-4 ">
+                <div className="max-w-1/2 space-y-4">
+                    <CustomSelect 
+                        label="Cari dan Pilih Tahun Ajaran"
+                        placeholder="2024/2025"
+                    />
+                    <CustomSelect 
+                        label="Cari dan Pilih Jurusan"
+                        placeholder="Nama Jurusan disini"
+                    />
+                    <CustomSelect 
+                        label="Cari dan Pilih Jurusan"
+                        placeholder="Nama Jurusan disini"
+                    />
+                </div>
+            </div>
+            {/* <div className="p-4">
+                Daftar Mata Kuliah / Kelas yang Terdaftar
+            </div> */}
+            <CustomDataTable />
+        </div>
+    )
+}
+
+function ProdiPage_Rekap_BeritaAcara({ token, base_url, role }) {
+    return (
+        <div className="divide-y divide-zinc-300">
+            <div className="p-4"></div>
+        </div>
+    )
+}
+
+function ProdiPage_Pengumuman({ token, base_url, role }) {
+    return (
+        <div className="divide-y divide-zinc-300">
+            <div className="p-4"></div>
+        </div>
+    )
+}
+
+function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
+    return (
+        <div className="divide-y divide-zinc-300">
+            <div className="p-4"></div>
+        </div>
+    )
+}
+
+function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
+
+    const [listData, setListData] = useState({
+        tahun_ajaran: {
+            data: [],
+            loading: {
+                fetch: false,
+                refresh: false
+            },
+            select: null
+        },
+        dosen: {
+            data: [],
+            loading: {
+                fetch: false,
+                refresh: false
+            },
+            select: null
+        },
+        matkul: {
+            data: [],
+            select: null,
+            loading: false,
+            error: null
+        },
+        detail: {
+            data: null,
+            loading: false
+        }
+    })
+
+    const aksi = {
+        tahun_ajaran: {
+            get: async () => {
+                try {
+                    aksi.tahun_ajaran.loading('fetch')
+
+                    const response = await api_handler.get({
+                        url: 'rekap/presensi/filter/tahun-ajaran',
+                        base_url,
+                        token
+                    })
+
+                    aksi.tahun_ajaran.loading('fetch')
+
+                    if (response?.success) {
+                        aksi.tahun_ajaran.set('data', response?.data?.tahun_ajaran)                        
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData({
+                    ...listData,
+                    tahun_ajaran: {
+                        ...listData.tahun_ajaran,
+                        [column]: value
+                    }
+                })
+            },
+            loading: (column) => {
+                setListData({
+                    ...listData,
+                    tahun_ajaran: {
+                        ...listData.tahun_ajaran,
+                        loading: {
+                            ...listData.tahun_ajaran.loading,
+                            [column]: !listData.tahun_ajaran.loading[column]
+                        }
+                    }
+                })
+            },
+            select: async (value) => {
+                // aksi.dosen.set('data', [])
+                aksi.tahun_ajaran.set('select', value)
+                aksi.dosen.set('select', null)
+                aksi.matkul.set('select', null)
+                aksi.detail.set('data', null)
+                if(value) {
+                    aksi.dosen.get(value['tahun_id'])
+                }else{
+                    aksi.dosen.set('data', [])
+                }
+
+            }
+        },
+        dosen: {
+            get: async (tahun_id) => {
+                try {
+                    // aksi.dosen.set('data', [])
+                    aksi.dosen.loading('fetch')
+
+                    const response = await api_handler.get({
+                        url: `rekap/presensi/filter/dosen?tahun_id=${tahun_id}`,
+                        base_url,
+                        token
+                    })
+
+                    aksi.dosen.loading('fetch')
+                    
+                    if (response?.success) {
+                        aksi.dosen.set('data', response?.data?.dosen_mengajar)                        
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    dosen: {
+                        ...state.dosen,
+                        [column]: value
+                    }
+                }))
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    dosen: {
+                        ...state.dosen,
+                        loading: {
+                            ...state.dosen.loading,
+                            [column]: !state.dosen.loading[column]
+                        }
+                    }
+                }))
+            },
+            select: (dosen) => {
+                aksi.matkul.set('data', null)
+                aksi.matkul.select(null)
+                aksi.dosen.set('select', dosen)
+                aksi.detail.set('data', null)
+                if(dosen) {
+                    aksi.matkul.get(dosen)
+                }
+            }
+        },
+        matkul: {
+            get: async (dosen) => {
+                try {
+                    aksi.matkul.set('loading', true)
+
+                    const response = await api_handler.get({
+                        url: `rekap/presensi/filter/matkul?tahun_id=${dosen?.tahun_id}&dosen_id=${dosen?.dosen_id}`,
+                        base_url,
+                        token
+                    })
+
+                    aksi.matkul.set('loading', false)
+
+                    if (response?.success) {
+                        aksi.matkul.set('data', response?.data?.matakuliah_diselenggarakan)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    matkul: {
+                        ...state.matkul,
+                        [column]: value
+                    }
+                }))
+            },
+            select: (matkul) => {
+                
+                aksi.matkul.set('select', matkul)
+                if(matkul) {
+                    aksi.detail.get(matkul)
+                }else{
+                    aksi.detail.set('data', null)
+                }
+            }
+        },
+        detail: {
+            get: async (matkul) => {
+                try {
+                    aksi.detail.set('loading', true)
+
+                    const response = await api_handler.get({
+                        url: `rekap/presensi?kelas_kuliah_id=${matkul?.kelas_kuliah_id}`,  
+                        base_url,
+                        token  
+                    })
+
+                    console.log(response)
+
+                    aksi.detail.set('loading', false)
+
+                    if(!response?.success) {
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+
+                        return
+                    }
+
+                    aksi.detail.set('data', response?.data?.rekap_presensi)
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    detail: {
+                        ...state.detail,
+                        [column]: value
+                    }
+                }))
+            },
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            await aksi.tahun_ajaran.get()
+        })();
+    }, [])
+
+    return (
+        <div className="divide-y divide-zinc-300">
+
+            <div className="p-4 ">
+                <div className="sm:max-w-1/2 space-y-4">
+                    <CustomSelect 
+                        label="Cari dan Pilih Tahun Ajaran"
+                        placeholder="2024/2025"
+                        loading={listData.tahun_ajaran.loading.fetch || listData.dosen.loading.fetch}
+                        loadingText="Loading.."
+                        optionLabel="uraian"
+                        options={listData.tahun_ajaran.data}
+                        value={listData.tahun_ajaran.select}
+                        onChange={(e, value) => aksi.tahun_ajaran.select(value)}
+                        disabled={listData.tahun_ajaran.loading.fetch || listData.dosen.loading.fetch}
+                    />
+                    <CustomSelect 
+                        label={listData.tahun_ajaran.select ? "Cari dan Pilih Dosen Mengajar" : "Silahkan pilih Tahun Ajaran terlebih dahulu"}
+                        placeholder="Nama Dosen disini"
+                        loading={listData.dosen.loading.fetch}
+                        loadingText="Loading.."
+                        optionLabel="nm_dosen"
+                        options={listData.dosen.data}
+                        value={listData.dosen.select}
+                        onChange={(e, value) => aksi.dosen.select(value)}
+                        disabled={listData.tahun_ajaran.loading.fetch || listData.dosen.loading.fetch || !listData.tahun_ajaran.select}
+                    />
+                    <CustomSelect 
+                        label={listData.dosen.select ? "Cari dan Pilih Mata Kuliah" : "Silahkan pilih Dosen Mengajar terlebih dahulu"}
+                        placeholder="Nama Mata Kuliah disini"
+                        loading={listData.matkul.loading || listData.dosen.loading.fetch}
+                        loadingText="Loading.."
+                        // optionLabel="uraian"
+                        getOptionLabel={(option) => option?.matakuliah?.nm_mk}
+                        options={listData.matkul.data}
+                        value={listData.matkul.select}
+                        onChange={(e, value) => aksi.matkul.select(value)}
+                        disabled={listData.matkul.loading || listData.dosen.loading.fetch || !listData.dosen.select}
+                    />
+                </div>
+            </div>
+            <CustomTabs>
+                <CustomTabItem label="Daftar Mahasiswa">
+                    {!listData.tahun_ajaran.select || !listData.dosen.select || !listData.matkul.select
+                        ? (
+                            <div className="flex items-center justify-center h-80">
+                                Silahkan Isi Kolom diatas terlebih dahulu
+                            </div>
+                        )
+                        : (
+                            <CustomDataTable 
+                                loading={listData.detail.loading}
+                            />
+                        )
+                    }
+                </CustomTabItem>
+                <CustomTabItem label="Detail Kelas">
+                    {!listData.tahun_ajaran.select || !listData.dosen.select || !listData.matkul.select
+                        ? (
+                            <div className="flex items-center justify-center h-80">
+                                Silahkan Isi Kolom diatas terlebih dahulu
+                            </div>
+                        )
+                        : listData.detail.loading
+                            ? (
+                                <div className="flex items-center justify-center h-80">
+                                    <CircularProgress size={30} color="primary" />
+                                </div>
+                            )
+                            : !listData.detail.data
+                                ? (
+                                    <div className="flex items-center justify-center h-80">
+                                        Data yang anda cari tidak ditemukan
+                                    </div>
+                                ) 
+                                : (
+                                    <div className="">
+                                        Data Ada
+                                    </div>
+                                )
+                    }
+                </CustomTabItem>
+            </CustomTabs>
+        </div>
+    )
+}
+
+function ProdiPage({ token, base_url, role }) {
+    return (
+        <MainLayout2 token={token} base_url={base_url} role={role} app={app} page_title="Dashboard">
+            <CustomTabs>
+                <CustomTabItem label="Rekap">
+                    <CustomTabs>
+                        <CustomTabItem label="Presensi">
+                            <ProdiPage_Rekap_Presensi token={token} base_url={base_url} role={role} />
+                        </CustomTabItem>
+                        <CustomTabItem label="pertemuan">
+                            <ProdiPage_Rekap_Pertemuan token={token} base_url={base_url} role={role} />
+                        </CustomTabItem>
+                        <CustomTabItem label="Berita Acara">
+                            <ProdiPage_Rekap_BeritaAcara token={token} base_url={base_url} role={role} />
+                        </CustomTabItem>
+                    </CustomTabs>
+                </CustomTabItem>
+                <CustomTabItem label="Pengumuman">
+                    <ProdiPage_Pengumuman token={token} base_url={base_url} role={role} />
+                </CustomTabItem>
+            </CustomTabs>
+        </MainLayout2>
+    )
 }
 
 function ApplicationSection({ app }) {
@@ -1120,7 +1556,7 @@ function MahasiswaPagePengumumanUmum({ token, base_url, role }) {
                             )
                             : (
                                 <>
-                                    {listData.pengumuman.data.map(pengumuman => (
+                                    {listData.pengumuman.data.filter(pengumuman => pengumuman?.target === 0).map(pengumuman => (
                                         <div key={pengumuman['pengumuman_id']} className={`relative overflow-hidden rounded-md ${pengumuman['target'] === 0 ? 'border-2 border-blue-500' : 'border border-zinc-300'} w-full shadow-md`}>
                                             <div className="space-y-1">
                                                 {pengumuman['target'] === 0
@@ -1425,15 +1861,206 @@ function MahasiswaPagePengumumanKelas({ token, base_url, role }) {
     )
 }
 
-function DosenWaliPage({ token, base_url, role }) {
+function DosenWaliPage({ token, base_url, role, app }) {
     const { setShowSidebar } = useSidebar();
 
     const { userdata, loadingUserdata } = useUser();
+
+    const [listData, setListData] = useState({
+        krs: {
+            data: [],
+            loading: {
+                fetch: false
+            },
+            detail: {
+                data: []
+            }
+        }
+    })
+
+    const aksi = {
+        krs: {
+            get: async () => {
+                try {
+                    aksi.krs.loading('fetch')
+
+                    const response = await api_handler.get({
+                        url: 'krs/mahasiswa/list',
+                        base_url,
+                        token
+                    })
+
+                    aksi.krs.loading('fetch')
+
+                    if(response?.success) {
+                        aksi.krs.set('data', response?.data?.list_krs_mahasiswa)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    krs: {
+                        ...state.krs,
+                        loading: {
+                            ...state.krs.loading,
+                            [column]: !state.krs.loading[column]
+                        }
+                    }
+                }))
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    krs: {
+                        ...state.krs,
+                        [column]: value
+                    }
+                }))
+            },
+            detail: (mhs_id) => {
+                const data = listData.krs.data.find(item => item.mhs_id === mhs_id)?.krs
+
+                setListData(state => ({
+                    ...state,
+                    krs: {
+                        ...state.krs,
+                        detail: {
+                            data
+                        }
+                    }
+                }))
+
+                modal.show('detail_krs')
+            },
+            filter: {
+                select: {
+                    jenis_mhs: () => {
+                        const data = []
+
+                        Array.from(
+                            new Set(
+                                listData.krs.data
+                                    // .filter(item => item?.krs?.some(krs => krs?.sts_krs !== 'S'))
+                                    // .filter(item => item?.krs?.some(krs => dayjs(krs?.tanggal).isSame(dayjs())))
+                                    .map(item => item.jns_mhs)
+                            )
+                        )
+                        .map(jns_mhs => {
+                            if(jns_mhs === 'R') {
+                                data.push({
+                                    label: 'Reguler',
+                                    value: 'R'
+                                })
+                            }
+
+                            if(jns_mhs === 'K') {
+                                data.push({
+                                    label: 'Karyawan',
+                                    value: 'K'
+                                })
+                            }
+
+                            if(jns_mhs === 'E') {
+                                data.push({
+                                    label: 'Eksekutif',
+                                    value: 'E'
+                                })
+                            }
+                        })
+
+                        return data
+                    },
+                    sts_mhs: () => {
+                        const data = []
+
+                        Array.from(
+                            new Set(
+                                listData.krs.data
+                                    // .filter(item => item?.krs?.some(krs => krs?.sts_krs !== 'S'))
+                                    // .filter(item => item?.krs?.some(krs => dayjs(krs?.tanggal).isSame(dayjs())))
+                                    .map(item => item?.sts_mhs)
+                            )
+                        )
+                        .map(sts_mhs => {
+                            if(sts_mhs === 'A') {
+                                data.push({
+                                    label: 'Aktif',
+                                    value: 'A'
+                                })
+                            }
+
+                            if(sts_mhs === 'TA') {
+                                data.push({
+                                    label: 'Tidak Aktif',
+                                    value: 'TA'
+                                })
+                            }
+
+                            if(sts_mhs === 'C') {
+                                data.push({
+                                    label: 'Cuti',
+                                    value: 'C'
+                                })
+                            }
+                        })
+
+                        return data
+                    },
+                    masuk_tahun: () => {
+                        const data = []
+
+                        Array.from(
+                            new Set(
+                                listData.krs.data
+                                    // .filter(item => item?.krs?.some(krs => krs?.sts_krs !== 'S'))
+                                    // .filter(item => item?.krs?.some(krs => dayjs(krs?.tanggal).isSame(dayjs())))
+                                    .map(item => item?.masuk_tahun)
+                            )
+                        )
+                        .sort((a, b) => b - a)
+                        .map(masuk_tahun => data.push({ label: masuk_tahun, value: masuk_tahun }))
+
+                        return data
+                    },
+                    semester: () => {
+                        const data = []
+
+                        Array.from(
+                            new Set(
+                                listData.krs.data
+                                    // .filter(item => item?.krs?.some(krs => krs?.sts_krs !== 'S'))
+                                    // .filter(item => item?.krs?.some(krs => dayjs(krs?.tanggal).isSame(dayjs())))
+                                    .map(item => item?.masuk_tahun)
+                            )
+                        )
+                        .sort((a, b) => b - a)
+                        .map(masuk_tahun => data.push({ label: masuk_tahun, value: masuk_tahun }))
+
+                        return data
+                    }
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        aksi.krs.get()
+    }, [])
 
     return (
         <MainLayout token={token} base_url={base_url} role={role}>
             <div className="bg-white w-full rounded-lg border border-zinc-300 shadow-md">
                 <div className="divide-y divide-zinc-300">
+
                     <div className="p-2 lg:p-4">
                         <div className="flex justify-between items-center ">
                             <div className="flex items-center lg:gap-3">
@@ -1452,10 +2079,163 @@ function DosenWaliPage({ token, base_url, role }) {
                             </div>
                         </div>
                     </div>
+
+                    <ApplicationSection app={app} />
+
+                    <CustomTabs>
+                        <CustomTabItem label="pengajuan krs">
+                            <div className="divide-y divide-zinc-300">
+                                <div className="p-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                        <div className="flex gap-4">
+                                            <InfoOutlined fontSize="small" color="primary" />
+                                            <p>
+                                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis molestiae dolorum animi itaque! Pariatur placeat vero adipisci voluptas, rem dolore quam. Consequatur alias quasi adipisci aliquam exercitationem distinctio consequuntur repellendus.
+                                            </p>
+                                        </div>
+                                        <div className="shrink-0">
+                                            <Button variant="contained" startIcon={<RefreshOutlined />} size="small" className="w-full sm:w-fit">
+                                                <p className="font-jakarta font-bold text-xs">
+                                                    Refresh
+                                                </p>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                        <CustomLoading loading={listData.krs.loading.fetch}>
+                                            <CustomSelect 
+                                                label="Jenis Mahasiswa"
+                                                size="small"
+                                                placeholder="Cari disini"
+                                                multiple
+                                                optionLabel="label"
+                                                options={aksi.krs.filter.select.jenis_mhs()}
+                                            />
+                                        </CustomLoading>
+                                        <CustomLoading loading={listData.krs.loading.fetch}>
+                                            <CustomSelect 
+                                                label="Status Mahasiswa"
+                                                size="small"
+                                                placeholder="Cari disini"
+                                                multiple
+                                                optionLabel="label"
+                                                options={aksi.krs.filter.select.sts_mhs()}
+                                            />
+                                        </CustomLoading>
+                                        <CustomLoading loading={listData.krs.loading.fetch}>
+                                            <CustomSelect 
+                                                label="Tahun Angkatan"
+                                                size="small"
+                                                placeholder="Cari disini"
+                                                multiple
+                                                optionLabel="label"
+                                                options={aksi.krs.filter.select.masuk_tahun()}
+                                            />
+                                        </CustomLoading>
+                                        <CustomLoading loading={listData.krs.loading.fetch}>
+                                            <CustomSelect 
+                                                label="Semester"
+                                                size="small"
+                                                placeholder="Cari disini"
+                                                multiple
+                                                optionLabel="label"
+                                                options={[
+                                                    {
+                                                        label: 'Aktif',
+                                                        value: 'A'
+                                                    },
+                                                    {
+                                                        label: 'Tidak Aktif',
+                                                        value: 'TA'
+                                                    },
+                                                    {
+                                                        label: 'Cuti',
+                                                        value: 'C'
+                                                    }
+                                                ]}
+                                            />
+                                        </CustomLoading>
+                                    </div>
+                                </div>
+                                <DosenWaliPage_KRSTab token={token} base_url={base_url} role={role} />
+                            </div>
+                        </CustomTabItem>
+                        <CustomTabItem label="pengajuan surat">
+                            <DosenWaliPage_SuratTab token={token} base_url={base_url} role={role} />
+                        </CustomTabItem>
+                    </CustomTabs>
                 </div>
             </div>
         </MainLayout>
     );
+}
+
+function DosenWaliPage_KRSTab({ token, base_url, role }) {
+    return (
+        <CustomTabs>
+            <CustomTabItem label="Hari ini">
+                <div className="divide-y divide-zinc-300">
+                    <div className="p-4">
+                        <CustomDataTable />
+                    </div>
+                </div>
+            </CustomTabItem>
+            <CustomTabItem label="Minggu ini">
+                <div className="divide-y divide-zinc-300">
+                    <div className="p-4">
+                        <CustomDataTable />
+                    </div>
+                </div>
+            </CustomTabItem>
+            <CustomTabItem label="Statistik">
+                <div className="divide-y divide-zinc-300">
+                    <div className="p-4">
+                        {/* <CustomDataTable /> */}
+                    </div>
+                </div>
+            </CustomTabItem>
+        </CustomTabs>
+    )
+}
+
+function DosenWaliPage_SuratTab({ token, base_url, role }) {
+    return (
+        <div className="divide-y divide-zinc-300">
+            <div className="p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex gap-4">
+                        <InfoOutlined fontSize="small" color="primary" />
+                        <p>
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis molestiae dolorum animi itaque! Pariatur placeat vero adipisci voluptas, rem dolore quam. Consequatur alias quasi adipisci aliquam exercitationem distinctio consequuntur repellendus.
+                        </p>
+                    </div>
+                    <div className="shrink-0">
+                        <Button variant="contained" startIcon={<RefreshOutlined />} size="small" className="w-full sm:w-fit">
+                            <p className="font-jakarta font-bold text-xs">
+                                Refresh
+                            </p>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+            <div className="p-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <CustomSelect 
+                        multiple
+                        size="small"  
+                        label="Cari Jenis Pengajuan"
+                    />
+                </div>
+            </div>
+            <div className="p-4">
+                <CustomDataTable 
+
+                />
+            </div>
+        </div>
+    )
 }
 
 function DosenPage({ token, base_url, role, app }) {
@@ -2751,7 +3531,7 @@ function DosenPage({ token, base_url, role, app }) {
                                                                                 )}
                                                                             </div>
                                                                             <div className="flex justify-end w-full sm:w-fit">
-                                                                                {item[
+                                                                                {!item[
                                                                                     "kontrak_kuliah"
                                                                                 ] ? (
                                                                                     item[
@@ -3039,7 +3819,7 @@ function DosenPagePengumumanUmum({ token, base_url, role }) {
                             )
                             : (
                                 <>
-                                    {listData.pengumuman.data.map(pengumuman => (
+                                    {listData.pengumuman.data.filter(pengumuman => pengumuman?.target === 0).map(pengumuman => (
                                         <div key={pengumuman['pengumuman_id']} className={`relative overflow-hidden rounded-md ${pengumuman['target'] === 0 ? 'border-2 border-blue-500' : 'border border-zinc-300'} w-full shadow-md`}>
                                             <div className="space-y-1">
                                                 {pengumuman['target'] === 0

@@ -82,6 +82,16 @@ class WebController extends Controller {
             'krs_id' => $krs_id
         ]);
     }
+
+    public function surat() {
+        return $this->render('surat');
+    }
+
+    public function surat_detail_by_id(Int $id) {
+        return $this->render('surat_detail_by_id', [
+            'id' => $id
+        ]);
+    }
 }
 
 ?>

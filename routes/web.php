@@ -29,6 +29,12 @@ Route::middleware(['auth.token'])
         Route::get('/notfound', [WebController::class, 'index'])->name('notfound');
         Route::get('/krs', [WebController::class, 'krs'])->name('krs');
         Route::get('/krs/approve/{mhs_id}/{krs_id}', [WebController::class, 'krs_approve_by_dosen_wali'])->name('krs_approve_by_dosen_wali');
+        // Route::get('/surat', [WebController::class, 'surat'])->name('surat');
+        Route::prefix('/surat')
+            ->group(function () {
+                Route::get('/', [WebController::class, 'surat'])->name('surat');
+                Route::get('/detail/{id}', [WebController::class, 'surat_detail_by_id'])->name('surat_detail_by_id');
+            });
     });
 
 /**

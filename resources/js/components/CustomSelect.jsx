@@ -1,6 +1,6 @@
 'use client';
 
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, CircularProgress, TextField } from '@mui/material';
 import { useState, useEffect } from 'react';
 
 export default function CustomSelect({
@@ -20,7 +20,10 @@ export default function CustomSelect({
     isOptionEqualToValue = (option, value) => option === value,
     renderOption,
     noOptionsText = 'Tidak ada opsi',
-    disabled = false
+    disabled = false,
+    loading = false,
+    loadingText='Sedang mendapatkan data..',
+    getOptionLabel
 }) {
     const [modalContainer, setModalContainer] = useState(null);
 
@@ -36,7 +39,9 @@ export default function CustomSelect({
             fullWidth={fullWidth}
             options={options}
             disabled={disabled}
-            getOptionLabel={(option) =>
+            getOptionLabel={getOptionLabel
+                ? getOptionLabel
+                : (option) =>
                 optionLabel && option[optionLabel] !== undefined
                     ? option[optionLabel]
                     : typeof option === 'string'
@@ -44,6 +49,8 @@ export default function CustomSelect({
                         : option[optionLabel]
             }
             defaultValue={defaultValue}
+            loading={loading}
+            loadingText={loadingText}
             size={size}
             value={value}
             filterSelectedOptions
@@ -59,6 +66,17 @@ export default function CustomSelect({
                     variant={variant}
                     label={label}
                     placeholder={placeholder}
+                    slotProps={{
+                        input: {
+                            ...params.InputProps,
+                            endAdornment: (
+                                <>
+                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                    {params.InputProps.endAdornment}
+                                </>
+                            ),
+                        },
+                    }}
                 />
             )}
         />

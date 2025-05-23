@@ -459,7 +459,47 @@ function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
                     />
                 </div>
             </div>
-            <CustomTabs>
+            {!listData.tahun_ajaran.select || !listData.dosen.select || !listData.matkul.select
+                ? (
+                    <div className="flex items-center justify-center h-80">
+                        Silahkan Isi Kolom diatas terlebih dahulu
+                    </div>
+                )
+                : (
+                    <CustomDataTable 
+                        loading={listData.detail.loading}
+                        rows={listData.detail.data?.kehadiran_mahasiswa || []}
+                        getRowId={(row) => row?.mhs_id}
+                        columns={[
+                            {
+                                field: 'nim',
+                                headerName: 'NIM',
+                                minWidth: 150
+                            },
+                            {
+                                field: 'nm_mhs',
+                                headerName: 'Nama',
+                                minWidth: 350
+                            },
+                            {
+                                field: 'total_kehadiran',
+                                headerName: 'Kehadiran',  
+                            },
+                            {
+                                field: 'total_pertemuan',
+                                headerName: 'Pertemuan'
+                            },
+                            {
+                                field: 'persentase_kehadiran',
+                                headerName: 'Persentase Kehadiran',
+                                minWidth: 250,
+                                valueGetter: (value, row) => `${value}%`
+                            }
+                        ]}
+                    />
+                )
+            }
+            {/* <CustomTabs>
                 <CustomTabItem label="Daftar Mahasiswa">
                     {!listData.tahun_ajaran.select || !listData.dosen.select || !listData.matkul.select
                         ? (
@@ -470,6 +510,34 @@ function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
                         : (
                             <CustomDataTable 
                                 loading={listData.detail.loading}
+                                rows={listData.detail.data?.kehadiran_mahasiswa || []}
+                                getRowId={(row) => row?.mhs_id}
+                                columns={[
+                                    {
+                                        field: 'nim',
+                                        headerName: 'NIM',
+                                        minWidth: 150
+                                    },
+                                    {
+                                        field: 'nm_mhs',
+                                        headerName: 'Nama',
+                                        minWidth: 350
+                                    },
+                                    {
+                                        field: 'total_kehadiran',
+                                        headerName: 'Kehadiran',  
+                                    },
+                                    {
+                                        field: 'total_pertemuan',
+                                        headerName: 'Pertemuan'
+                                    },
+                                    {
+                                        field: 'persentase_kehadiran',
+                                        headerName: 'Persentase Kehadiran',
+                                        minWidth: 250,
+                                        valueGetter: (value, row) => `${value}%`
+                                    }
+                                ]}
                             />
                         )
                     }
@@ -494,13 +562,65 @@ function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
                                     </div>
                                 ) 
                                 : (
-                                    <div className="">
-                                        Data Ada
+                                    <div className="p-4">
+                                        <div className="space-y-6">
+                                            <div className="border-y border-zinc-300 py-2">
+                                                <p className="font-bold text-sm">
+                                                    Data Dosen
+                                                </p>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                                                    <div className="font-medium">
+                                                        Nama
+                                                    </div>
+                                                    <div className="lg:col-span-2 font-bold">
+                                                        {listData.detail.data?.dosen?.nm_dosen}
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                                                    <div className="font-medium">
+                                                        Gelar
+                                                    </div>
+                                                    <div className="lg:col-span-2 font-bold">
+                                                        {listData.detail.data?.dosen?.gelar}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr className="my-4 opacity-0" />
+                                        <div className="space-y-6">
+                                            <div className="border-y border-zinc-300 py-2">
+                                                <p className="font-bold text-sm">
+                                                    Data Tahun Ajaran
+                                                </p>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                                                    <div className="font-medium">
+                                                        Jenis Mahasiswa
+                                                    </div>
+                                                    <div className="lg:col-span-2 font-bold">
+                                                        {listData.detail.data?.tahun_ajaran?.jns_mhs === 'R'
+                                                            ? 'Reguler'
+                                                            : 'Karyawan'}
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                                                    <div className="font-medium">
+                                                        Tanggal Kuliah
+                                                    </div>
+                                                    <div className="lg:col-span-2 font-bold">
+                                                        {dayjs(listData.detail.data?.tahun_ajaran?.tgl_kuliah).locale('id').format('DD MMMM YYYY')}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 )
                     }
                 </CustomTabItem>
-            </CustomTabs>
+            </CustomTabs> */}
         </div>
     )
 }

@@ -26,7 +26,7 @@
         "@mui/material": "^6.4.7",
         "@mui/material-nextjs": "^6.4.2",
         "@mui/x-data-grid": "^7.23.5",
-        "@mui/x-date-pickers": "^7.23.6",
+        "@mui/x-date-pickers": "^7.29.4",
         "@supabase/supabase-js": "^2.47.10",
         "@tailwindcss/vite": "^4.0.9",
         "@tinymce/tinymce-react": "^6.1.0",

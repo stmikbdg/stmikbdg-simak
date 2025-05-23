@@ -76,6 +76,7 @@ import { CustomControlledTextEditor, CustomTextEditor } from "../components/Cust
 import DOMPurify from "isomorphic-dompurify";
 import CustomSelectAjax from "../components/CustomSelectAjax";
 import CustomSelect from "../components/CustomSelect";
+import { DatePicker } from "@mui/x-date-pickers";
 
 export default function Home({ token, base_url, role, app }) {
 
@@ -167,9 +168,381 @@ function ProdiPage_Pengumuman({ token, base_url, role }) {
 }
 
 function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
+    const [listData, setListData] = useState({
+        tahun_ajaran: {
+            data: [],
+            loading: {
+                fetch: false,
+                refresh: false
+            },
+            select: null
+        },
+        dosen: {
+            data: [],
+            loading: {
+                fetch: false,
+                refresh: false
+            },
+            select: null
+        },
+        matkul: {
+            data: [],
+            select: null,
+            loading: false,
+            error: null
+        },
+        tanggal: {
+            from: null,
+            to: null
+        },
+        detail: {
+            data: null,
+            loading: false
+        }
+    })
+
+    const aksi = {
+        tahun_ajaran: {
+            get: async () => {
+                try {
+                    aksi.tahun_ajaran.loading('fetch')
+
+                    const response = await api_handler.get({
+                        url: 'rekap/presensi/filter/tahun-ajaran',
+                        base_url,
+                        token
+                    })
+
+                    aksi.tahun_ajaran.loading('fetch')
+
+                    if (response?.success) {
+                        aksi.tahun_ajaran.set('data', response?.data?.tahun_ajaran)                        
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData({
+                    ...listData,
+                    tahun_ajaran: {
+                        ...listData.tahun_ajaran,
+                        [column]: value
+                    }
+                })
+            },
+            loading: (column) => {
+                setListData({
+                    ...listData,
+                    tahun_ajaran: {
+                        ...listData.tahun_ajaran,
+                        loading: {
+                            ...listData.tahun_ajaran.loading,
+                            [column]: !listData.tahun_ajaran.loading[column]
+                        }
+                    }
+                })
+            },
+            select: async (value) => {
+                // aksi.dosen.set('data', [])
+                aksi.tahun_ajaran.set('select', value)
+                aksi.dosen.set('select', null)
+                aksi.matkul.set('select', null)
+                aksi.detail.set('data', null)
+                if(value) {
+                    aksi.dosen.get(value['tahun_id'])
+                }else{
+                    aksi.dosen.set('data', [])
+                }
+
+            }
+        },
+        dosen: {
+            get: async (tahun_id) => {
+                try {
+                    // aksi.dosen.set('data', [])
+                    aksi.dosen.loading('fetch')
+
+                    const response = await api_handler.get({
+                        url: `rekap/presensi/filter/dosen?tahun_id=${tahun_id}`,
+                        base_url,
+                        token
+                    })
+
+                    aksi.dosen.loading('fetch')
+                    
+                    if (response?.success) {
+                        aksi.dosen.set('data', response?.data?.dosen_mengajar)                        
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    dosen: {
+                        ...state.dosen,
+                        [column]: value
+                    }
+                }))
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    dosen: {
+                        ...state.dosen,
+                        loading: {
+                            ...state.dosen.loading,
+                            [column]: !state.dosen.loading[column]
+                        }
+                    }
+                }))
+            },
+            select: (dosen) => {
+                aksi.matkul.set('data', null)
+                aksi.matkul.select(null)
+                aksi.dosen.set('select', dosen)
+                aksi.detail.set('data', null)
+                if(dosen) {
+                    aksi.matkul.get(dosen)
+                }
+            }
+        },
+        matkul: {
+            get: async (dosen) => {
+                try {
+                    aksi.matkul.set('loading', true)
+
+                    const response = await api_handler.get({
+                        url: `rekap/presensi/filter/matkul?tahun_id=${dosen?.tahun_id}&dosen_id=${dosen?.dosen_id}`,
+                        base_url,
+                        token
+                    })
+
+                    aksi.matkul.set('loading', false)
+
+                    if (response?.success) {
+                        aksi.matkul.set('data', response?.data?.matakuliah_diselenggarakan)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    matkul: {
+                        ...state.matkul,
+                        [column]: value
+                    }
+                }))
+            },
+            select: (matkul) => {
+                
+                aksi.matkul.set('select', matkul)
+                if(matkul) {
+                    aksi.detail.get(matkul)
+                }else{
+                    aksi.detail.set('data', null)
+                }
+            }
+        },
+        detail: {
+            get: async (matkul) => {
+                try {
+                    if(!listData.tanggal.from || !listData.tanggal.to) {
+                        return
+                    }
+
+                    aksi.detail.set('loading', true)
+
+                    const response = await api_handler.get({
+                        url: `rekap/pertemuan?kelas_kuliah_id=${matkul?.kelas_kuliah_id}&from=${dayjs(listData.tanggal.from).format('YYYY-MM-DD')}&to=${dayjs(listData.tanggal.to).format('YYYY-MM-DD')}`,  
+                        base_url,
+                        token  
+                    })
+
+                    aksi.detail.set('loading', false)
+
+                    if(!response?.success) {
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+
+                        return
+                    }
+
+                    aksi.detail.set('data', response?.data)
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    detail: {
+                        ...state.detail,
+                        [column]: value
+                    }
+                }))
+            },
+        },
+        tanggal: {
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    tanggal: {
+                        ...state.tanggal,
+                        [column]: value
+                    }
+                }))
+            },
+            from: (value) => {
+                aksi.tanggal.set('from', value)
+            },
+            to: (value) => {
+                aksi.tanggal.set('to', value)
+            }
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            await aksi.tahun_ajaran.get()
+        })();
+    }, [])
+
+    useEffect(() => {
+        if(listData.tanggal.from && listData.tanggal.to) {
+            aksi.detail.get(listData.matkul.select)
+        }else{
+            aksi.detail.set('data', null)
+        }
+    }, [listData.tanggal.from, listData.tanggal.to])
+
     return (
         <div className="divide-y divide-zinc-300">
-            <div className="p-4"></div>
+
+            <div className="p-4 ">
+                <div className="sm:max-w-1/2 space-y-4">
+                    <CustomSelect 
+                        label="Cari dan Pilih Tahun Ajaran"
+                        placeholder="2024/2025"
+                        loading={listData.tahun_ajaran.loading.fetch || listData.dosen.loading.fetch}
+                        loadingText="Loading.."
+                        optionLabel="uraian"
+                        options={listData.tahun_ajaran.data}
+                        value={listData.tahun_ajaran.select}
+                        onChange={(e, value) => aksi.tahun_ajaran.select(value)}
+                        disabled={listData.tahun_ajaran.loading.fetch || listData.dosen.loading.fetch}
+                    />
+                    <CustomSelect 
+                        label={listData.tahun_ajaran.select ? "Cari dan Pilih Dosen Mengajar" : "Silahkan pilih Tahun Ajaran terlebih dahulu"}
+                        placeholder="Nama Dosen disini"
+                        loading={listData.dosen.loading.fetch}
+                        loadingText="Loading.."
+                        optionLabel="nm_dosen"
+                        options={listData.dosen.data}
+                        value={listData.dosen.select}
+                        onChange={(e, value) => aksi.dosen.select(value)}
+                        disabled={listData.tahun_ajaran.loading.fetch || listData.dosen.loading.fetch || !listData.tahun_ajaran.select}
+                    />
+                    <CustomSelect 
+                        label={listData.dosen.select ? "Cari dan Pilih Mata Kuliah" : "Silahkan pilih Dosen Mengajar terlebih dahulu"}
+                        placeholder="Nama Mata Kuliah disini"
+                        loading={listData.matkul.loading || listData.dosen.loading.fetch}
+                        loadingText="Loading.."
+                        // optionLabel="uraian"
+                        getOptionLabel={(option) => option?.matakuliah?.nm_mk}
+                        options={listData.matkul.data}
+                        value={listData.matkul.select}
+                        onChange={(e, value) => aksi.matkul.select(value)}
+                        disabled={listData.matkul.loading || listData.dosen.loading.fetch || !listData.dosen.select}
+                    />
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <DatePicker 
+                            label="Dari Tanggal"
+                            value={listData.tanggal.from}
+                            onChange={(value) => aksi.tanggal.from(value)}
+                            disabled={!listData.matkul.select}
+                            slotProps={{
+                                field: {
+                                    clearable: true
+                                }
+                            }}
+
+                        />
+                        <DatePicker 
+                            label="Hingga Tanggal"
+                            value={listData.tanggal.to}
+                            onChange={(value) => aksi.tanggal.to(value)}
+                            disabled={!listData.matkul.select}
+                            slotProps={{
+                                field: {
+                                    clearable: true
+                                }
+                            }}
+                        />
+                    </div>
+                </div>
+            </div>
+            {!listData.tahun_ajaran.select || !listData.dosen.select || !listData.matkul.select
+                ? (
+                    <div className="flex items-center justify-center h-80">
+                        Silahkan Isi Kolom diatas terlebih dahulu
+                    </div>
+                )
+                : listData.detail.loading
+                    ? (
+                        <div className="flex items-center justify-center h-80">
+                            <CircularProgress size={30} color="primary" />
+                        </div>
+                    )
+                    : !listData.detail.data
+                        ? (
+                            <div className="flex items-center justify-center h-80">
+                                Data yang anda cari tidak ditemukan
+                            </div>
+                        ) 
+                        : (
+                            <div className="p-4 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="font-medium text-lg">
+                                        Tanggal Daftar Pertemuan
+                                    </div>
+                                </div>
+                                <div className="flex flex-wrap gap-2 font-medium">
+                                    {listData.detail.data?.rekap_pertemuan?.map(item => (
+                                        <p key={item?.tanggal} className="w-fit px-5 py-3 rounded-full bg-zinc-100">
+                                            {dayjs(item?.tanggal).locale('id').format('DD MMMM YYYY')}
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
+                        )
+            }
+            
         </div>
     )
 }
@@ -380,8 +753,6 @@ function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
                         base_url,
                         token  
                     })
-
-                    console.log(response)
 
                     aksi.detail.set('loading', false)
 

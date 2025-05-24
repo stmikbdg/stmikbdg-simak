@@ -97,7 +97,7 @@ export default function Home({ token, base_url, role, app }) {
     }
 
     if(role?.prodi?.enable) {
-        return <ProdiPage token={token} base_url={base_url} role={role} />
+        return <ProdiPage token={token} base_url={base_url} role={role} app={app} />
     }
 }
 
@@ -1500,7 +1500,7 @@ function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
     )
 }
 
-function ProdiPage({ token, base_url, role }) {
+function ProdiPage({ token, base_url, role, app }) {
     return (
         <MainLayout2 token={token} base_url={base_url} role={role} app={app} page_title="Dashboard">
             <CustomTabs>

@@ -7,6 +7,10 @@ import './bootstrap';
 import { BrowserRouter } from 'react-router-dom';
 import { UserProvider } from './context/UserContext';
 import { BackdropProvider } from './context/BackdropContext';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import 'dayjs/locale/id'
 
 createInertiaApp({
     resolve: (name) => {
@@ -24,8 +28,10 @@ createInertiaApp({
                     <UserProvider>
                         <SidebarProvider>
                             <BackdropProvider>
-                                <CssBaseline />
-                                <App {...props} />
+                                <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={'id'}>
+                                    <CssBaseline />
+                                    <App {...props} />
+                                </LocalizationProvider>
                             </BackdropProvider>
                         </SidebarProvider>
                     </UserProvider>

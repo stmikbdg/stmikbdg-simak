@@ -487,9 +487,186 @@ function ProdiPage_Rekap_BeritaAcara({ token, base_url, role }) {
 }
 
 function ProdiPage_Pengumuman({ token, base_url, role }) {
+    const { userdata, loadingUserdata } = useUser();
+    
+    const [listData, setListData] = useState({
+        pengumuman: {
+            data: [],
+            meta: null,
+            loading: {
+                fetch: false,
+                refresh: false
+            }
+        }
+    })
+
+    const aksi = {
+        pengumuman: {
+            get: async () => {
+                try {
+                    aksi.pengumuman.loading('fetch')
+
+                    const response = await api_handler.get({
+                        base_url,
+                        token,
+                        url: 'pengumuman/list'
+                    })
+
+                    aksi.pengumuman.loading('fetch')
+
+                    if(response?.success) {
+                        aksi.pengumuman.set('data', response?.data?.list_pengumuman)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    pengumuman: {
+                        ...state.pengumuman,
+                        [column]: value
+                    }
+                }))
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    pengumuman: {
+                        ...state.pengumuman,
+                        loading: {
+                            ...state.pengumuman.loading,
+                            [column]: !state.pengumuman.loading[column]
+                        }
+                    }
+                }))
+            },
+            refresh: async () => {
+                try {
+                    aksi.pengumuman.loading('refresh')
+
+                    const response = await api_handler.get({
+                        base_url,
+                        token,
+                        url: 'pengumuman/list'
+                    })
+
+                    aksi.pengumuman.loading('refresh')
+
+                    if(response?.success) {
+                        aksi.pengumuman.set('data', response?.data?.list_pengumuman)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            aksi.pengumuman.get()
+        })();
+    }, []);
+
     return (
-        <div className="divide-y divide-zinc-300">
-            <div className="p-4"></div>
+        <div className="p-4">
+            <div className="flex justify-center">
+                <div className="max-w-5xl w-full space-y-4 flex flex-col items-center">
+
+                    {listData.pengumuman.loading.fetch || listData.pengumuman.loading.refresh
+                        ? (
+                            <div className="w-full h-80 flex items-center justify-center">
+                                <CircularProgress size={45} color="primary" />
+                            </div>
+                        )
+                        : listData.pengumuman.data.length < 1 
+                            ? (
+                                <div className="w-full h-80 flex items-center justify-center">
+                                    <div className="flex flex-col items-center gap-4">
+                                        <p className="italic opacity-50">
+                                            Tampaknya belum ada pengumuman
+                                        </p>
+                                    </div>
+                                </div>
+                            )
+                            : (
+                                <>
+                                    {listData.pengumuman.data.filter(pengumuman => pengumuman?.target === 0).map(pengumuman => (
+                                        <div key={pengumuman['pengumuman_id']} className={`relative overflow-hidden rounded-md ${pengumuman['target'] === 0 ? 'border-2 border-blue-500' : 'border border-zinc-300'} w-full shadow-md`}>
+                                            <div className="space-y-1">
+                                                {pengumuman['target'] === 0
+                                                    ? (
+                                                        <div className="bg-blue-800/80 p-4 border-b border-zinc-300 text-white font-semibold">
+                                                            <div className="flex items-center gap-4">
+                                                                <CampaignTwoTone fontSize="small" />
+                                                                <p>
+                                                                    {pengumuman['keterangan_target']}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                    : (
+                                                        <div className="bg-zinc-50 p-4 border-b border-zinc-300">
+                                                            <div className="flex items-center gap-4">
+                                                                <CampaignTwoTone fontSize="small" />
+                                                                <p>
+                                                                    {pengumuman['keterangan_target']}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }
+                                                <div className="p-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <Avatar 
+                                                            sx={{
+                                                                width: 40,
+                                                                height: 40
+                                                            }}
+                                                            className="w-80 h-80"
+                                                            src={pengumuman['avatar_pengirim']}
+                                                            alt="Foto Profil"
+                                                        />
+                                                        <div className="space-y-1">
+                                                            <p className="font-bold">
+                                                                {pengumuman['nm_pengirim']}
+                                                            </p>
+                                                            <p className="text-xs font-light italic opacity-70">
+                                                                {dayjs(pengumuman['tgl_dikirim']).locale('id').format('dddd, DD MMMM YYYY, HH:mm:ss')}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div className="p-4">
+                                                    <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(pengumuman['message'])}}></div>
+                                                </div>
+                                                {pengumuman['image'] && (
+                                                    <img className="w-full h-full" src={pengumuman['image']} alt="Foto Pengumuman" />
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </>
+                            )
+                    }
+
+                </div>
+            </div>
         </div>
     )
 }

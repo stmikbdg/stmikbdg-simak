@@ -588,7 +588,7 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                             </div>
                         </div>
                     )}
-                    {menuFor('Mahasiswa', 'Dosen Wali') && (
+                    {menuFor('Mahasiswa') && (
                         <div className="relative overflow-visible w-full">
                             <div className={`absolute top-0 left-0 w-2 rounded-md h-full bg-blue-500 ${pathname === '/krs' ? 'opacity-100' : 'opacity-0'}`}></div>
                             <div className="px-5">

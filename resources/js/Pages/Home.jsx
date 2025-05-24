@@ -2869,6 +2869,12 @@ function DosenWaliPage({ token, base_url, role, app }) {
             },
             detail: {
                 data: []
+            },
+            filter: {
+                jns_mhs: null,
+                sts_mhs: null,
+                masuk_tahun: null,
+                semester: null
             }
         }
     })
@@ -3025,23 +3031,50 @@ function DosenWaliPage({ token, base_url, role, app }) {
                         .map(masuk_tahun => data.push({ label: masuk_tahun, value: masuk_tahun }))
 
                         return data
-                    },
-                    semester: () => {
-                        const data = []
-
-                        Array.from(
-                            new Set(
-                                listData.krs.data
-                                    // .filter(item => item?.krs?.some(krs => krs?.sts_krs !== 'S'))
-                                    // .filter(item => item?.krs?.some(krs => dayjs(krs?.tanggal).isSame(dayjs())))
-                                    .map(item => item?.masuk_tahun)
-                            )
-                        )
-                        .sort((a, b) => b - a)
-                        .map(masuk_tahun => data.push({ label: masuk_tahun, value: masuk_tahun }))
-
-                        return data
                     }
+                },
+                set: (column, value) => {
+                    setListData(state => ({
+                        ...state,
+                        krs: {
+                            ...state.krs,
+                            filter: {
+                                ...state.krs.filter,
+                                [column]: value
+                            }
+                        }
+                    }))
+                }
+            },
+            filtered: {
+                hari_ini: () => {
+                    return listData.krs.data
+                        .filter(item => item?.krs?.some(krs => dayjs(krs?.tanggal).isSame(dayjs())))
+                },
+                sts_krs: (status) => {
+                    const data = aksi.krs.filtered.get()
+                    return data
+                        .filter(item => item?.krs?.some(krs => krs?.sts_krs === status))
+                },
+                get: () => {
+                    let data = listData.krs.data
+                    if(listData.krs.filter.jns_mhs) {
+                        data = data.filter(item => item?.jns_mhs === listData.krs.filter.jns_mhs?.value)
+                    }
+
+                    if(listData.krs.filter.sts_mhs) {
+                        data = data.filter(item => item?.sts_mhs === listData.krs.filter.sts_mhs?.value)
+                    }
+
+                    if(listData.krs.filter.masuk_tahun) {
+                        data = data.filter(item => item?.masuk_tahun === listData.krs.filter.masuk_tahun?.value)
+                    }
+
+                    if(listData.krs.filter.semester) {
+                        data = data.filter(item => item?.krs?.some(krs => krs?.semester === listData.krs.filter.semester?.value))
+                    }
+
+                    return data
                 }
             }
         }
@@ -3077,6 +3110,58 @@ function DosenWaliPage({ token, base_url, role, app }) {
 
                     <ApplicationSection app={app} />
 
+                    <Modal modalId="detail_krs" title="Detail" modalBoxClassname="max-w-2xl">
+                        <CustomDataTable 
+                            onModal="detail_krs"
+                            getRowId={(row) => row.krs_id}
+                            rows={listData.krs.detail.data}
+                            toolbar={{}}
+                            columns={[
+                                {
+                                    field: 'krs_id',
+                                    headerName: 'ID',
+                                    maxWidth: 75
+                                },
+                                {
+                                    field: 'nmr_krs',
+                                    headerName: 'Nomor KRS',
+                                    minWidth: 125
+                                },
+                                {
+                                    field: 'tanggal',
+                                    headerName: 'Tanggal',
+                                    minWidth: 125,
+                                    valueGetter: (value, row) => dayjs(row.tanggal).locale('id').format('DD MMMM YYYY')
+                                },
+                                {
+                                    field: 'semester',
+                                    headerName: 'Semester',
+                                    minWidth: 75
+                                },
+                                {
+                                    field: 'sts_krs',
+                                    headerName: 'Status KRS',
+                                    valueGetter: (value, row) => row.sts_krs === 'P'
+                                        ? 'Pengajuan'
+                                        : row.sts_krs === 'S'
+                                            ? 'Disetujui'
+                                            : 'Ditolak'
+                                },
+                                {
+                                    field: 'aksi',
+                                    headerName: '',
+                                    renderCell: ({ row }) => (
+                                        <div className="flex items-center justify-center h-full">
+                                            <IconButton onClick={() => window.location.href = `/krs/approve/${row.mhs_id}/${row.krs_id}`} size="small" color="primary">
+                                                <EastOutlined fontSize="small" />
+                                            </IconButton>
+                                        </div>
+                                    )
+                                }
+                            ]}
+                        />
+                    </Modal>
+
                     <CustomTabs>
                         <CustomTabItem label="pengajuan krs">
                             <div className="divide-y divide-zinc-300">
@@ -3085,11 +3170,11 @@ function DosenWaliPage({ token, base_url, role, app }) {
                                         <div className="flex gap-4">
                                             <InfoOutlined fontSize="small" color="primary" />
                                             <p>
-                                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis molestiae dolorum animi itaque! Pariatur placeat vero adipisci voluptas, rem dolore quam. Consequatur alias quasi adipisci aliquam exercitationem distinctio consequuntur repellendus.
+                                                Silahkan Refresh Data jika terdapat Data yang tidak sesuai, atau hubungi Administrator segera.
                                             </p>
                                         </div>
                                         <div className="shrink-0">
-                                            <Button variant="contained" startIcon={<RefreshOutlined />} size="small" className="w-full sm:w-fit">
+                                            <Button variant="contained" onClick={() => aksi.krs.get()} loading={listData.krs.loading.fetch} loadingPosition="start" startIcon={<RefreshOutlined />} size="small" className="w-full sm:w-fit">
                                                 <p className="font-jakarta font-bold text-xs">
                                                     Refresh
                                                 </p>
@@ -3099,62 +3184,49 @@ function DosenWaliPage({ token, base_url, role, app }) {
                                 </div>
                                 <div className="p-4">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                        <CustomLoading loading={listData.krs.loading.fetch}>
-                                            <CustomSelect 
-                                                label="Jenis Mahasiswa"
-                                                size="small"
-                                                placeholder="Cari disini"
-                                                multiple
-                                                optionLabel="label"
-                                                options={aksi.krs.filter.select.jenis_mhs()}
-                                            />
-                                        </CustomLoading>
-                                        <CustomLoading loading={listData.krs.loading.fetch}>
-                                            <CustomSelect 
-                                                label="Status Mahasiswa"
-                                                size="small"
-                                                placeholder="Cari disini"
-                                                multiple
-                                                optionLabel="label"
-                                                options={aksi.krs.filter.select.sts_mhs()}
-                                            />
-                                        </CustomLoading>
-                                        <CustomLoading loading={listData.krs.loading.fetch}>
-                                            <CustomSelect 
-                                                label="Tahun Angkatan"
-                                                size="small"
-                                                placeholder="Cari disini"
-                                                multiple
-                                                optionLabel="label"
-                                                options={aksi.krs.filter.select.masuk_tahun()}
-                                            />
-                                        </CustomLoading>
-                                        <CustomLoading loading={listData.krs.loading.fetch}>
-                                            <CustomSelect 
-                                                label="Semester"
-                                                size="small"
-                                                placeholder="Cari disini"
-                                                multiple
-                                                optionLabel="label"
-                                                options={[
-                                                    {
-                                                        label: 'Aktif',
-                                                        value: 'A'
-                                                    },
-                                                    {
-                                                        label: 'Tidak Aktif',
-                                                        value: 'TA'
-                                                    },
-                                                    {
-                                                        label: 'Cuti',
-                                                        value: 'C'
-                                                    }
-                                                ]}
-                                            />
-                                        </CustomLoading>
+                                        <CustomSelect 
+                                            label="Jenis Mahasiswa"
+                                            size="small"
+                                            placeholder="Cari disini"
+                                            optionLabel="label"
+                                            options={aksi.krs.filter.select.jenis_mhs()}
+                                            value={listData.krs.filter.jns_mhs}
+                                            onChange={(e, value) => aksi.krs.filter.set('jns_mhs', value)}
+                                            loading={listData.krs.loading.fetch}
+                                        />
+                                        <CustomSelect 
+                                            label="Status Mahasiswa"
+                                            size="small"
+                                            placeholder="Cari disini"
+                                            optionLabel="label"
+                                            options={aksi.krs.filter.select.sts_mhs()}
+                                            value={listData.krs.filter.sts_mhs}
+                                            onChange={(e, value) => aksi.krs.filter.set('sts_mhs', value)}
+                                            loading={listData.krs.loading.fetch}
+                                        />
+                                        <CustomSelect 
+                                            label="Tahun Angkatan"
+                                            size="small"
+                                            placeholder="Cari disini"
+                                            optionLabel="label"
+                                            options={aksi.krs.filter.select.masuk_tahun()}
+                                            value={listData.krs.filter.masuk_tahun}
+                                            onChange={(e, value) => aksi.krs.filter.set('masuk_tahun', value)}
+                                            loading={listData.krs.loading.fetch}
+                                        />
+                                        <CustomSelect 
+                                            label="Semester"
+                                            size="small"
+                                            placeholder="Cari disini"
+                                            optionLabel="label"
+                                            options={Array.from({ length: 8 }).map((_, index) => ({ label: `Semester ${index + 1}`, value: index + 1 }))}
+                                            value={listData.krs.filter.semester}
+                                            onChange={(e, value) => aksi.krs.filter.set('semester', value)}
+                                            loading={listData.krs.loading.fetch}
+                                        />
                                     </div>
                                 </div>
-                                <DosenWaliPage_KRSTab token={token} base_url={base_url} role={role} />
+                                <DosenWaliPage_KRSTab token={token} base_url={base_url} role={role} aksi={aksi} listData={listData} />
                             </div>
                         </CustomTabItem>
                         <CustomTabItem label="pengajuan surat">
@@ -3167,20 +3239,157 @@ function DosenWaliPage({ token, base_url, role, app }) {
     );
 }
 
-function DosenWaliPage_KRSTab({ token, base_url, role }) {
+function DosenWaliPage_KRSTab({ token, base_url, role, aksi, listData }) {
+
     return (
         <CustomTabs>
-            <CustomTabItem label="Hari ini">
+            <CustomTabItem label="Pengajuan">
                 <div className="divide-y divide-zinc-300">
                     <div className="p-4">
-                        <CustomDataTable />
+                        <CustomDataTable 
+                            getRowId={(row) => row.mhs_id}
+                            loading={listData.krs.loading.fetch}
+                            rows={aksi.krs.filtered.sts_krs('P')}
+                            columns={[
+                                {
+                                    field: 'mhs_id',
+                                    headerName: 'NIM',
+                                    valueGetter: (value, row) => row.nim,
+                                    minWidth: 120
+                                },
+                                {
+                                    field: 'nm_mhs',
+                                    headerName: 'Nama Mahasiswa',
+                                    minWidth: 350
+                                },
+                                {
+                                    field: 'masuk_tahun',
+                                    headerName: 'Angkatan',
+                                    minWidth: 100
+                                },
+                                {
+                                    field: 'status',
+                                    headerName: 'Status Mahasiswa',
+                                    minWidth: 150,
+                                    valueGetter: (value, row) => row.sts_mhs === 'A'
+                                        ? 'Aktif'
+                                        : row.sts_mhs === 'C'
+                                            ? 'Cuti'
+                                            : 'Tidak Aktif'
+                                },
+                                {
+                                    field: 'aksi',
+                                    headerName: '',
+                                    renderCell: ({ row }) => (
+                                        <div className="flex items-center justify-center h-full">
+                                            <IconButton onClick={() => aksi.krs.detail(row.mhs_id)} size="small" color="primary">
+                                                <EastOutlined fontSize="small" />
+                                            </IconButton>
+                                        </div>
+                                    )
+                                }
+                            ]}
+                        />
                     </div>
                 </div>
             </CustomTabItem>
-            <CustomTabItem label="Minggu ini">
+            <CustomTabItem label="Draft / Ditolak">
                 <div className="divide-y divide-zinc-300">
                     <div className="p-4">
-                        <CustomDataTable />
+                        <CustomDataTable 
+                            getRowId={(row) => row.mhs_id}
+                            loading={listData.krs.loading.fetch}
+                            rows={aksi.krs.filtered.sts_krs('D')}
+                            columns={[
+                                {
+                                    field: 'mhs_id',
+                                    headerName: 'NIM',
+                                    valueGetter: (value, row) => row.nim,
+                                    minWidth: 120
+                                },
+                                {
+                                    field: 'nm_mhs',
+                                    headerName: 'Nama Mahasiswa',
+                                    minWidth: 350
+                                },
+                                {
+                                    field: 'masuk_tahun',
+                                    headerName: 'Angkatan',
+                                    minWidth: 100
+                                },
+                                {
+                                    field: 'status',
+                                    headerName: 'Status Mahasiswa',
+                                    minWidth: 150,
+                                    valueGetter: (value, row) => row.sts_mhs === 'A'
+                                        ? 'Aktif'
+                                        : row.sts_mhs === 'C'
+                                            ? 'Cuti'
+                                            : 'Tidak Aktif'
+                                },
+                                {
+                                    field: 'aksi',
+                                    headerName: '',
+                                    renderCell: ({ row }) => (
+                                        <div className="flex items-center justify-center h-full">
+                                            <IconButton onClick={() => aksi.krs.detail(row.mhs_id)} size="small" color="primary">
+                                                <EastOutlined fontSize="small" />
+                                            </IconButton>
+                                        </div>
+                                    )
+                                }
+                            ]}
+                        />
+                    </div>
+                </div>
+            </CustomTabItem>
+            <CustomTabItem label="Di setujui">
+                <div className="divide-y divide-zinc-300">
+                    <div className="p-4">
+                        <CustomDataTable 
+                            getRowId={(row) => row.mhs_id}
+                            loading={listData.krs.loading.fetch}
+                            rows={aksi.krs.filtered.sts_krs('S')}
+                            columns={[
+                                {
+                                    field: 'mhs_id',
+                                    headerName: 'NIM',
+                                    valueGetter: (value, row) => row.nim,
+                                    minWidth: 120
+                                },
+                                {
+                                    field: 'nm_mhs',
+                                    headerName: 'Nama Mahasiswa',
+                                    minWidth: 350
+                                },
+                                {
+                                    field: 'masuk_tahun',
+                                    headerName: 'Angkatan',
+                                    minWidth: 100
+                                },
+                                {
+                                    field: 'status',
+                                    headerName: 'Status Mahasiswa',
+                                    minWidth: 150,
+                                    valueGetter: (value, row) => row.sts_mhs === 'A'
+                                        ? 'Aktif'
+                                        : row.sts_mhs === 'C'
+                                            ? 'Cuti'
+                                            : 'Tidak Aktif'
+                                },
+                                {
+                                    field: 'aksi',
+                                    headerName: '',
+                                    renderCell: ({ row }) => (
+                                        <div className="flex items-center justify-center h-full">
+                                            <IconButton onClick={() => aksi.krs.detail(row.mhs_id)} size="small" color="primary">
+                                                <EastOutlined fontSize="small" />
+                                            </IconButton>
+                                        </div>
+                                    )
+                                }
+                            ]}
+                        />
                     </div>
                 </div>
             </CustomTabItem>
@@ -3203,7 +3412,7 @@ function DosenWaliPage_SuratTab({ token, base_url, role }) {
                     <div className="flex gap-4">
                         <InfoOutlined fontSize="small" color="primary" />
                         <p>
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis molestiae dolorum animi itaque! Pariatur placeat vero adipisci voluptas, rem dolore quam. Consequatur alias quasi adipisci aliquam exercitationem distinctio consequuntur repellendus.
+                            Silahkan Refresh Data jika terdapat Data yang tidak sesuai, atau hubungi Administrator segera.
                         </p>
                     </div>
                     <div className="shrink-0">

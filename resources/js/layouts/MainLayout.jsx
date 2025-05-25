@@ -489,40 +489,43 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
             </div> */}
             <hr className="my-2 opacity-0" />
             <div className="space-y-4">
-                <div className="space-y-1">
-                    <div className="flex gap-4 justify-between">
-                        <div className="">
-                            <p className="text-xs font-semibold opacity-50">
-                                Selamat Datang,
-                            </p>
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <p className="font-semibold text-blue-600 text-sm">
-                                    {userdata?.profile?.nama || 'Loading..'}
+                <div className="flex items-center gap-4 w-full">
+                    <Avatar src={userdata?.account?.image} />
+                    <div className="space-y-1  w-full">
+                        <div className="flex gap-4 justify-between">
+                            <div className="">
+                                <p className="text-xs font-semibold opacity-50">
+                                    Selamat Datang,
                                 </p>
-                            </CustomLoading>
+                                <CustomLoading loading={loadingUserdata} renderIf={userdata}>
+                                    <p className="font-semibold text-blue-600 text-sm">
+                                        {userdata?.profile?.nama || 'Loading..'}
+                                    </p>
+                                </CustomLoading>
+                            </div>
+                            {mobile && (
+                                <IconButton onClick={() => setShowSidebar(state => !state)}>
+                                    <MenuOutlined fontSize="small" />
+                                </IconButton>
+                            )}
                         </div>
-                        {mobile && (
-                            <IconButton onClick={() => setShowSidebar(state => !state)}>
-                                <MenuOutlined fontSize="small" />
-                            </IconButton>
-                        )}
+                        <CustomLoading loading={loadingUserdata} renderIf={userdata}>
+                            <p className="px-2 py-0.5 rounded w-fit bg-blue-700/80 text-white text-xs font-medium tracking-tighter">
+                                {role?.admin?.enable 
+                                    ? 'Admin' 
+                                    : role?.dosen?.enable
+                                        ? 'Dosen' 
+                                        : role?.dosen_wali?.enable
+                                            ? 'Dosen Wali' 
+                                            : role?.prodi?.enable
+                                                ? 'Prodi' 
+                                                : role?.developer?.enable
+                                                    ? 'Developer' 
+                                                    : 'Mahasiswa'
+                                }
+                            </p>
+                        </CustomLoading>
                     </div>
-                    <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                        <p className="px-2 py-0.5 rounded w-fit bg-blue-700/80 text-white text-xs font-medium tracking-tighter">
-                            {role?.admin?.enable 
-                                ? 'Admin' 
-                                : role?.dosen?.enable
-                                    ? 'Dosen' 
-                                    : role?.dosen_wali?.enable
-                                        ? 'Dosen Wali' 
-                                        : role?.prodi?.enable
-                                            ? 'Prodi' 
-                                            : role?.developer?.enable
-                                                ? 'Developer' 
-                                                : 'Mahasiswa'
-                            }
-                        </p>
-                    </CustomLoading>
                 </div>
                 {!role?.mahasiswa?.enable && (
                     <CustomLoading loading={loadingUserdata} renderIf={userdata}>

@@ -496,65 +496,6 @@ function ProfilDosen({ token, role, base_url, change_profil }) {
                             </CustomLoading>
                         </div>
                     </div>
-
-                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="col-span-1">
-                            <h1 className="font-bold">
-                                Ganti Role
-                            </h1>
-                            <p className="opacity-70 text-xs">
-                                Dengan mengganti role, anda akan diarahkan kembali ke halaman utama.
-                            </p>
-                        </div>
-                        <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                            <div className="col-span-1 lg:col-span-2 flex gap-4 flex-wrap h-fit">
-                                <ChangeRoleSection account={userdata?.account} role={role} token={token} />
-                            </div>
-                        </CustomLoading>
-                    </div>
-                    
-                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="col-span-1">
-                            <h1 className="font-bold">
-                                Ganti Password
-                            </h1>
-                            <p className="opacity-70 text-xs">
-                                Dengan mengganti password, anda akan diarahkan ke halaman login.
-                            </p>
-                        </div>
-                        <div className="col-span-1 lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <TextField 
-                                        fullWidth
-                                        size={'small'}
-                                        label={'Password Lama'}
-                                    />
-                                </div>
-                            </CustomLoading>
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <TextField 
-                                        fullWidth
-                                        size={'small'}
-                                        label={'Password Baru'}
-                                    />
-                                </div>
-                            </CustomLoading>
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <Button variant="contained" size="small" startIcon={<SaveOutlined />}>
-                                        <p className="font-jakarta font-medium">
-                                            Simpan
-                                        </p>
-                                    </Button>
-                                </div>
-                            </CustomLoading>
-                            
-                            
-                            
-                        </div>
-                    </div>
                     
                 </div>
             </div>
@@ -687,64 +628,7 @@ function ProfilProdi({ token, role, base_url, change_profil }) {
                         </div>
                     </div>
 
-                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="col-span-1">
-                            <h1 className="font-bold">
-                                Ganti Role
-                            </h1>
-                            <p className="opacity-70 text-xs">
-                                Dengan mengganti role, anda akan diarahkan kembali ke halaman utama.
-                            </p>
-                        </div>
-                        <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                            <div className="col-span-1 lg:col-span-2 flex gap-4 flex-wrap h-fit">
-                                <ChangeRoleSection account={userdata?.account} role={role} token={token} />
-                            </div>
-                        </CustomLoading>
-                    </div>
                     
-                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="col-span-1">
-                            <h1 className="font-bold">
-                                Ganti Password
-                            </h1>
-                            <p className="opacity-70 text-xs">
-                                Dengan mengganti password, anda akan diarahkan ke halaman login.
-                            </p>
-                        </div>
-                        <div className="col-span-1 lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <TextField 
-                                        fullWidth
-                                        size={'small'}
-                                        label={'Password Lama'}
-                                    />
-                                </div>
-                            </CustomLoading>
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <TextField 
-                                        fullWidth
-                                        size={'small'}
-                                        label={'Password Baru'}
-                                    />
-                                </div>
-                            </CustomLoading>
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <Button variant="contained" size="small" startIcon={<SaveOutlined />}>
-                                        <p className="font-jakarta font-medium">
-                                            Simpan
-                                        </p>
-                                    </Button>
-                                </div>
-                            </CustomLoading>
-                            
-                            
-                            
-                        </div>
-                    </div>
                     
                 </div>
             </div>
@@ -876,65 +760,6 @@ function ProfilDosWal({ token, role, base_url, change_profil }) {
                             </CustomLoading>
                         </div>
                     </div>
-
-                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="col-span-1">
-                            <h1 className="font-bold">
-                                Ganti Role
-                            </h1>
-                            <p className="opacity-70 text-xs">
-                                Dengan mengganti role, anda akan diarahkan kembali ke halaman utama.
-                            </p>
-                        </div>
-                        <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                            <div className="col-span-1 lg:col-span-2 flex gap-4 flex-wrap h-fit">
-                                <ChangeRoleSection account={userdata?.account} role={role} token={token} />
-                            </div>
-                        </CustomLoading>
-                    </div>
-                    
-                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="col-span-1">
-                            <h1 className="font-bold">
-                                Ganti Password
-                            </h1>
-                            <p className="opacity-70 text-xs">
-                                Dengan mengganti password, anda akan diarahkan ke halaman login.
-                            </p>
-                        </div>
-                        <div className="col-span-1 lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <TextField 
-                                        fullWidth
-                                        size={'small'}
-                                        label={'Password Lama'}
-                                    />
-                                </div>
-                            </CustomLoading>
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <TextField 
-                                        fullWidth
-                                        size={'small'}
-                                        label={'Password Baru'}
-                                    />
-                                </div>
-                            </CustomLoading>
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <Button variant="contained" size="small" startIcon={<SaveOutlined />}>
-                                        <p className="font-jakarta font-medium">
-                                            Simpan
-                                        </p>
-                                    </Button>
-                                </div>
-                            </CustomLoading>
-                            
-                            
-                            
-                        </div>
-                    </div>
                     
                 </div>
             </div>
@@ -945,8 +770,6 @@ function ProfilDosWal({ token, role, base_url, change_profil }) {
 function ProfilAdmin({ token, role, base_url, change_profil }) {
     const { setShowSidebar } = useSidebar()
     const { userdata, loadingUserdata } = useUser()
-
-    console.log(userdata)
 
     return (
         <MainLayout token={token} base_url={base_url} role={role}>
@@ -1068,131 +891,9 @@ function ProfilAdmin({ token, role, base_url, change_profil }) {
                             </CustomLoading>
                         </div>
                     </div>
-
-                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="col-span-1">
-                            <h1 className="font-bold">
-                                Ganti Role
-                            </h1>
-                            <p className="opacity-70 text-xs">
-                                Dengan mengganti role, anda akan diarahkan kembali ke halaman utama.
-                            </p>
-                        </div>
-                        <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                            <div className="col-span-1 lg:col-span-2 flex gap-4 flex-wrap h-fit">
-                                <ChangeRoleSection account={userdata?.account} role={role} token={token} />
-                            </div>
-                        </CustomLoading>
-                    </div>
-                    
-                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="col-span-1">
-                            <h1 className="font-bold">
-                                Ganti Password
-                            </h1>
-                            <p className="opacity-70 text-xs">
-                                Dengan mengganti password, anda akan diarahkan ke halaman login.
-                            </p>
-                        </div>
-                        <div className="col-span-1 lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <TextField 
-                                        fullWidth
-                                        size={'small'}
-                                        label={'Password Lama'}
-                                    />
-                                </div>
-                            </CustomLoading>
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <TextField 
-                                        fullWidth
-                                        size={'small'}
-                                        label={'Password Baru'}
-                                    />
-                                </div>
-                            </CustomLoading>
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="col-span-1">
-                                    <Button variant="contained" size="small" startIcon={<SaveOutlined />}>
-                                        <p className="font-jakarta font-medium">
-                                            Simpan
-                                        </p>
-                                    </Button>
-                                </div>
-                            </CustomLoading>
-                        </div>
-                    </div>
                     
                 </div>
             </div>
         </MainLayout>
-    )
-}
-
-function ChangeRoleSection({ account, role, token }) {
-
-    const { goTo } = useRedirect()
-    const { setShowBackdrop } = useBackdrop()
-
-    const aksi = {
-        isDisabled: (target_role) => {
-            return role[target_role]?.enable
-        },
-        isHave: (target_role) => {
-            return account?.[target_role]
-        },
-        change: (target_role) => {
-            setShowBackdrop(true)
-            goTo(`/?token=${token}&role=${target_role}`)
-        }
-    }
-
-    return (
-        <>
-            {aksi.isHave('is_admin') && (
-                <Button disabled={aksi.isDisabled('admin')} onClick={() => aksi.change('is_admin')} variant="contained" size="small">
-                    <p className="font-jakarta text-xs font-semibold">
-                        Administrator
-                    </p>
-                </Button>
-            )}
-            {aksi.isHave('is_dosen') && (
-                <Button disabled={aksi.isDisabled('dosen')} onClick={() => aksi.change('is_dosen')} variant="contained" size="small">
-                    <p className="font-jakarta text-xs font-semibold">
-                        Dosen
-                    </p>
-                </Button>
-            )}
-            {aksi.isHave('is_dev') && (
-                <Button disabled={aksi.isDisabled('developer')} onClick={() => aksi.change('is_developer')} variant="contained" size="small">
-                    <p className="font-jakarta text-xs font-semibold">
-                        Developer
-                    </p>
-                </Button>
-            )}
-            {aksi.isHave('is_doswal') && (
-                <Button disabled={aksi.isDisabled('dosen_wali')} onClick={() => aksi.change('is_doswal')} variant="contained" size="small">
-                    <p className="font-jakarta text-xs font-semibold">
-                        Dosen Wali
-                    </p>
-                </Button>
-            )}
-            {aksi.isHave('is_prodi') && (
-                <Button disabled={aksi.isDisabled('prodi')} onClick={() => aksi.change('is_prodi')} variant="contained" size="small">
-                    <p className="font-jakarta text-xs font-semibold">
-                        Prodi
-                    </p>
-                </Button>
-            )}
-            {aksi.isHave('is_mhs') && (
-                <Button disabled={aksi.isDisabled('mahasiswa')} onClick={() => aksi.change('is_mhs')} variant="contained" size="small">
-                    <p className="font-jakarta text-xs font-semibold">
-                        Mahasiswa
-                    </p>
-                </Button>
-            )}
-        </>
     )
 }

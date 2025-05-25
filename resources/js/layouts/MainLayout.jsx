@@ -306,7 +306,7 @@ export default function MainLayout({ children, token, base_url, role }) {
 
 export function MainLayout2({ children, token, base_url, role, page_title = 'Page Title', noApplications = false, app }) {
     const { showSidebar, setShowSidebar } = useSidebar()
-    const { userdata, setUserdata, loadingUserdata, setLoadingUserdata } = useUser() 
+    const { userdata, setUserdata, loadingUserdata, setLoadingUserdata, setAksiUserdata } = useUser() 
     const { goTo, showAnimation } = useRedirect()
 
     const [showFab, setShowFab] = useState(true)
@@ -325,6 +325,8 @@ export function MainLayout2({ children, token, base_url, role, page_title = 'Pag
         window.addEventListener("scroll", handleScroll)
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
+
+
     
 
     const aksi = {
@@ -369,6 +371,7 @@ export function MainLayout2({ children, token, base_url, role, page_title = 'Pag
 
     useEffect(() => {
         aksi.userdata.get()
+        setAksiUserdata(aksi.userdata)
     }, [])
 
     return (

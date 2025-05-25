@@ -7,54 +7,124 @@ import dayjs from "dayjs"
 import 'dayjs/locale/id'
 import FileUploadComponent from "../components/CustomUpload"
 import CustomLoading from "../components/CustomLoading"
-import { useUser } from "../context/UserContext"
+
 import { useRedirect } from "../context/RedirectContext"
 import { useBackdrop } from "../context/BackdropContext"
+import { customSwal } from "../components/CustomSwal"
+import api_handler from "../libs/api_handler"
+import { useUser } from "../context/UserContext"
+import NotAllowedPage from "./NotAllowed"
 
 export default function Profil({ token, role, base_url }) {
 
+    const { userdata, loadingUserdata, setUserdata, setLoadingUserdata } = useUser()
+    const { showBackdrop, setShowBackdrop } = useBackdrop()
+
+    const aksi = {
+        userdata: {
+            get: async () => {
+                try {
+                    setLoadingUserdata(true)
+
+                    const response = await api_handler.get({
+                        url: 'users/me',
+                        token,
+                        base_url
+                    })
+
+                    setLoadingUserdata(false)
+
+                    console.log(response)
+
+                    if(response?.success) {
+                        setUserdata(response?.data)
+                    }else{
+                        setUserdata(null)
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            }
+        },
+        profil: {
+            change_image: async (file) => {
+                try {
+                    setShowBackdrop(true)
+
+                    const response = await api_handler.postForm({
+                        token,
+                        base_url,
+                        url: 'users/me/image',
+                        payload: {
+                            image: file[0]
+                        }
+                    })
+
+                    setShowBackdrop(false)
+
+                    if(response?.success) {
+                        aksi.userdata.get()
+                        customSwal.toast.success({
+                            message: 'Berhasil mengubah foto profil'
+                        })
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            }
+        }
+    }
+
     if(role.mahasiswa.enable) {
         return (
-            <ProfilMahasiswa token={token} role={role} base_url={base_url} />
+            <ProfilMahasiswa token={token} role={role} base_url={base_url} change_profil={aksi.profil.change_image} />
         )
     }
 
     if(role.dosen.enable) {
         return (
-            <ProfilDosen token={token} role={role} base_url={base_url} />
+            <ProfilDosen token={token} role={role} base_url={base_url} change_profil={aksi.profil.change_image}  />
         )
     }
 
     if(role.admin.enable) {
         return (
-            <ProfilAdmin token={token} role={role} base_url={base_url} />
+            <ProfilAdmin token={token} role={role} base_url={base_url} change_profil={aksi.profil.change_image}  />
         )
     }
 
     if(role.prodi.enable) {
         return (
-            <ProfilProdi token={token} role={role} base_url={base_url} />
+            <ProfilProdi token={token} role={role} base_url={base_url} change_profil={aksi.profil.change_image}  />
         )
     }
 
     if(role.dosen_wali.enable) {
         return (
-            <ProfilDosWal token={token} role={role} base_url={base_url} />    
+            <ProfilDosWal token={token} role={role} base_url={base_url} change_profil={aksi.profil.change_image}  />    
         )
     }
     
     return (
-        <MainLayout token={token} base_url={base_url} role={role}>
-
-        </MainLayout>
+        <NotAllowedPage token={token} base_url={base_url} role={role} />
     )
 }
 
-function ProfilMahasiswa({ token, role, base_url }) {
+function ProfilMahasiswa({ token, role, base_url, change_profil }) {
 
     const { setShowSidebar } = useSidebar()
-    const { userdata, loadingUserdata } = useUser()
-    
+    const { userdata, loadingUserdata, aksiUserdata } = useUser()
 
     return (
         <MainLayout token={token} base_url={base_url} role={role}>
@@ -78,37 +148,34 @@ function ProfilMahasiswa({ token, role, base_url }) {
                     </div>
 
                     {/* Content */}
-                    
-                    <div className="p-4">
-                        <div className="flex items-center justify-center">
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="space-y-6 w-fit">
-                                    <div className="flex justify-center">
-                                        <Avatar src={userdata?.avatar} sx={{ width: 120, height: 120 }} />
-                                    </div>
-                                    <div className="flex justify-center items-center gap-2">
-                                        <FileUploadComponent 
-                                            variant="contained"
-                                            size="small"
-                                            text="Ganti Profil"
-                                            buttonProps={{
-                                                size: 'small'
-                                            }}
-                                        />
-                                        {/* <button type="button" className="px-3 py-1 rounded bg-zinc-100 hover:bg-zinc-200 active:bg-zinc-300 cursor-pointer">
-                                            Hapus
-                                        </button> */}
-                                    </div>
-                                    <div className="space-y-1">
-                                        <h1 className="text-center text-lg sm:text-xl lg:text-2xl font-medium">
-                                            {userdata?.profile?.nama}
-                                        </h1>
-                                        <p className="text-center opacity-70">
-                                            {userdata?.profile?.nama_jurusan}
-                                        </p>
-                                    </div>
+
+                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="col-span-1 flex items-center justify-center w-full aspect-square flex-col gap-4">
+                            <Avatar src={userdata?.account?.image} sx={{ width: 240, height: 240 }} className="shadow-md" />
+                            <FileUploadComponent 
+                                variant="contained"
+                                size="small"
+                                text="Ganti Profil"
+                                buttonProps={{
+                                    size: 'small'
+                                }}
+                                onUploaded={change_profil}
+                                accept={['image/*']}
+                            />
+                        </div>
+                        <div className="col-span-1 lg:col-span-2 flex items-center w-full">
+                            <div className="space-y-2 w-full">
+                                <div className="flex justify-center lg:justify-start">
+                                    <h1 className="font-medium text-xl sm:text-2xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-zinc-700 py-2">
+                                        {userdata?.profile?.nama}
+                                    </h1>
                                 </div>
-                            </CustomLoading>
+                                <div className="flex justify-center lg:justify-start">
+                                    <p className="w-fit px-3 py-1 rounded-md shadow-md bg-blue-700/80 text-white font-bold tracking-tighter">
+                                        {userdata?.profile?.nama_jurusan}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -239,7 +306,7 @@ function ProfilMahasiswa({ token, role, base_url }) {
                         </div>
                     </div>
 
-                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="col-span-1">
                             <h1 className="font-bold">
                                 Ganti Role
@@ -296,7 +363,7 @@ function ProfilMahasiswa({ token, role, base_url }) {
                             
                             
                         </div>
-                    </div>
+                    </div> */}
                     
                 </div>
             </div>
@@ -304,7 +371,7 @@ function ProfilMahasiswa({ token, role, base_url }) {
     )
 }
 
-function ProfilDosen({ token, role, base_url }) {
+function ProfilDosen({ token, role, base_url, change_profil }) {
 
     const { setShowSidebar } = useSidebar()
     const { userdata, loadingUserdata } = useUser()
@@ -332,36 +399,33 @@ function ProfilDosen({ token, role, base_url }) {
 
                     {/* Content */}
                     
-                    <div className="p-4">
-                        <div className="flex items-center justify-center">
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="space-y-6 w-fit">
-                                    <div className="flex justify-center">
-                                        <Avatar src={userdata?.avatar} sx={{ width: 120, height: 120 }} />
-                                    </div>
-                                    <div className="flex justify-center items-center gap-2">
-                                        <FileUploadComponent 
-                                            variant="contained"
-                                            size="small"
-                                            text="Ganti Profil"
-                                            buttonProps={{
-                                                size: 'small'
-                                            }}
-                                        />
-                                        {/* <button type="button" className="px-3 py-1 rounded bg-zinc-100 hover:bg-zinc-200 active:bg-zinc-300 cursor-pointer">
-                                            Hapus
-                                        </button> */}
-                                    </div>
-                                    <div className="space-y-1">
-                                        <h1 className="text-center text-lg sm:text-xl lg:text-2xl font-medium">
-                                            {userdata?.profile?.nama_dan_gelar}
-                                        </h1>
-                                        <p className="text-center opacity-70">
-                                            Dosen
-                                        </p>
-                                    </div>
+                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="col-span-1 flex items-center justify-center w-full aspect-square flex-col gap-4">
+                            <Avatar src={userdata?.account?.image} sx={{ width: 240, height: 240 }} className="shadow-md" />
+                            <FileUploadComponent 
+                                variant="contained"
+                                size="small"
+                                text="Ganti Profil"
+                                buttonProps={{
+                                    size: 'small'
+                                }}
+                                onUploaded={change_profil}
+                                accept={['image/*']}
+                            />
+                        </div>
+                        <div className="col-span-1 lg:col-span-2 flex items-center w-full">
+                            <div className="space-y-2 w-full">
+                                <div className="flex justify-center lg:justify-start">
+                                    <h1 className="font-medium text-xl sm:text-2xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-zinc-700 py-2">
+                                        {userdata?.profile?.nama}
+                                    </h1>
                                 </div>
-                            </CustomLoading>
+                                <div className="flex justify-center lg:justify-start">
+                                    <p className="w-fit px-3 py-1 rounded-md shadow-md bg-blue-700/80 text-white font-bold tracking-tighter">
+                                        Dosen
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -498,7 +562,7 @@ function ProfilDosen({ token, role, base_url }) {
     )
 }
 
-function ProfilProdi({ token, role, base_url }) {
+function ProfilProdi({ token, role, base_url, change_profil }) {
     const { setShowSidebar } = useSidebar()
     const { userdata, loadingUserdata } = useUser()
 
@@ -525,36 +589,33 @@ function ProfilProdi({ token, role, base_url }) {
 
                     {/* Content */}
                     
-                    <div className="p-4">
-                        <div className="flex items-center justify-center">
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="space-y-6 w-fit">
-                                    <div className="flex justify-center">
-                                        <Avatar src={userdata?.avatar} sx={{ width: 120, height: 120 }} />
-                                    </div>
-                                    <div className="flex justify-center items-center gap-2">
-                                        <FileUploadComponent 
-                                            variant="contained"
-                                            size="small"
-                                            text="Ganti Profil"
-                                            buttonProps={{
-                                                size: 'small'
-                                            }}
-                                        />
-                                        {/* <button type="button" className="px-3 py-1 rounded bg-zinc-100 hover:bg-zinc-200 active:bg-zinc-300 cursor-pointer">
-                                            Hapus
-                                        </button> */}
-                                    </div>
-                                    <div className="space-y-1">
-                                        <h1 className="text-center text-lg sm:text-xl lg:text-2xl font-medium">
-                                            {userdata?.profile?.nama_dan_gelar}
-                                        </h1>
-                                        <p className="text-center opacity-70">
-                                            Prodi
-                                        </p>
-                                    </div>
+                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="col-span-1 flex items-center justify-center w-full aspect-square flex-col gap-4">
+                            <Avatar src={userdata?.account?.image} sx={{ width: 240, height: 240 }} className="shadow-md" />
+                            <FileUploadComponent 
+                                variant="contained"
+                                size="small"
+                                text="Ganti Profil"
+                                buttonProps={{
+                                    size: 'small'
+                                }}
+                                onUploaded={change_profil}
+                                accept={['image/*']}
+                            />
+                        </div>
+                        <div className="col-span-1 lg:col-span-2 flex items-center w-full">
+                            <div className="space-y-2 w-full">
+                                <div className="flex justify-center lg:justify-start">
+                                    <h1 className="font-medium text-xl sm:text-2xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-zinc-700 py-2">
+                                        {userdata?.profile?.nama}
+                                    </h1>
                                 </div>
-                            </CustomLoading>
+                                <div className="flex justify-center lg:justify-start">
+                                    <p className="w-fit px-3 py-1 rounded-md shadow-md bg-blue-700/80 text-white font-bold tracking-tighter">
+                                        Prodi
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -691,7 +752,7 @@ function ProfilProdi({ token, role, base_url }) {
     )
 }
 
-function ProfilDosWal({ token, role, base_url }) {
+function ProfilDosWal({ token, role, base_url, change_profil }) {
     const { setShowSidebar } = useSidebar()
     const { userdata, loadingUserdata } = useUser()
 
@@ -718,36 +779,33 @@ function ProfilDosWal({ token, role, base_url }) {
 
                     {/* Content */}
                     
-                    <div className="p-4">
-                        <div className="flex items-center justify-center">
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="space-y-6 w-fit">
-                                    <div className="flex justify-center">
-                                        <Avatar src={userdata?.avatar} sx={{ width: 120, height: 120 }} />
-                                    </div>
-                                    <div className="flex justify-center items-center gap-2">
-                                        <FileUploadComponent 
-                                            variant="contained"
-                                            size="small"
-                                            text="Ganti Profil"
-                                            buttonProps={{
-                                                size: 'small'
-                                            }}
-                                        />
-                                        {/* <button type="button" className="px-3 py-1 rounded bg-zinc-100 hover:bg-zinc-200 active:bg-zinc-300 cursor-pointer">
-                                            Hapus
-                                        </button> */}
-                                    </div>
-                                    <div className="space-y-1">
-                                        <h1 className="text-center text-lg sm:text-xl lg:text-2xl font-medium">
-                                            {userdata?.profile?.nama_dan_gelar}
-                                        </h1>
-                                        <p className="text-center opacity-70">
-                                            Dosen Wali
-                                        </p>
-                                    </div>
+                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="col-span-1 flex items-center justify-center w-full aspect-square flex-col gap-4">
+                            <Avatar src={userdata?.account?.image} sx={{ width: 240, height: 240 }} className="shadow-md" />
+                            <FileUploadComponent 
+                                variant="contained"
+                                size="small"
+                                text="Ganti Profil"
+                                buttonProps={{
+                                    size: 'small'
+                                }}
+                                onUploaded={change_profil}
+                                accept={['image/*']}
+                            />
+                        </div>
+                        <div className="col-span-1 lg:col-span-2 flex items-center w-full">
+                            <div className="space-y-2 w-full">
+                                <div className="flex justify-center lg:justify-start">
+                                    <h1 className="font-medium text-xl sm:text-2xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-zinc-700 py-2">
+                                        {userdata?.profile?.nama}
+                                    </h1>
                                 </div>
-                            </CustomLoading>
+                                <div className="flex justify-center lg:justify-start">
+                                    <p className="w-fit px-3 py-1 rounded-md shadow-md bg-blue-700/80 text-white font-bold tracking-tighter">
+                                        Dosen Wali
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -884,7 +942,7 @@ function ProfilDosWal({ token, role, base_url }) {
     )
 }
 
-function ProfilAdmin({ token, role, base_url }) {
+function ProfilAdmin({ token, role, base_url, change_profil }) {
     const { setShowSidebar } = useSidebar()
     const { userdata, loadingUserdata } = useUser()
 
@@ -913,36 +971,33 @@ function ProfilAdmin({ token, role, base_url }) {
 
                     {/* Content */}
                     
-                    <div className="p-4">
-                        <div className="flex items-center justify-center">
-                            <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                                <div className="space-y-6 w-fit">
-                                    <div className="flex justify-center">
-                                        <Avatar src={userdata?.avatar} sx={{ width: 120, height: 120 }} />
-                                    </div>
-                                    <div className="flex justify-center items-center gap-2">
-                                        <FileUploadComponent 
-                                            variant="contained"
-                                            size="small"
-                                            text="Ganti Profil"
-                                            buttonProps={{
-                                                size: 'small'
-                                            }}
-                                        />
-                                        {/* <button type="button" className="px-3 py-1 rounded bg-zinc-100 hover:bg-zinc-200 active:bg-zinc-300 cursor-pointer">
-                                            Hapus
-                                        </button> */}
-                                    </div>
-                                    <div className="space-y-1">
-                                        <h1 className="text-center text-lg sm:text-xl lg:text-2xl font-medium">
-                                            {userdata?.profile?.nama_dan_gelar}
-                                        </h1>
-                                        <p className="text-center opacity-70">
-                                            Administrator
-                                        </p>
-                                    </div>
+                    <div className="p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="col-span-1 flex items-center justify-center w-full aspect-square flex-col gap-4">
+                            <Avatar src={userdata?.account?.image} sx={{ width: 240, height: 240 }} className="shadow-md" />
+                            <FileUploadComponent 
+                                variant="contained"
+                                size="small"
+                                text="Ganti Profil"
+                                buttonProps={{
+                                    size: 'small'
+                                }}
+                                onUploaded={change_profil}
+                                accept={['image/*']}
+                            />
+                        </div>
+                        <div className="col-span-1 lg:col-span-2 flex items-center w-full">
+                            <div className="space-y-2 w-full">
+                                <div className="flex justify-center lg:justify-start">
+                                    <h1 className="font-medium text-xl sm:text-2xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-zinc-700 py-2">
+                                        {userdata?.profile?.nama}
+                                    </h1>
                                 </div>
-                            </CustomLoading>
+                                <div className="flex justify-center lg:justify-start">
+                                    <p className="w-fit px-3 py-1 rounded-md shadow-md bg-blue-700/80 text-white font-bold tracking-tighter">
+                                        Administrator
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

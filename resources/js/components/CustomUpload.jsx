@@ -17,48 +17,59 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 export default function CustomUpload({
-    fullWidth = false,
-    variant = 'text',
-    startIcon = <CloudUploadIcon />,
-    text = 'Import',
-    accept = [], // Dynamically set accepted file types
-    multiple = false, // Toggle multiple file selection
-    buttonProps = {}, // Additional props for the button
-    inputProps = {}, // Additional props for the input
-    loading = false,
-    size = 'small',
-    onUploaded = async (files) => console.log(files)
-  }) {
-    return text !== '' ? (
-      <Button
-        fullWidth={fullWidth}
-        component="label"
-        variant={variant}
-        disabled={loading}
-        startIcon={loading ? <CircularProgress size={15} className='grayscale' /> : startIcon}
-        {...buttonProps} // Spread additional button props
-      >
-        <p className='font-jakarta text-xs font-semibold'>
-          {loading ? 'Loading' : text}
-        </p>
-        <VisuallyHiddenInput
-          type="file"
-          accept={accept.length < 1 ? '*' : accept.join(',')}
-          multiple={multiple}
-          onChange={(e) => onUploaded(e.target.files)}
-          {...inputProps} // Spread additional input props
-        />
-      </Button>
-    ):(
-      <IconButton disabled={loading} component="label">
-        {loading ? <CircularProgress size={15} className='grayscale' /> : <CloudUploadIcon color='primary' />}
-        <VisuallyHiddenInput
-          type="file"
-          accept={accept.length < 1 ? '*' : accept.join(',')}
-          multiple={multiple}
-          onChange={(e) => onUploaded(e.target.files)}
-          {...inputProps} // Spread additional input props
-        />
-      </IconButton>
-    )
-  }
+  fullWidth = false,
+  variant = 'text',
+  startIcon = <CloudUploadIcon />,
+  text = 'Import',
+  accept = [],
+  multiple = false,
+  buttonProps = {},
+  inputProps = {},
+  loading = false,
+  size = 'small',
+  onUploaded = async (files) => console.log(files)
+}) {
+  const inputRef = React.useRef(null);
+
+  const handleChange = (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    onUploaded(files);
+
+    // Reset input value so the same file can be uploaded again
+    e.target.value = '';
+  };
+
+  const InputElement = (
+    <VisuallyHiddenInput
+      ref={inputRef}
+      type="file"
+      accept={accept.length < 1 ? '*' : accept.join(',')}
+      multiple={multiple}
+      onChange={handleChange}
+      {...inputProps}
+    />
+  );
+
+  return text !== '' ? (
+    <Button
+      fullWidth={fullWidth}
+      component="label"
+      variant={variant}
+      disabled={loading}
+      startIcon={loading ? <CircularProgress size={15} className='grayscale' /> : startIcon}
+      {...buttonProps}
+    >
+      <p className='font-jakarta text-xs font-semibold'>
+        {loading ? 'Loading' : text}
+      </p>
+      {InputElement}
+    </Button>
+  ) : (
+    <IconButton disabled={loading} component="label">
+      {loading ? <CircularProgress size={15} className='grayscale' /> : <CloudUploadIcon color='primary' />}
+      {InputElement}
+    </IconButton>
+  );
+}

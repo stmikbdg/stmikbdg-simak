@@ -10,10 +10,11 @@ export const UserProvider = ({ children, token, base_url }) => {
     
     const [userdata, setUserdata] = useState(null)
     const [loadingUserdata, setLoadingUserdata] = useState(false)
+    const [aksiUserdata, setAksiUserdata] = useState(null)
 
 
     return (
-        <UserContext.Provider value={{ userdata, loadingUserdata, setUserdata, setLoadingUserdata }}>
+        <UserContext.Provider value={{ userdata, loadingUserdata, setUserdata, setLoadingUserdata, aksiUserdata, setAksiUserdata }}>
             {children}
         </UserContext.Provider>
     )

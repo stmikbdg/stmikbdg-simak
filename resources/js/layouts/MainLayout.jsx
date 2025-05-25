@@ -193,6 +193,55 @@ function ApplicationSection({ app }) {
     )
 }
 
+function Footer() {
+    return (
+        <div className="p-4 flex justify-center items-center gap-5 italic text-xs">
+            <div className="w-full flex flex-col sm:flex-row sm:justify-between items-center gap-6">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-4">
+                        <img src="/images/stmik.png" className="w-12" />
+                        <div className="">
+                            <div className="flex items-center gap-2">
+                                <p className="font-bold tracking-tight text-sm text-blue-800">
+                                    SIMAK
+                                </p>
+                                <p>
+                                    //
+                                </p>
+                                <p className="font-bold tracking-tight text-sm text-blue-800">
+                                    STMIK Bandung
+                                </p>
+                            </div>
+                            <p>
+                                Sistem Informasi Manajemen Akademik
+                            </p>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div className="w-full sm:w-fit">
+                    <p>© Since 2024 - STMIK Bandung</p>
+                </div>
+                <div className="w-full sm:w-fit">
+                    <div className="flex items-start sm:items-center gap-6 flex-col sm:flex-row">
+                        <a href="/report" className="hover:text-blue-600 hover:underline w-fit cursor-pointer">
+                            Laporkan Bug
+                        </a>
+                        <p className="text-xs opacity-50 hidden sm:block">//</p>
+                        <a href="https://stmik-bandung.ac.id" target="_blank" className="hover:text-blue-600 hover:underline w-fit cursor-pointer">
+                            Web Utama
+                        </a>
+                        <p className="text-xs opacity-50 hidden sm:block">//</p>
+                        <a href="/update" className="hover:text-blue-600 hover:underline w-fit cursor-pointer">
+                            Updates & Patches
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export default function MainLayout({ children, token, base_url, role }) {
     const { showSidebar, setShowSidebar } = useSidebar()
     const { userdata, setUserdata, loadingUserdata, setLoadingUserdata } = useUser() 
@@ -261,7 +310,7 @@ export default function MainLayout({ children, token, base_url, role }) {
     }, [])
 
     return (
-        <div className={`min-h-screen bg-zinc-100 jakarta text-zinc-700 text-xs sm:text-sm font-jakarta flex flex-col justify-between`}>
+        <div className={`min-h-screen bg-gradient-to-b from-zinc-100 to-white jakarta text-zinc-700 text-xs sm:text-sm font-jakarta flex flex-col justify-between`}>
             <div className="w-full flex gap-3">
                 {aksi.menu.for('Mahasiswa') && (
                     <div className="fixed bottom-5 right-5 sm:hidden items-center justify-center z-[40]">
@@ -295,11 +344,7 @@ export default function MainLayout({ children, token, base_url, role }) {
             </div>
             
             {/* Footer */}
-            <div className="p-4 flex justify-center items-center gap-5 italic text-xs opacity-50">
-                <p>
-                    © Since 2024 - STMIK Bandung
-                </p>
-            </div>
+            <Footer />
         </div>
     )
 }
@@ -375,7 +420,7 @@ export function MainLayout2({ children, token, base_url, role, page_title = 'Pag
     }, [])
 
     return (
-        <div className={`min-h-screen bg-zinc-100 jakarta text-zinc-700 text-xs sm:text-sm font-jakarta flex flex-col justify-between`}>
+        <div className={`min-h-screen bg-gradient-to-b from-zinc-100 to-white jakarta text-zinc-700 text-xs sm:text-sm font-jakarta flex flex-col justify-between`}>
             <div className="w-full flex gap-3">
                 {aksi.menu.for('Mahasiswa') && (
                     <div className="fixed bottom-5 right-5 sm:hidden items-center justify-center z-[40]">
@@ -437,11 +482,7 @@ export function MainLayout2({ children, token, base_url, role, page_title = 'Pag
             </div>
             
             {/* Footer */}
-            <div className="p-4 flex justify-center items-center gap-5 italic text-xs opacity-50">
-                <p>
-                    © Since 2024 - STMIK Bandung
-                </p>
-            </div>
+            <Footer />
         </div>
     )
 }

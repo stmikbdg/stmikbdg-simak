@@ -20,5 +20,8 @@ return [
         'pembelajaran' => env('PEMBELAJARAN_BASE_URL', null),
         'lms' => env('LMS_BASE_URL', null),
         'ujian' => env('UJIAN_BASE_URL', null),
+        'pendaftaran' => env('PENDAFTARAN_BASE_URL', null),
+        'pengajuan' => env('PENGAJUAN_BASE_URL', null),
+        'journal' => env('JOURNAL_BASE_URL', null),
     ]
 ];

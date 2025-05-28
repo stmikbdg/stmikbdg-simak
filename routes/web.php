@@ -21,6 +21,7 @@ Route::controller(AuthController::class)
 Route::middleware(['auth.token'])
     ->group(function () {
         Route::get('/home', [WebController::class, 'index'])->name('home');
+        Route::get('/dashboard', [WebController::class, 'dashboard'])->name('dashboard');
         Route::get('/absenqr', [WebController::class, 'absenqr'])->name('absenqr');
         // Route::get('/khs', [WebController::class, 'khs'])->name('khs');
         Route::get('/khs/semester/{semester}', [WebController::class, 'khs_per_semester'])->name('khs_per_semester');

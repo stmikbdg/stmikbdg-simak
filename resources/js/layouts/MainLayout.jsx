@@ -1,6 +1,6 @@
 'use client'
 
-import { AssignmentOutlined, AssignmentTwoTone, BookmarksTwoTone, BookTwoTone, CalendarMonthOutlined, CameraOutlined, ChangeCircleOutlined, ChatTwoTone, ChevronLeft, ComputerOutlined, DarkModeOutlined, DashboardTwoTone, EventAvailableOutlined, EventNoteOutlined, Home, HomeOutlined, HowToRegTwoTone, LightModeOutlined, LogoDev, Logout, LogoutOutlined, MailTwoTone, MenuBookTwoTone, MenuOutlined, NewspaperOutlined, PeopleAltTwoTone, Person, PersonOutline, QrCode2Outlined, QrCodeOutlined, SchoolTwoTone, VerifiedOutlined, WalletTwoTone } from "@mui/icons-material"
+import { AssignmentOutlined, AssignmentTwoTone, BookmarksTwoTone, BookTwoTone, CalendarMonthOutlined, CameraOutlined, ChangeCircleOutlined, ChatTwoTone, ChevronLeft, ComputerOutlined, DarkModeOutlined, DashboardTwoTone, EventAvailableOutlined, EventNoteOutlined, Home, HomeOutlined, HouseTwoTone, HowToRegTwoTone, LightModeOutlined, LogoDev, Logout, LogoutOutlined, MailTwoTone, MenuBookTwoTone, MenuOutlined, NewspaperOutlined, PeopleAltTwoTone, Person, PersonOutline, QrCode2Outlined, QrCodeOutlined, SchoolTwoTone, VerifiedOutlined, WalletTwoTone } from "@mui/icons-material"
 import { Avatar, Button, Fab, Fade, IconButton, Slide, SpeedDial, SpeedDialAction, SpeedDialIcon, Tooltip } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useSidebar } from "../context/SidebarContext"
@@ -615,7 +615,18 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                         <div className={`absolute top-0 left-0 w-2 h-full rounded-md bg-blue-500 ${pathname === '/home' ? 'opacity-100' : 'opacity-0'}`}></div>
                         <div className="px-5">
                             <button onClick={() => goTo('/home')} disabled={pathname === '/home'} className={`p-2 w-full rounded-md ${pathname === '/home' ? 'border bg-white border-zinc-300' : 'hover:bg-zinc-200 ease-out duration-100'} flex items-center gap-3 `}>
-                                <HomeOutlined color={pathname === '/home' ? 'primary' : ''} fontSize="small" />
+                                <HouseTwoTone color={pathname === '/home' ? 'primary' : ''} fontSize="small" />
+                                <p className="font-medium">
+                                    Homepage
+                                </p>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="relative overflow-clip w-full">
+                        <div className={`absolute top-0 left-0 w-2 h-full rounded-md bg-blue-500 ${pathname === '/dashboard' ? 'opacity-100' : 'opacity-0'}`}></div>
+                        <div className="px-5">
+                            <button onClick={() => goTo('/dashboard')} disabled={pathname === '/dashboard'} className={`p-2 w-full rounded-md ${pathname === '/dashboard' ? 'border bg-white border-zinc-300' : 'hover:bg-zinc-200 ease-out duration-100'} flex items-center gap-3 `}>
+                                <DashboardTwoTone color={pathname === '/dashboard' ? 'primary' : ''} fontSize="small" />
                                 <p className="font-medium">
                                     Dashboard
                                 </p>

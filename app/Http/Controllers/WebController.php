@@ -41,13 +41,77 @@ class WebController extends Controller {
         ];
         $props['base_url'] = config('myconfig.api.base_url');
 
-        $props['app'] = config('myconfig.app');
+        $app = config('myconfig.app');
+        $props['app'] = $app;
+
+        $props['apps'] = [
+            [
+                'name' => 'Keuangan',
+                'deskripsi' => 'Sistem Informasi dan layanan pembayaran keuangan',
+                'label' => 'keuangan',
+                'icon' => 'PaymentsTwoTone',
+                'color' => 'blue'
+            ],
+            [
+                'name' => 'LMS',
+                'deskripsi' => 'Sistem Pembelajaran dan Ujian Daring (Learning Management System)',
+                'label' => 'lms',
+                'icon' => 'AssignmentTwoTone',
+                'color' => 'green'
+            ],
+            [
+                'name' => 'Journal',
+                'deskripsi' => 'Pengelolaan publikasi jurnal ilmiah kampus',
+                'label' => 'journal',
+                'icon' => 'BookmarkAddedTwoTone',
+                'color' => 'amber'
+            ],
+            [
+                'name' => 'Verdig',
+                'deskripsi' => 'Verifikasi digital dokumen akademik',
+                'label' => 'verdig',
+                'icon' => 'HowToRegTwoTone',
+                'color' => 'fuchsia'
+            ],
+            [
+                'name' => 'Bimbingan',
+                'deskripsi' => 'Sistem Informasi dan Layanan pembimbingan akademik',
+                'label' => 'bimbingan',
+                'icon' => 'CallSplitTwoTone',
+                'color' => 'teal'
+            ],
+            [
+                'name' => 'Pendaftaran',
+                'deskripsi' => 'Pendaftaran sidang skripsi atau kerja praktek',
+                'label' => 'pendaftaran_sidang_skripsi_kp',
+                'icon' => 'SchoolTwoTone',
+                'color' => 'orange'
+            ],
+            [
+                'name' => 'Pengajuan',
+                'deskripsi' => 'Pengelolaan berbagai jenis permohonan akademik',
+                'label' => 'pengajuan',
+                'icon' => 'FeedTwoTone',
+                'color' => 'violet'
+            ],
+            [
+                'name' => 'Kuesioner',
+                'deskripsi' => 'Survei dan evaluasi layanan atau pembelajaran',
+                'label' => 'kuesioner',
+                'icon' => 'PollTwoTone',
+                'color' => 'red'
+            ],            
+        ];
 
         return Inertia::render($component, $props);
     }
 
     public function index() {
         return $this->render('Home');
+    }
+
+    public function dashboard() {
+        return $this->render('dashboard');
     }
 
     public function absenqr() {

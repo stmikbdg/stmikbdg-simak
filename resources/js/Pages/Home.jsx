@@ -526,7 +526,7 @@ export default function Home({ token, base_url, role, app, apps }) {
                                                         ))}
                                                     </>
                                                 ):(
-                                                    <div className="flex flex-col items-center gap-4 justify-center h-40 italic opacity-50">
+                                                    <div className="flex flex-col items-center gap-4 justify-center h-40 italic opacity-50 text-center">
                                                         <Close fontSize="small" />
                                                         Saat ini, belum ada pengumuman dari dosen pengajar mata kuliah anda.
                                                     </div>

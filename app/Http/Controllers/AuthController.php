@@ -57,7 +57,7 @@ class AuthController extends Controller
             return redirect()->route('home');
         } else {
             if (Session::has('role') and Session::has('token')) {
-                return redirect()->route('dashboard');
+                return redirect()->route('home');
             }
 
             return self::redirectToVerifyPage();

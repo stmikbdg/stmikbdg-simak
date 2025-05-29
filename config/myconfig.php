@@ -17,7 +17,7 @@ return [
         'bimbingan' => env('BIMBINGAN_BASE_URL', null),
         'verdig' => env('VERDIG_BASE_URL', null),
         'wisuda' => env('WISUDA_BASE_URL', null),
-        'pembelajaran' => env('PEMBELAJARAN_BASE_URL', null),
+        'pembelajaran' => '/dashboard',
         'lms' => env('LMS_BASE_URL', null),
         'ujian' => env('UJIAN_BASE_URL', null),
         'pendaftaran' => env('PENDAFTARAN_BASE_URL', null),

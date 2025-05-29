@@ -91,6 +91,7 @@ import ShinyText from "../components/react-bits/src/blocks/TextAnimations/ShinyT
 import { useBackdrop } from "../context/BackdropContext";
 import { MaterialIcons } from "../components/MaterialIcons";
 import { da } from "@faker-js/faker";
+import ScrollReveal from "../components/react-bits/src/blocks/TextAnimations/ScrollReveal/ScrollReveal";
 
 export default function Home({ token, base_url, role, app, apps }) {
 
@@ -307,10 +308,10 @@ export default function Home({ token, base_url, role, app, apps }) {
                         </div>
                         <div className="">
                             <h1 className="text-2xl font-extrabold tracking-tighter">
-                                Layanan Akademik
+                                SIMAK
                             </h1>
                             <p>
-                                Sistem Informasi Layanan Terpadu
+                                Sistem Informasi Manajemen Akademik dan Keuangan
                             </p>
                         </div>
                     </div>
@@ -340,29 +341,36 @@ export default function Home({ token, base_url, role, app, apps }) {
                         {/* Notifikasi Pengumuman Penting */}
                         {aksi.pengumuman.terkini.admin().length > 0 ? (
                             <>
-                                <div className="relative bg-gradient-to-r from-red-500 via-pink-500 to-orange-500 rounded-2xl p-1 mb-8 shadow-2xl z-[50]">
-                                    <div className="bg-white rounded-xl p-6">
-                                        <div className="flex items-center flex-col justify-center space-y-4 mb-4">
-                                            <div className="relative">
-                                                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center animate-pulse">
-                                                    <NotificationsTwoTone className="w-6 h-6 text-white" />
+                                <div className="flex justify-center">
+                                    <div className="max-w-2xl w-full">
+                                        <div className="relative bg-gradient-to-r from-red-500 via-pink-500 to-orange-500 rounded-2xl p-1 mb-8 shadow-2xl z-[50] ">
+                                            <div className="bg-white rounded-xl p-6 relative overflow-hidden">
+                                                <div className="absolute bottom-0 left-0 w-full z-[1] flex justify-center translate-y-16">
+                                                    {/* <div className="w-60 h-60 rounded-full bg-gradient-to-br from-red-500 to-violet-500 blur-[150px]"></div> */}
                                                 </div>
-                                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full"></div>
-                                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full animate-ping"></div>
+                                                <div className="flex items-center flex-col justify-center space-y-4 mb-4 relative z-[2]">
+                                                    <div className="relative">
+                                                        <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center animate-pulse">
+                                                            <NotificationsTwoTone className="w-6 h-6 text-white" />
+                                                        </div>
+                                                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full"></div>
+                                                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full animate-ping"></div>
+                                                    </div>
+                                                    <div className="text-center space-y-2">
+                                                        <h2 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                                                            Pengumuman Penting!
+                                                        </h2>
+                                                        <p className="text-gray-600 italic font-medium sm:text-lg">
+                                                            Perhatian, terdapat pengumuman informasi terbaru untuk seluruh sivitas akademika!
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-center relative z-[2]">
+                                                    <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full font-semibold cursor-pointer hover:opacity-80" onClick={() => console.log('clicked')}>
+                                                        {aksi.pengumuman.terkini.admin().length} Pengumuman Baru
+                                                    </Badge>
+                                                </div>
                                             </div>
-                                            <div className="text-center space-y-2">
-                                                <h2 className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
-                                                    Pengumuman Penting!
-                                                </h2>
-                                                <p className="text-gray-600 italic font-medium sm:text-lg">
-                                                    Perhatian, terdapat pengumuman informasi terbaru untuk seluruh sivitas akademika!
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="text-center">
-                                            <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full font-semibold animate-pulse">
-                                                {aksi.pengumuman.terkini.admin().length} Pengumuman Baru
-                                            </Badge>
                                         </div>
                                     </div>
                                 </div>
@@ -372,6 +380,72 @@ export default function Home({ token, base_url, role, app, apps }) {
                         ):(
                             <hr className="my-8 opacity-0" />
                         )}
+
+                        
+
+                        {/* <hr className="my-8 opacity-0" /> */}
+
+                        <div className="space-y-4">
+                            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 ">
+                                <div className="w-10 aspect-square bg-gradient-to-br from-blue-500 to-pink-500 rounded-xl flex items-center justify-center">
+                                    <AppsTwoTone className="text-white" />
+                                </div>
+                                <h1 className="font-medium tracking-tighter text-3xl opacity-80">
+                                    Aplikasi Tersedia
+                                </h1>
+                            </div>
+                            <div className="flex items-center justify-center">
+                                <div className="p-0.5 rounded-full w-1/3 bg-gradient-to-r from-blue-500 to-pink-500 "></div>
+                            </div>
+                            <div className="flex justify-center items-center gap-4  text-center">
+                                <p className="italic opacity-70">
+                                    Akses layanan akademik lainnya dalam
+                                    <br />
+                                    satu platform yang terintegrasi
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr className="my-8 opacity-0" />
+
+                        <div className="flex justify-center">
+                            <div className="max-w-5xl w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+
+                                {apps?.map((item) => (
+                                    <div key={item['label']} className="p-4 bg-white rounded-xl  group hover:shadow-md ease-out duration-300 hover:-translate-y-1">
+                                        <div className="flex flex-col justify-between h-full gap-4">
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    <div className={`w-10 group-hover:scale-110 aspect-square ease-out duration-300 flex items-center justify-center bg-blue-700 relative overflow-hidden rounded-lg`}>
+                                                        <div className="absolute -top-2 -left-2 bg-blue-100 w-8 aspect-square rounded-full blur-lg z-10"></div>
+                                                        <div className="relative z-50">
+                                                            {/* <PaymentsTwoTone className="text-white" /> */}
+                                                            <MaterialIcons icon={item['icon']} className="text-white" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h1 className={`text-xl font-semibold opacity-80 group-hover:text-blue-500 ease-out duration-300`}>
+                                                    {item['name']}
+                                                </h1>
+                                                <p>
+                                                    {item['deskripsi']}
+                                                </p>
+                                            </div>
+                                            <button type="button" onClick={() => window.open(app[item['label']], '_blank')} className={`flex items-center justify-center gap-4 border shadow border-zinc-300 hover:border-blue-500 hover:bg-blue-100/50 hover:text-blue-500 w-full px-3 py-2 rounded-full ease-out duration-300 cursor-pointer text-zinc-500 hover:shadow-md active:scale-95`}>
+                                                Buka Aplikasi
+                                                {/* <EastTwoTone fontSize="small" /> */}
+                                                <MaterialIcons icon={'EastTwoTone'} fontSize="small" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+
+
+
+                            </div>
+                        </div>
+
+                        <hr className="my-8 opacity-0" />
 
                         <div className="space-y-4">
                             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 ">
@@ -537,72 +611,6 @@ export default function Home({ token, base_url, role, app, apps }) {
                                 </div>
                             </div>
                         </div>
-
-                        <hr className="my-8 opacity-0" />
-
-                        <div className="space-y-4">
-                            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 ">
-                                <div className="w-10 aspect-square bg-gradient-to-br from-blue-500 to-pink-500 rounded-xl flex items-center justify-center">
-                                    <AppsTwoTone className="text-white" />
-                                </div>
-                                <h1 className="font-medium tracking-tighter text-3xl opacity-80">
-                                    Aplikasi Tersedia
-                                </h1>
-                            </div>
-                            <div className="flex items-center justify-center">
-                                <div className="p-0.5 rounded-full w-1/3 bg-gradient-to-r from-blue-500 to-pink-500 "></div>
-                            </div>
-                            <div className="flex justify-center items-center gap-4  text-center">
-                                <p className="italic opacity-70">
-                                    Akses layanan akademik lainnya dalam
-                                    <br />
-                                    satu platform yang terintegrasi
-                                </p>
-                            </div>
-                        </div>
-
-                        <hr className="my-8 opacity-0" />
-
-                        <div className="flex justify-center">
-                            <div className="max-w-5xl w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-
-                                {apps?.map((item) => (
-                                    <div key={item['label']} className="p-4 bg-white rounded-xl  group hover:shadow-md ease-out duration-300 hover:-translate-y-1">
-                                        <div className="flex flex-col justify-between h-full gap-4">
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center">
-                                                    <div className={`w-10 group-hover:scale-110 aspect-square ease-out duration-300 flex items-center justify-center bg-blue-700 relative overflow-hidden rounded-lg`}>
-                                                        <div className="absolute -top-2 -left-2 bg-blue-100 w-8 aspect-square rounded-full blur-lg z-10"></div>
-                                                        <div className="relative z-50">
-                                                            {/* <PaymentsTwoTone className="text-white" /> */}
-                                                            <MaterialIcons icon={item['icon']} className="text-white" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <h1 className={`text-xl font-semibold opacity-80 group-hover:text-blue-500 ease-out duration-300`}>
-                                                    {item['name']}
-                                                </h1>
-                                                <p>
-                                                    {item['deskripsi']}
-                                                </p>
-                                            </div>
-                                            <button type="button" onClick={() => window.open(app[item['label']], '_blank')} className={`flex items-center justify-center gap-4 border shadow border-zinc-300 hover:border-blue-500 hover:bg-blue-100/50 hover:text-blue-500 w-full px-3 py-2 rounded-full ease-out duration-300 cursor-pointer text-zinc-500 hover:shadow-md active:scale-95`}>
-                                                Buka Aplikasi
-                                                {/* <EastTwoTone fontSize="small" /> */}
-                                                <MaterialIcons icon={'EastTwoTone'} fontSize="small" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-
-
-
-                            </div>
-                        </div>
-
-                        <hr className="my-8 opacity-0" />
-
-
                         
                     </div>
                 </div>

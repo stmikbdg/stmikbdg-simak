@@ -46,6 +46,13 @@ class WebController extends Controller {
 
         $props['apps'] = [
             [
+                'name' => 'Pembelajaran',
+                'deskripsi' => 'Sistem pembelajaran daring kampus',
+                'label' => 'pembelajaran',
+                'icon' => 'SchoolTwoTone',
+                'color' => 'indigo'
+            ],
+            [
                 'name' => 'Keuangan',
                 'deskripsi' => 'Sistem Informasi dan layanan pembayaran keuangan',
                 'label' => 'keuangan',
@@ -59,20 +66,20 @@ class WebController extends Controller {
                 'icon' => 'AssignmentTwoTone',
                 'color' => 'green'
             ],
-            [
-                'name' => 'Journal',
-                'deskripsi' => 'Pengelolaan publikasi jurnal ilmiah kampus',
-                'label' => 'journal',
-                'icon' => 'BookmarkAddedTwoTone',
-                'color' => 'amber'
-            ],
-            [
-                'name' => 'Verdig',
-                'deskripsi' => 'Verifikasi digital dokumen akademik',
-                'label' => 'verdig',
-                'icon' => 'HowToRegTwoTone',
-                'color' => 'fuchsia'
-            ],
+            // [
+            //     'name' => 'Journal',
+            //     'deskripsi' => 'Pengelolaan publikasi jurnal ilmiah kampus',
+            //     'label' => 'journal',
+            //     'icon' => 'BookmarkAddedTwoTone',
+            //     'color' => 'amber'
+            // ],
+            // [
+            //     'name' => 'Verdig',
+            //     'deskripsi' => 'Verifikasi digital dokumen akademik',
+            //     'label' => 'verdig',
+            //     'icon' => 'HowToRegTwoTone',
+            //     'color' => 'fuchsia'
+            // ],
             [
                 'name' => 'Bimbingan',
                 'deskripsi' => 'Sistem Informasi dan Layanan pembimbingan akademik',
@@ -94,13 +101,13 @@ class WebController extends Controller {
                 'icon' => 'FeedTwoTone',
                 'color' => 'violet'
             ],
-            [
-                'name' => 'Kuesioner',
-                'deskripsi' => 'Survei dan evaluasi layanan atau pembelajaran',
-                'label' => 'kuesioner',
-                'icon' => 'PollTwoTone',
-                'color' => 'red'
-            ],            
+            // [
+            //     'name' => 'Kuesioner',
+            //     'deskripsi' => 'Survei dan evaluasi layanan atau pembelajaran',
+            //     'label' => 'kuesioner',
+            //     'icon' => 'PollTwoTone',
+            //     'color' => 'red'
+            // ],            
         ];
 
         return Inertia::render($component, $props);

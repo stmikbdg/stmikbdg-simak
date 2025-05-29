@@ -2063,7 +2063,7 @@ function MahasiswaPage({ token, base_url, role, app }) {
                         </CustomLoading>
                     </div>
 
-                    <ApplicationSection app={app} />
+                    {/* <ApplicationSection app={app} /> */}
 
                     <CustomTabs centered>
                         <CustomTabItem label="Jadwal Hari ini">
@@ -3109,7 +3109,7 @@ function DosenWaliPage({ token, base_url, role, app }) {
                         </div>
                     </div>
 
-                    <ApplicationSection app={app} />
+                    {/* <ApplicationSection app={app} /> */}
 
                     <Modal modalId="detail_krs" title="Detail" modalBoxClassname="max-w-2xl">
                         <CustomDataTable 
@@ -4049,7 +4049,7 @@ function DosenPage({ token, base_url, role, app }) {
                         </div>
                     </div>
 
-                    <ApplicationSection app={app} />
+                    {/* <ApplicationSection app={app} /> */}
 
                     <Modal modalId="kontrak" title="Kontrak Kuliah" modalBoxClassname="max-w-5xl min-h-40" modalClassname="py-4">
                         <div className="divide-y divide-zinc-300">
@@ -5828,7 +5828,7 @@ function AdminPage({ token, base_url, role, app }) {
                         </div>
                     </div>
 
-                    <ApplicationSection app={app} />
+                    {/* <ApplicationSection app={app} /> */}
 
                     <CustomTabs>
                         <CustomTabItem label="Pengumuman">

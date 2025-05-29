@@ -38,6 +38,7 @@
         "axios": "^1.7.9",
         "dayjs": "^1.11.13",
         "framer-motion": "^11.18.2",
+        "gsap": "^3.13.0",
         "html5-qrcode": "^2.3.8",
         "isomorphic-dompurify": "^2.24.0",
         "nanoid": "^3.3.8",

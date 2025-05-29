@@ -470,9 +470,9 @@ export function MainLayout2({ children, token, base_url, role, page_title = 'Pag
                                     </div>
                                 </div>
             
-                                {!noApplications && (
+                                {/* {!noApplications && (
                                     <ApplicationSection app={app} />
-                                )}
+                                )} */}
             
                                 {children}
                             </div>

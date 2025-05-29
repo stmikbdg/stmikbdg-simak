@@ -4735,7 +4735,7 @@ function DosenPage({ token, base_url, role, app }) {
                                                                                 )}
                                                                             </div>
                                                                             <div className="flex justify-end w-full sm:w-fit">
-                                                                                {!item[
+                                                                                {item[
                                                                                     "kontrak_kuliah"
                                                                                 ] ? (
                                                                                     item[

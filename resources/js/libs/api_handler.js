@@ -80,7 +80,9 @@ const api_handler = {
                 timeoutErrorMessage: 'Tampaknya ada masalah di server, silahkan coba lagi'
             })
 
-            if(response?.data?.status === 'success') {
+            console.log(response?.data, response)
+
+            if(response?.data?.status === 'success' || response?.data?.success) {
                 return {
                     success: true,
                     data: response?.data?.data,
@@ -130,7 +132,7 @@ const api_handler = {
                 timeoutErrorMessage: 'Tampaknya ada masalah di server, silahkan coba lagi'
             })
 
-            if(response?.data?.status === 'success') {
+            if(response?.data?.status === 'success'  || response?.data?.success) {
                 return {
                     success: true,
                     data: response?.data?.data,

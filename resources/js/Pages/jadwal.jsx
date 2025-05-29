@@ -1,7 +1,7 @@
 import { Avatar, Button, Checkbox, CircularProgress, Collapse, Fade, IconButton, Link, Tab, Tabs, TextField, Tooltip } from "@mui/material"
 import { useSidebar } from "../context/SidebarContext"
 import MainLayout from "../layouts/MainLayout"
-import { AccessTimeOutlined, Check, CheckBox, CheckBoxOutlineBlankTwoTone, CheckBoxTwoTone, Close, CollectionsBookmarkOutlined, CropSquareOutlined, Delete, Download, DownloadOutlined, IndeterminateCheckBoxTwoTone, InfoOutlined, LocationOnOutlined, MenuOutlined, PersonOutline, Pin, QrCode, RefreshOutlined, Remove, SendOutlined, Star, SubjectOutlined, Upload, VisibilityOutlined, Warning } from "@mui/icons-material"
+import { AccessTimeOutlined, Check, CheckBox, CheckBoxOutlineBlankTwoTone, CheckBoxTwoTone, Close, CollectionsBookmarkOutlined, CropSquareOutlined, Delete, Download, DownloadOutlined, IndeterminateCheckBoxTwoTone, InfoOutlined, LocationOnOutlined, MenuOutlined, PersonOutline, Pin, QrCode, RefreshOutlined, Remove, SendOutlined, Star, SubjectOutlined, Upload, VisibilityOutlined, VisibilityTwoTone, Warning } from "@mui/icons-material"
 import { CustomTabItem, CustomTabs } from "../components/CustomTabs"
 import CustomDropdown, { CustomDropdown2 } from "../components/CustomDropdown"
 import { useUser } from "../context/UserContext"
@@ -47,8 +47,10 @@ function JadwalDosen({ token, base_url, role }) {
             kelas_kuliah_id: '',
             data: null,
             loading: {
-                buka: false
+                buka: false,
+                upload_kontrak: false
             },
+            kontrak: null,
             absen: {
                 error: null,
                 unique: false,
@@ -492,7 +494,7 @@ function JadwalDosen({ token, base_url, role }) {
                 }
             },
             kontrak: {
-                upload: async (file) => {
+                upload: async (file, kelas_kuliah_id) => {
                     try {
                         aksi.kelas.loading('upload_kontrak')
 
@@ -501,22 +503,36 @@ function JadwalDosen({ token, base_url, role }) {
                             url: 'kelas-kuliah/dosen/kontrak',
                             token,
                             payload: {
-                                file
+                                file,
+                                kelas_kuliah_id
                             }
                         })
 
                         aksi.kelas.loading('upload_kontrak')
 
-                        if(response?.success) {
+                        // console.log(response)
 
+                        if(response?.success) {
+                            customSwal.toast.success({
+                                message: 'Berhasil mengupload kontrak kuliah'
+                            })
+                            aksi.jadwal.get()
                         }else{
-                            
+                            customSwal.toast.error({
+                                message: response?.message
+                            })
                         }
                     } catch (error) {
-                        customSwal.toast.erorr({
+                        customSwal.toast.error({
                             message: error?.message
                         })
                     }
+                },
+                view: (kontrak_kuliah) => {
+                    aksi.kelas.set('kontrak', kontrak_kuliah)
+                    console.log(kontrak_kuliah)
+
+                    modal.show('kontrak')
                 }
             }
         },
@@ -738,6 +754,19 @@ function JadwalDosen({ token, base_url, role }) {
                             <TextField multiline fullWidth label="Berita Acara" required size="small" value={formData.tutup.berita_acara} onChange={e => aksi.kelas.tutup.set('berita_acara', e.target.value)} />
                         </div>
                     </ModalForm>
+
+                    <Modal modalId="kontrak" title="Kontrak Kuliah" modalBoxClassname="max-w-5xl min-h-40" modalClassname="py-4">
+                        <div className="divide-y divide-zinc-300">
+                            {/* <div className="p-4">
+                                <Button fullWidth startIcon={<Download />} variant="contained">
+                                    <p className="font-jakarta font-bold">
+                                        Download Kontrak
+                                    </p>
+                                </Button>
+                            </div> */}
+                            <iframe src={listData.kelas.kontrak?.file_link} className="w-full min-h-screen h-full" />
+                        </div>
+                    </Modal>
 
                     {/* <CustomTabs>
                         {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map(hari => (
@@ -1074,7 +1103,7 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                     </div>
                                                                                 )}
                                                                                 <div className="flex items-center">
-                                                                                    <Button startIcon={<Download fontSize="small" />} size="small" disabled={!item['kontrak_kuliah']}>
+                                                                                    <Button startIcon={<VisibilityTwoTone fontSize="small" />} size="small" disabled={!item['kontrak_kuliah']} onClick={() => aksi.kelas.kontrak.view(item['kontrak_kuliah'])}>
                                                                                         <p className="text-xs font-semibold font-jakarta">
                                                                                             Kontrak/silabus Kuliah
                                                                                         </p>
@@ -1120,7 +1149,7 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                 )}
                                                                             </div>
                                                                             <div className="flex justify-end w-full sm:w-fit">
-                                                                                {!item['kontrak_kuliah']
+                                                                                {item['kontrak_kuliah']
                                                                                     ? item['kelas_dibuka']
                                                                                     ? (
                                                                                         <div className="flex items-center gap-4 w-full sm:w-fit">
@@ -1153,7 +1182,7 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                         </Button>
                                                                                     )
                                                                                     : (
-                                                                                        <CustomUpload buttonProps={{ size: 'small', variant: 'contained' }} text="upload kontrak/silabus" startIcon={<Upload />} />
+                                                                                        <CustomUpload buttonProps={{ size: 'small', variant: 'contained' }} text="upload kontrak/silabus" onUploaded={(files) => aksi.kelas.kontrak.upload(files[0], item['data_kelas']['kelas_kuliah_id'])} startIcon={<Upload />} loading={listData.kelas.loading.upload_kontrak} />
                                                                                     )
                                                                                 }
                                                                             </div>

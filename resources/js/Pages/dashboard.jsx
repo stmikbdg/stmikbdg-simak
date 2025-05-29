@@ -44,6 +44,7 @@ import {
     SubjectOutlined,
     Upload,
     VisibilityOutlined,
+    VisibilityTwoTone,
     WalletTwoTone,
     Warning,
 } from "@mui/icons-material";
@@ -3465,7 +3466,9 @@ function DosenPage({ token, base_url, role, app }) {
             data: null,
             loading: {
                 buka: false,
+                upload_kontrak: false
             },
+            kontrak: null,
             absen: {
                 error: null,
                 unique: false,
@@ -3969,6 +3972,48 @@ function DosenPage({ token, base_url, role, app }) {
                     },
                 },
             },
+            kontrak: {
+                upload: async (file, kelas_kuliah_id) => {
+                    try {
+                        aksi.kelas.loading('upload_kontrak')
+
+                        const response = await api_handler.postForm({
+                            base_url,
+                            url: 'kelas-kuliah/dosen/kontrak',
+                            token,
+                            payload: {
+                                file,
+                                kelas_kuliah_id
+                            }
+                        })
+
+                        aksi.kelas.loading('upload_kontrak')
+
+                        // console.log(response)
+
+                        if(response?.success) {
+                            customSwal.toast.success({
+                                message: 'Berhasil mengupload kontrak kuliah'
+                            })
+                            aksi.jadwal.get()
+                        }else{
+                            customSwal.toast.error({
+                                message: response?.message
+                            })
+                        }
+                    } catch (error) {
+                        customSwal.toast.error({
+                            message: error?.message
+                        })
+                    }
+                },
+                view: (kontrak_kuliah) => {
+                    aksi.kelas.set('kontrak', kontrak_kuliah)
+                    console.log(kontrak_kuliah)
+
+                    modal.show('kontrak')
+                }
+            }
         },
     };
 
@@ -4005,6 +4050,19 @@ function DosenPage({ token, base_url, role, app }) {
                     </div>
 
                     <ApplicationSection app={app} />
+
+                    <Modal modalId="kontrak" title="Kontrak Kuliah" modalBoxClassname="max-w-5xl min-h-40" modalClassname="py-4">
+                        <div className="divide-y divide-zinc-300">
+                            {/* <div className="p-4">
+                                <Button fullWidth startIcon={<Download />} variant="contained">
+                                    <p className="font-jakarta font-bold">
+                                        Download Kontrak
+                                    </p>
+                                </Button>
+                            </div> */}
+                            <iframe src={listData.kelas.kontrak?.file_link} className="w-full min-h-screen h-full" />
+                        </div>
+                    </Modal>
 
                     <CustomTabs centered>
                         <CustomTabItem label="Jadwal Hari ini">
@@ -4604,20 +4662,9 @@ function DosenPage({ token, base_url, role, app }) {
                                                                                     </div>
                                                                                 )}
                                                                                 <div className="flex items-center">
-                                                                                    <Button
-                                                                                        startIcon={
-                                                                                            <Download fontSize="small" />
-                                                                                        }
-                                                                                        size="small"
-                                                                                        disabled={
-                                                                                            !item[
-                                                                                                "kontrak_kuliah"
-                                                                                            ]
-                                                                                        }
-                                                                                    >
+                                                                                    <Button startIcon={<VisibilityTwoTone fontSize="small" />} size="small" disabled={!item['kontrak_kuliah']} onClick={() => aksi.kelas.kontrak.view(item['kontrak_kuliah'])}>
                                                                                         <p className="text-xs font-semibold font-jakarta">
-                                                                                            Kontrak/silabus
-                                                                                            Kuliah
+                                                                                            Kontrak/silabus Kuliah
                                                                                         </p>
                                                                                     </Button>
                                                                                 </div>
@@ -4854,9 +4901,7 @@ function DosenPage({ token, base_url, role, app }) {
                                                                                                 "contained",
                                                                                         }}
                                                                                         text="upload kontrak/silabus"
-                                                                                        startIcon={
-                                                                                            <Upload />
-                                                                                        }
+                                                                                        onUploaded={(files) => aksi.kelas.kontrak.upload(files[0], item['data_kelas']['kelas_kuliah_id'])} startIcon={<Upload />} loading={listData.kelas.loading.upload_kontrak}
                                                                                     />
                                                                                 )}
                                                                             </div>

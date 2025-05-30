@@ -1,12 +1,20 @@
 <?php 
 namespace App\Http\Controllers;
 
+use App\Models\WebService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Session;
 
 class WebController extends Controller {
+
+    protected $service;
+    public function __construct()
+    {
+        $this->service = new WebService();
+    }
 
     private function render(string $component, array $props = []) {
         $token = Session::get('token');
@@ -162,6 +170,77 @@ class WebController extends Controller {
         return $this->render('surat_detail_by_id', [
             'id' => $id
         ]);
+    }
+
+    public function ksm_download_per_semester(int $semester) {
+
+        $user = Session::get('profile');
+
+        Carbon::setLocale('id');
+
+        $response = $this->service->get(null, 'krs/ip/semester?s='.$semester)->getData('data');
+
+        if($response['status'] != 'success') {
+            return abort(404);
+        }
+
+        if(!isset($response['data']['matakuliah'])) {
+            return abort(404);
+        }
+
+        $response_data = $response['data'];
+
+        $data = [
+            'nim' => $user['nim'],
+            'nama' => $user['nama'],
+            'dosen_wali' => $user['dosen_wali'],
+            'matakuliah' => array_map(function($item) {
+                $item['kelas'] = '-';
+
+                return $item;
+            }, $response_data['matakuliah']),
+            'total_sks' => $response_data['total_sks'],
+            'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
+            'image' => public_path('images/stmik.png')
+        ];
+
+        $pdf = Pdf::loadView('pdf/ksm-download', $data)->setPaper('A4', 'portrait');
+        return $pdf->stream('Kartu Studi Mahasiswa - '.$user['nim'].' - '.$user['nama'].' - Semester - '.$semester.'.pdf');
+    }
+
+    public function ksm_preview_per_semester(int $semester) {
+
+        $user = Session::get('profile');
+
+        Carbon::setLocale('id');
+
+        $response = $this->service->get(null, 'krs/ip/semester?s='.$semester)->getData('data');
+
+        if($response['status'] != 'success') {
+            return abort(404);
+        }
+
+        if(!isset($response['data']['matakuliah'])) {
+            return $this->render('NotFound');
+        }
+
+        $response_data = $response['data'];
+
+        $data = [
+            'nim' => $user['nim'],
+            'nama' => $user['nama'],
+            'dosen_wali' => $user['dosen_wali'],
+            'matakuliah' => array_map(function($item) {
+                $item['kelas'] = '-';
+
+                return $item;
+            }, $response_data['matakuliah']),
+            'total_sks' => $response_data['total_sks'],
+            'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
+            'image' => asset('images/stmik.png')
+        ];
+
+        return view('pdf/ksm-preview', $data);
     }
 }
 

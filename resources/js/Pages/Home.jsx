@@ -567,8 +567,8 @@ export default function Home({ token, base_url, role, app, apps }) {
                                                                                     </p>
                                                                                 </div>
                                                                             </div>
-                                                                            <div className="flex gap-4 translate-y-2">
-                                                                                <p className="font-bold text-blue-400 w-fit px-3 py-1 rounded-full border bg-blue-500/10 text-xs tracking-tighter h-fit ">
+                                                                            <div className="flex gap-4 translate-y-2 items-center">
+                                                                                <p className="font-bold text-blue-400 w-fit text-center px-3 py-1 rounded-full border bg-blue-500/10 text-xs tracking-tighter h-fit ">
                                                                                     {item?.matakuliah}
                                                                                 </p>
                                                                                 <p className="font-bold text-white w-fit px-3 py-1 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-xs tracking-tighter h-fit ">

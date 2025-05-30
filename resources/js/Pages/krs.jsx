@@ -2,7 +2,7 @@ import { Button, CircularProgress, IconButton, InputAdornment, TextField } from 
 import { useSidebar } from "../context/SidebarContext"
 import { useUser } from "../context/UserContext"
 import MainLayout from "../layouts/MainLayout"
-import { AccessTimeOutlined, AssignmentOutlined, AutoGraphOutlined, CalendarMonthOutlined, Cancel, Check, CheckCircle, CheckCircleOutline, Close, DescriptionOutlined, DownloadOutlined, East, EastOutlined, FormatAlignLeftOutlined, InfoOutlined, MenuOutlined, SendOutlined, StickyNote2Outlined } from "@mui/icons-material"
+import { AccessTimeOutlined, AssignmentOutlined, AutoGraphOutlined, CalendarMonthOutlined, Cancel, Check, CheckCircle, CheckCircleOutline, Close, DescriptionOutlined, DownloadOutlined, DownloadTwoTone, East, EastOutlined, FormatAlignLeftOutlined, InfoOutlined, MenuOutlined, SendOutlined, StickyNote2Outlined } from "@mui/icons-material"
 import { CustomTabItem, CustomTabs } from "../components/CustomTabs"
 import FileUploadComponent from "../components/CustomUpload"
 import CustomDataTable from "../components/CustomDataTable"
@@ -736,7 +736,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2 *:grow *:sm:grow-0">
-                                                {aksi.krs.is_aktif() && (
+                                                {/* {aksi.krs.is_aktif() && (
                                                     <>
 
                                                         <Button startIcon={<DownloadOutlined />} variant="contained" size="small">
@@ -745,7 +745,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                                                             </p>
                                                         </Button>
                                                     </>
-                                                )}
+                                                )} */}
                                                 <Button disabled={aksi.krs.pengajuan.is_disabled()} onClick={() => modal.show('modal_pengajuan_krs')} startIcon={<SendOutlined />} variant="contained" size="small">
                                                     <p className="font-jakarta text-xs">
                                                         Ajukan
@@ -1131,74 +1131,83 @@ function KHSPage({ token, base_url, role}) {
             </div>
 
             <Modal modalId="detail_semester" title="Detail Semester" modalBoxClassname="max-w-3xl">
-                <CustomDataTable 
-                    toolbar={{ search: true, export: false, import: false, column: false, density: false }}
-                    pageSize={25}
-                    loading={listData.semester.loading}
-                    rows={listData.semester.data?.matakuliah}
-                    getRowId={(row) => row.kd_mk}
-                    columns={[
-                        {
-                            field: 'kd_mk',
-                            headerName: 'Kode',
-                            minWidth: 150,
-                            headerClassname: 'bg-zinc-100'
-                        },
-                        {
-                            field: 'nm_mk',
-                            headerName: 'Nama',
-                            minWidth: 250
-                        },
-                        {
-                            field: 'sks',
-                            headerName: 'SKS',
-                            align: 'center',
-                            headerAlign: 'center'
-                        },
-                        {
-                            field: 'nilai_akhir',
-                            headerName: 'Nilai',
-                            align: 'center',
-                            headerAlign: 'center',
-                            renderCell: ({ row }) => (
-                                <div className="flex items-center justify-center h-full">
-                                    {row?.nilai === 'A' && (
-                                        <div className="flex items-center justify-center w-6 h-6 bg-green-100 font-bold text-green-700 text-xs rounded">
-                                            {row?.nilai}
-                                        </div>
-                                    )}
-                                    {row?.nilai === 'B' && (
-                                        <div className="flex items-center justify-center w-6 h-6 bg-blue-100 font-bold text-blue-700 text-xs rounded">
-                                            {row?.nilai}
-                                        </div>
-                                    )}
-                                    {row?.nilai === 'C' && (
-                                        <div className="flex items-center justify-center w-6 h-6 bg-amber-100 font-bold text-amber-700 text-xs rounded">
-                                            {row?.nilai}
-                                        </div>
-                                    )}
-                                    {row?.nilai === 'D' && (
-                                        <div className="flex items-center justify-center w-6 h-6 bg-orange-100 font-bold text-orange-700 text-xs rounded">
-                                            {row?.nilai}
-                                        </div>
-                                    )}
-                                    {row?.nilai === 'E' && (
-                                        <div className="flex items-center justify-center w-6 h-6 bg-red-100 font-bold text-red-700 text-xs rounded">
-                                            {row?.nilai}
-                                        </div>
-                                    )}
-                                </div>
-                            )
-                        },
-                        {
-                            field: 'nilai_mutu',
-                            headerName: 'Mutu',
-                            valueGetter: (value, row) => row?.mutu,
-                            align: 'center',
-                            headerAlign: 'center'
-                        }
-                    ]}
-                />
+                <div className="divide-y divide-zinc-300">
+                    <div className="p-4">
+                        <Button variant="contained" onClick={() => window.open(`/ksm/download/semester/${listData.semester.data?.semester}`)} startIcon={<DownloadTwoTone />} fullWidth>
+                            <p className="font-jakarta font-medium">  
+                                Unduh KSM
+                            </p>
+                        </Button>
+                    </div>
+                    <CustomDataTable 
+                        toolbar={{ search: true, export: false, import: false, column: false, density: false }}
+                        pageSize={25}
+                        loading={listData.semester.loading}
+                        rows={listData.semester.data?.matakuliah}
+                        getRowId={(row) => row.kd_mk}
+                        columns={[
+                            {
+                                field: 'kd_mk',
+                                headerName: 'Kode',
+                                minWidth: 150,
+                                headerClassname: 'bg-zinc-100'
+                            },
+                            {
+                                field: 'nm_mk',
+                                headerName: 'Nama',
+                                minWidth: 250
+                            },
+                            {
+                                field: 'sks',
+                                headerName: 'SKS',
+                                align: 'center',
+                                headerAlign: 'center'
+                            },
+                            {
+                                field: 'nilai_akhir',
+                                headerName: 'Nilai',
+                                align: 'center',
+                                headerAlign: 'center',
+                                renderCell: ({ row }) => (
+                                    <div className="flex items-center justify-center h-full">
+                                        {row?.nilai === 'A' && (
+                                            <div className="flex items-center justify-center w-6 h-6 bg-green-100 font-bold text-green-700 text-xs rounded">
+                                                {row?.nilai}
+                                            </div>
+                                        )}
+                                        {row?.nilai === 'B' && (
+                                            <div className="flex items-center justify-center w-6 h-6 bg-blue-100 font-bold text-blue-700 text-xs rounded">
+                                                {row?.nilai}
+                                            </div>
+                                        )}
+                                        {row?.nilai === 'C' && (
+                                            <div className="flex items-center justify-center w-6 h-6 bg-amber-100 font-bold text-amber-700 text-xs rounded">
+                                                {row?.nilai}
+                                            </div>
+                                        )}
+                                        {row?.nilai === 'D' && (
+                                            <div className="flex items-center justify-center w-6 h-6 bg-orange-100 font-bold text-orange-700 text-xs rounded">
+                                                {row?.nilai}
+                                            </div>
+                                        )}
+                                        {row?.nilai === 'E' && (
+                                            <div className="flex items-center justify-center w-6 h-6 bg-red-100 font-bold text-red-700 text-xs rounded">
+                                                {row?.nilai}
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            },
+                            {
+                                field: 'nilai_mutu',
+                                headerName: 'Mutu',
+                                valueGetter: (value, row) => row?.mutu,
+                                align: 'center',
+                                headerAlign: 'center'
+                            }
+                        ]}
+                    />
+                </div>
             </Modal>
 
             <div className="p-4">
@@ -1206,13 +1215,13 @@ function KHSPage({ token, base_url, role}) {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <CustomLoading loading={listData.khs.loading} renderIf={listData.khs.data}>
                             {listData.khs.data?.ip_per_semester?.map(item => (
-                                <div key={item['semester']} className="border border-zinc-300 rounded-md shadow divide-y divide-zinc-300">
-                                    <div className="px-4 py-3">
+                                <div key={item['semester']} className="border border-zinc-300 rounded-md shadow divide-y divide-zinc-300 overflow-hidden">
+                                    <div className="px-4 py-3 bg-zinc-50 text-zinc-700">
                                         <div className="flex items-center justify-between">
-                                            <h1 className="text-lg font-medium opacity-80">
+                                            <h1 className="text-lg font-semibold tracing-tighter opacity-80">
                                                 Semester {item['semester']}
                                             </h1>
-                                            <Button onClick={() => aksi.khs.detail.get(item['semester'])} color="primary" size="small" endIcon={<East fontSize="small" />}>
+                                            <Button variant="contained" onClick={() => aksi.khs.detail.get(item['semester'])} color="primary" size="small" endIcon={<East fontSize="small" />}>
                                                 <p className={`font-jakarta text-xs`}>
                                                     Lihat
                                                 </p>
@@ -1273,7 +1282,7 @@ function KHSPage({ token, base_url, role}) {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="p-4 space-y-4">
+                                    <div className="p-4 space-y-4 bg-zinc-50 text-zinc-700">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
                                                 <AutoGraphOutlined fontSize="small" color="primary" />

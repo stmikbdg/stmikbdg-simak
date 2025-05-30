@@ -19,23 +19,20 @@ Route::controller(AuthController::class)
  * ! harap tidak mengubah nilai pada name();
  */
 Route::middleware(['auth.token'])
+    ->controller(WebController::class)
     ->group(function () {
-        Route::get('/home', [WebController::class, 'index'])->name('home');
-        Route::get('/dashboard', [WebController::class, 'dashboard'])->name('dashboard');
-        Route::get('/absenqr', [WebController::class, 'absenqr'])->name('absenqr');
-        // Route::get('/khs', [WebController::class, 'khs'])->name('khs');
-        Route::get('/khs/semester/{semester}', [WebController::class, 'khs_per_semester'])->name('khs_per_semester');
-        Route::get('/profil', [WebController::class, 'profil'])->name('profil');
-        Route::get('/jadwal', [WebController::class, 'jadwal'])->name('jadwal');
-        Route::get('/notfound', [WebController::class, 'index'])->name('notfound');
-        Route::get('/krs', [WebController::class, 'krs'])->name('krs');
-        Route::get('/krs/approve/{mhs_id}/{krs_id}', [WebController::class, 'krs_approve_by_dosen_wali'])->name('krs_approve_by_dosen_wali');
-        // Route::get('/surat', [WebController::class, 'surat'])->name('surat');
-        Route::prefix('/surat')
-            ->group(function () {
-                Route::get('/', [WebController::class, 'surat'])->name('surat');
-                Route::get('/detail/{id}', [WebController::class, 'surat_detail_by_id'])->name('surat_detail_by_id');
-            });
+        Route::get('/home', 'index')->name('home');
+        Route::get('/dashboard', 'dashboard')->name('dashboard');
+        Route::get('/absenqr', 'absenqr')->name('absenqr');
+        Route::get('/khs/semester/{semester}', 'khs_per_semester');
+        Route::get('/profil', 'profil');
+        Route::get('/jadwal', 'jadwal');
+        Route::get('/notfound', 'index');
+        Route::get('/krs', 'krs');
+        Route::get('/krs/approve/{mhs_id}/{krs_id}', 'krs_approve_by_dosen_wali');
+        Route::get('/surat/detail/{id}', 'surat_detail_by_id');
+        Route::get('/ksm/download/semester/{semester}', 'ksm_download_per_semester');
+        // Route::get('/ksm/preview/semester/{semester}', 'ksm_preview_per_semester');
     });
 
 /**

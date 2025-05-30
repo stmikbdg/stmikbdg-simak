@@ -431,7 +431,7 @@ export default function Home({ token, base_url, role, app, apps }) {
                                                     {item['deskripsi']}
                                                 </p>
                                             </div>
-                                            <button type="button" onClick={() => window.open(app[item['label']], '_blank')} className={`flex items-center justify-center gap-4 border shadow border-zinc-300 hover:border-blue-500 hover:bg-blue-100/50 hover:text-blue-500 w-full px-3 py-2 rounded-full ease-out duration-300 cursor-pointer text-zinc-500 hover:shadow-md active:scale-95`}>
+                                            <button type="button" onClick={() => window.open(item['label'] === 'pembelajaran' ? '/dashboard' : app[item['label']], '_blank')} className={`flex items-center justify-center gap-4 border shadow border-zinc-300 hover:border-blue-500 hover:bg-blue-100/50 hover:text-blue-500 w-full px-3 py-2 rounded-full ease-out duration-300 cursor-pointer text-zinc-500 hover:shadow-md active:scale-95`}>
                                                 Buka Aplikasi
                                                 {/* <EastTwoTone fontSize="small" /> */}
                                                 <MaterialIcons icon={'EastTwoTone'} fontSize="small" />

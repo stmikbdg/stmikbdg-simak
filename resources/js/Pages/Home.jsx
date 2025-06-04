@@ -334,7 +334,7 @@ export default function Home({ token, base_url, role, app, apps }) {
 
             </div>
 
-            <div className="px-4">
+            <div className="px-4" >
                 <div className="flex justify-center">
                     <div className={`w-full max-w-screen-2xl ${aksi.pengumuman.terkini.admin().length > 0 && '-translate-y-12'}`}>
 
@@ -366,7 +366,7 @@ export default function Home({ token, base_url, role, app, apps }) {
                                                     </div>
                                                 </div>
                                                 <div className="text-center relative z-[2]">
-                                                    <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full font-semibold cursor-pointer hover:opacity-80" onClick={() => console.log('clicked')}>
+                                                    <Badge onClick={() => window.location.href = "#pengumuman"} className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full font-semibold cursor-pointer hover:opacity-80">
                                                         {aksi.pengumuman.terkini.admin().length} Pengumuman Baru
                                                     </Badge>
                                                 </div>
@@ -463,7 +463,7 @@ export default function Home({ token, base_url, role, app, apps }) {
 
                         <hr className="my-8 opacity-0" />
 
-                        <div className="flex justify-center w-full">
+                        <div className="flex justify-center w-full" id="pengumuman">
                             <div className="max-w-5xl w-full">
                                 <div className={`grid ${role?.mahasiswa?.enable || role?.dosen?.enable || role?.admin?.enable ? 'grid-cols-1 lg:grid-cols-2' : ' grid-cols-1'} gap-4 relative w-full`}>
                                     <div className={`sm:sticky top-24 space-y-4 h-fit `}>

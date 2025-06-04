@@ -659,7 +659,7 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                             </div>
                         </div>
                     )}
-                    {menuFor('Mahasiswa', 'Dosen Wali', 'Dosen') && (
+                    {/* {menuFor('Mahasiswa', 'Dosen Wali', 'Dosen') && (
                         <div className="relative overflow-visible w-full">
                             <div className={`absolute top-0 left-0 w-2 rounded-md h-full bg-blue-500 ${pathname.startsWith('/surat') ? 'opacity-100' : 'opacity-0'}`}></div>
                             <div className="px-5">
@@ -671,7 +671,7 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                                 </button>
                             </div>
                         </div>
-                    )}
+                    )} */}
                     {/* {menuFor('Prodi') && (
                         <div className="relative overflow-visible w-full">
                             <div className={`absolute top-0 left-0 w-2 rounded-md h-full bg-blue-500 ${pathname.startsWith('/rekap') ? 'opacity-100' : 'opacity-0'}`}></div>

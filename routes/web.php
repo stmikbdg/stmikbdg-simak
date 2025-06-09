@@ -32,7 +32,7 @@ Route::middleware(['auth.token'])
         Route::get('/krs/approve/{mhs_id}/{krs_id}', 'krs_approve_by_dosen_wali');
         Route::get('/surat/detail/{id}', 'surat_detail_by_id');
         Route::get('/ksm/download/semester/{semester}', 'ksm_download_per_semester');
-        // Route::get('/ksm/preview/semester/{semester}', 'ksm_preview_per_semester');
+        Route::get('/ksm/preview/semester/{semester}', 'ksm_preview_per_semester');
     });
 
 /**

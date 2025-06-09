@@ -848,11 +848,16 @@ function TabSemester({
                     onChange: onSelect_matakuliah
                 }}
                 columns={[
+                    // {
+                    //     field: 'mk_id',
+                    //     headerName: 'Kode Mata Kuliah',
+                    //     minWidth: 150,
+                    //     valueGetter: (value, row) => row.kd_mk
+                    // },
                     {
-                        field: 'mk_id',
-                        headerName: 'Kode Mata Kuliah',
-                        minWidth: 150,
-                        valueGetter: (value, row) => row.kd_mk
+                        field: 'nm_mk',
+                        headerName: 'Nama',
+                        minWidth: 250
                     },
                     {
                         field: 'status',
@@ -881,11 +886,7 @@ function TabSemester({
                         ),
                         minWidth: 150
                     },
-                    {
-                        field: 'nm_mk',
-                        headerName: 'Nama',
-                        minWidth: 250
-                    },
+                    
                     {
                         field: 'sks',
                         headerName: 'SKS',
@@ -1147,16 +1148,16 @@ function KHSPage({ token, base_url, role}) {
                         getRowId={(row) => row.kd_mk}
                         columns={[
                             {
-                                field: 'kd_mk',
-                                headerName: 'Kode',
-                                minWidth: 150,
-                                headerClassname: 'bg-zinc-100'
-                            },
-                            {
                                 field: 'nm_mk',
                                 headerName: 'Nama',
                                 minWidth: 250
                             },
+                            // {
+                            //     field: 'kd_mk',
+                            //     headerName: 'Kode',
+                            //     minWidth: 150,
+                            //     headerClassname: 'bg-zinc-100'
+                            // },
                             {
                                 field: 'sks',
                                 headerName: 'SKS',

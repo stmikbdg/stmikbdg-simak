@@ -361,7 +361,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
 
                     const date = dayjs(listData.krs.data?.tahun_ajaran?.du_sampai)
 
-                    if(now.isAfter(date)) {
+                    if(now.isAfter(date) || now.isSame(date)) {
                         return true
                     }
 

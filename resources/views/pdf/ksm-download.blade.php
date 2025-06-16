@@ -113,7 +113,7 @@
                     <th>Kode</th>
                     <th>Matakuliah</th>
                     <th>SKS</th>
-                    <th>Kelas</th>
+                    {{-- <th>Kelas</th> --}}
                 </tr>
             </thead>
             <tbody>
@@ -123,12 +123,12 @@
                     <td>{{ $mk['kd_mk'] }}</td>
                     <td>{{ $mk['nm_mk'] }}</td>
                     <td>{{ $mk['sks'] }}</td>
-                    <td>{{ $mk['kelas'] }}</td>
+                    {{-- <td>{{ $mk['kelas'] }}</td> --}}
                 </tr>
                 @endforeach
                 <tr>
                     <td colspan="3"><strong>Jumlah SKS</strong></td>
-                    <td colspan="2"><strong>{{ $total_sks }}</strong></td>
+                    <td colspan="1"><strong>{{ $total_sks }}</strong></td>
                 </tr>
             </tbody>
         </table>

@@ -2,7 +2,7 @@ import { Button, CircularProgress, IconButton, InputAdornment, TextField } from 
 import { useSidebar } from "../context/SidebarContext"
 import { useUser } from "../context/UserContext"
 import MainLayout from "../layouts/MainLayout"
-import { AccessTimeOutlined, AssignmentOutlined, AutoGraphOutlined, CalendarMonthOutlined, Cancel, Check, CheckCircle, CheckCircleOutline, Close, DescriptionOutlined, DownloadOutlined, DownloadTwoTone, East, EastOutlined, FormatAlignLeftOutlined, InfoOutlined, MenuOutlined, SendOutlined, StickyNote2Outlined } from "@mui/icons-material"
+import { AccessTimeOutlined, AssignmentOutlined, AutoGraphOutlined, CalendarMonthOutlined, Cancel, Check, CheckCircle, CheckCircleOutline, Close, DangerousTwoTone, DescriptionOutlined, DownloadOutlined, DownloadTwoTone, East, EastOutlined, FormatAlignLeftOutlined, InfoOutlined, MenuOutlined, SendOutlined, StickyNote2Outlined, WarningTwoTone } from "@mui/icons-material"
 import { CustomTabItem, CustomTabs } from "../components/CustomTabs"
 import FileUploadComponent from "../components/CustomUpload"
 import CustomDataTable from "../components/CustomDataTable"
@@ -387,7 +387,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
 
                     const date = dayjs(listData.krs.data?.tahun_ajaran?.du_sampai)
 
-                    if(now.isAfter(date)) {
+                    if(now.isAfter(date) || now.isSame(date)) {
                         return "Anda tidak bisa melakukan Pengajuan karena sudah melewati batas pengajuan KRS."
                     }
 
@@ -446,6 +446,38 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                     }
                 }))
             },
+            get_selected: (mk_id) => {
+                let matkul = listData.matakuliah.data.find(item => item?.mata_kuliah?.find(mk => mk_id?.includes(mk?.mk_id)))
+                let data = matkul?.mata_kuliah?.find(mk => mk_id?.includes(mk?.mk_id))
+
+                if(matkul) {
+                    data['semester'] = matkul['semester']
+                }
+
+                return data
+            },
+            selected: {
+                total_sks: () => {
+                    const mk_id = formData.pengajuan_krs.mata_kuliah.length > 0 ? formData.pengajuan_krs.mata_kuliah?.map(item => item?.mk_id).join(',').split(',') : []
+                    console.log(mk_id)
+
+                    let data = 0
+                    // let matkul = listData.matakuliah.data.find(item => item?.mata_kuliah?.find(mk => mk_id?.includes(String(mk?.mk_id))))
+                    // matkul?.mata_kuliah?.filter(mk => mk_id?.includes(String(mk?.mk_id)))?.map(mk => {
+                    //     console.log(mk)
+                    //     data += mk?.sks
+                    // })
+
+                    listData.matakuliah.data?.map(item => {
+                        item?.mata_kuliah?.filter(mk => mk_id?.includes(String(mk?.mk_id)))?.map(mk => {
+                            data += mk?.sks
+                        })
+                    })
+
+                    return data
+
+                }
+            }
         },
         formData: {
             pengajuan_krs: {
@@ -698,25 +730,87 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
 
                     
                     <Modal modalId="modal_pengajuan_krs" title="Ajukan KRS">
-                        <form onSubmit={e => e.preventDefault()} className="p-4 space-y-4">
-                            {formData.pengajuan_krs.error && (
-                                <div className="p-4 rounded-md bg-red-700/80 text-white font-jakarta text-medium">
-                                    {formData.pengajuan_krs.error}
-                                </div>
-                            )}
-                            <TextField fullWidth size="small" value={formData.pengajuan_krs.pengajuan_catatan} onChange={e => aksi.formData.pengajuan_krs.set('pengajuan_catatan', e.target.value)} multiline minRows={1} label="Berikan Keterangan untuk Pengajuan KRS" required helperText="Contoh: Pengajuan untuk KRS Tahun Ajaran 2025/2026 Semester Ganjil" />
-                            <hr className="opacity-0" />
-                            <div className="flex items-center gap-4">
-                                <Button type="submit" onClick={() => aksi.formData.pengajuan_krs.submit()} variant="contained" size="small" disabled={formData.pengajuan_krs.loading} startIcon={formData.pengajuan_krs.loading ? <CircularProgress size={15} className="grayscale" /> : <SendOutlined />}>
-                                    <p className="font-jakarta font-medium">
-                                        {formData.pengajuan_krs.loading
-                                            ? 'Sedang diproses..'
-                                            : 'Ajukan'
-                                        }
-                                    </p>
-                                </Button>
+                        {formData.pengajuan_krs.error && (
+                            <div className="p-4 rounded-md bg-red-700/80 text-white font-jakarta text-medium">
+                                {formData.pengajuan_krs.error}
                             </div>
-                        </form>
+                        )}
+                        <CustomTabs>
+                            <CustomTabItem label="Keterangan Pengajuan">
+
+                                <form onSubmit={e => e.preventDefault()} className="p-4 space-y-4">
+                                    <TextField 
+                                        fullWidth 
+                                        size="small" 
+                                        value={formData.pengajuan_krs.pengajuan_catatan} 
+                                        onChange={e => aksi.formData.pengajuan_krs.set('pengajuan_catatan', e.target.value)} 
+                                        multiline 
+                                        minRows={1} 
+                                        label="Berikan Keterangan untuk Pengajuan KRS" 
+                                        required 
+                                        helperText={
+                                            formData.pengajuan_krs.pengajuan_catatan.length > 50
+                                                ? "Maksimal 50 karakter"
+                                                : "Contoh: Pengajuan untuk KRS Tahun Ajaran 2025/2026 Semester Ganjil"
+                                        }
+                                        error={formData.pengajuan_krs.pengajuan_catatan.length > 50}
+                                    />
+                                    <hr className="opacity-0" />
+                                    <div className="flex items-center gap-4">
+                                        <Button type="submit" onClick={() => aksi.formData.pengajuan_krs.submit()} variant="contained" size="small" 
+                                            disabled={formData.pengajuan_krs.loading || formData.pengajuan_krs.pengajuan_catatan.length > 50} startIcon={formData.pengajuan_krs.loading ? <CircularProgress size={15} className="grayscale" /> : <SendOutlined />}>
+                                            <p className="font-jakarta font-medium">
+                                                {formData.pengajuan_krs.loading
+                                                    ? 'Sedang diproses..'
+                                                    : 'Ajukan'
+                                                }
+                                            </p>
+                                        </Button>
+                                    </div>
+                                </form>
+                            </CustomTabItem>
+                            <CustomTabItem label="Mata Kuliah yang dipilih">
+                                <div className="divide-y divide-zinc-300 ">
+                                    {/* {formData.pengajuan_krs.mata_kuliah} */}
+                                    <div className="p-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <p>
+                                                Total SKS
+                                            </p>
+                                            <p className="font-bold">
+                                                {aksi.matakuliah.selected.total_sks()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <CustomDataTable 
+                                        rows={formData.pengajuan_krs.mata_kuliah.length > 0 ? formData.pengajuan_krs.mata_kuliah?.map(item => item?.mk_id).join(',').split(',').map(item => ({ mk_id: item})) : []}
+                                        getRowId={(row) => row.mk_id}
+                                        columns={[
+                                            {
+                                                field: 'mk_id',
+                                                headerName: 'Mata Kuliah',
+                                                minWidth: 350,
+                                                valueGetter: (value, row) => aksi.matakuliah.get_selected(row?.mk_id)?.nm_mk || '-'
+                                            },
+                                            {
+                                                field: 'semester',
+                                                headerName: 'Semester',
+                                                maxWidth: 150,
+                                                valueGetter: (value, row) => aksi.matakuliah.get_selected(row?.mk_id)?.semester || '-'
+                                            },
+                                            {
+                                                field: 'mk',
+                                                headerName: 'SKS',
+                                                maxWidth: 150,
+                                                headerAlign: 'center',
+                                                align: 'center',
+                                                valueGetter: (value, row) => aksi.matakuliah.get_selected(row?.mk_id)?.sks || '-'
+                                            }
+                                        ]}
+                                    />
+                                </div>
+                            </CustomTabItem>
+                        </CustomTabs>
                     </Modal>
                     
                     <CustomLoading loading={loadingUserdata} renderIf={userdata}>
@@ -725,16 +819,52 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                                 <div className="p-4">
                                     <CustomLoading loading={listData.krs.loading.fetch} renderIf={listData.krs.fetched}>
                                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                            <div className="flex gap-4">
-                                                <InfoOutlined fontSize="small" color="primary" className=" shrink-0" />
-                                                <div className="space-y-3">
-                                                    {aksi.krs.pengajuan.is_disabled()
-                                                        ? aksi.krs.pengajuan.message()
-                                                        : 'Silahkan pilih mata kuliah untuk KRS anda'
-                                                    }
+                                            {!listData.krs.data?.krs?.sts_tiket
+                                                ? (
+                                                    <div className="flex gap-4 p-3 rounded-lg bg-red-50 text-red-700">
+                                                        <DangerousTwoTone fontSize="small" color="error" className=" shrink-0" />
+                                                        <div className="space-y-3">
+                                                            <p className="text-sm">
+                                                                Anda belum melakukan aktivasi keuangan. Silahkan hubungi bagian Administrasi Keuangan. 
+                                                            </p>
+                                                            <Button variant="contained" color="error" onClick={() => window.open('https://wa.me/+628112332113', '_blank')}>
+                                                                <p className="font-jakarta font-bold text-xs">
+                                                                    Hubungi Ibu Eva
+                                                                </p>
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                )
+                                                : dayjs().isAfter(dayjs(listData.krs.data?.tahun_ajaran?.du_sampai)) || dayjs().isSame(dayjs(listData.krs.data?.tahun_ajaran?.du_sampai))
+                                                    ? (
+                                                        <div className="flex gap-4 bg-red-50 text-red-700 p-3 rounded-lg">
+                                                            <WarningTwoTone fontSize="small" color="error" className=" shrink-0" />
+                                                            <div className="space-y-3 text-sm">
+                                                                <p>
+                                                                    Anda tidak bisa melakukan Pengajuan karena <b>sudah melewati batas pengajuan KRS.</b>
+                                                                </p>
+                                                                <Button variant="contained" color="error" onClick={() => window.open('https://wa.me/+6287739859278', '_blank')}>
+                                                                    <p className="font-jakarta font-bold text-xs">
+                                                                        Hubungi Pak Tantra
+                                                                    </p>
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                    : (
+                                                        <div className="flex gap-4">
+                                                            <InfoOutlined fontSize="small" color="primary" className=" shrink-0" />
+                                                            <div className="space-y-3 text-sm">
+                                                                {aksi.krs.pengajuan.is_disabled()
+                                                                    ? aksi.krs.pengajuan.message()
+                                                                    : 'Silahkan pilih mata kuliah untuk KRS anda'
+                                                                }
 
-                                                </div>
-                                            </div>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                            }
+                                            
                                             <div className="flex items-center gap-2 *:grow *:sm:grow-0">
                                                 {/* {aksi.krs.is_aktif() && (
                                                     <>
@@ -767,7 +897,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                                                 <div className="divide-y divide-zinc-300">
                                                     {Array.from({ length: 8 }).map((_, index) => index + 1).map(semester => (
                                                         
-                                                        <TabSemester semester={semester} maksimal_sks={21} total_sks={21} loading={listData.matakuliah.loading.fetch} matakuliah={listData.matakuliah.data} krs_disabled={aksi.krs.pengajuan.is_disabled()} status_krs={listData.krs.data?.krs?.sts_krs} selected_matakuliah={formData.pengajuan_krs.mata_kuliah} onSelect_matakuliah={(value) => aksi.formData.pengajuan_krs.matakuliah.set(semester, value)} />
+                                                        <TabSemester key={semester} semester={semester} maksimal_sks={21} total_sks={21} loading={listData.matakuliah.loading.fetch} matakuliah={listData.matakuliah.data} krs_disabled={aksi.krs.pengajuan.is_disabled()} status_krs={listData.krs.data?.krs?.sts_krs} selected_matakuliah={formData.pengajuan_krs.mata_kuliah} onSelect_matakuliah={(value) => aksi.formData.pengajuan_krs.matakuliah.set(semester, value)} />
                                                     ))}
                                                 </div>
                                             )
@@ -806,7 +936,8 @@ function TabSemester({
     matakuliah,
     krs_disabled,
     selected_matakuliah = [],
-    onSelect_matakuliah = () => {}
+    onSelect_matakuliah = () => {},
+    key
 }) {
 
     const aksi = {
@@ -822,11 +953,11 @@ function TabSemester({
                 return selected_matakuliah.find(item => item.mk_id.includes(mk_id))
             },
             selectable: (krs, mk_id) => {
-                if(selected_matakuliah.find(item => item.mk_id.includes(mk_id))) {
+                if(selected_matakuliah.find(item => item?.mk_id?.includes(mk_id))) {
                     return true
                 }
 
-                if(krs.is_aktif && !krs.is_checked) {
+                if(krs?.is_aktif) {
                     return true
                 }
 
@@ -835,7 +966,7 @@ function TabSemester({
         }
     }
     return (
-        <div className="p-4">
+        <div key={key} className="p-4">
             <CustomDataTable 
                 checkbox={!krs_disabled}
                 isRowSelectable={(params) => aksi.matakuliah.selectable(params.row.krs, params.row.mk_id)}

@@ -1359,7 +1359,7 @@ function JadwalMahasiswa({ token, base_url, role }) {
                             url: 'kelas-kuliah/mahasiswa/presensi',
                             token,
                             payload: {
-                                kelas_kuliah_id: formData.absen.kelas_kuliah_id,
+                                kelas_kuliah_id: String(formData.absen.kelas_kuliah_id),
                                 pin: formData.absen.pin
                             }
                         })

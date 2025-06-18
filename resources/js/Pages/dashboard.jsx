@@ -3628,7 +3628,14 @@ function DosenPage({ token, base_url, role, app }) {
                 }
             },
             tutup: {
-                init: () => {},
+                init: (kelas_kuliah_id) => {
+                    aksi.kelas.set('kelas_kuliah_id', kelas_kuliah_id)
+                    // aksi.formData.kelas.set('berita_acara', '')
+                    // aksi.formData.kelas.set('error', null)
+                    aksi.kelas.tutup.set('error', null)
+
+                    modal.show('modal_tutup_kelas')
+                },
                 submit: async (e) => {
                     try {
                         e.preventDefault();
@@ -4842,9 +4849,7 @@ function DosenPage({ token, base_url, role, app }) {
                                                                                                         .refresh
                                                                                                 }
                                                                                                 onClick={() =>
-                                                                                                    modal.show(
-                                                                                                        "modal_tutup_kelas",
-                                                                                                    )
+                                                                                                    aksi.kelas.tutup.init(item['data_kelas']['kelas_kuliah_id'])
                                                                                                 }
                                                                                                 size="small"
                                                                                                 className="text-xs w-full sm:w-fit"

@@ -96,6 +96,10 @@ function JadwalDosen({ token, base_url, role }) {
 
                     aksi.jadwal.loading('fetch')
 
+                    console.log({
+                        response
+                    })
+
                     if(response.success) {
                         aksi.jadwal.set('data', response?.data?.kelas_kuliah)
                         aksi.jadwal.set('fetched', true)
@@ -178,18 +182,30 @@ function JadwalDosen({ token, base_url, role }) {
                 }
             },
             tutup: {
-                init: () => {},
+                init: (kelas_kuliah_id) => {
+                    aksi.kelas.set('kelas_kuliah_id', kelas_kuliah_id)
+                    // aksi.formData.kelas.set('berita_acara', '')
+                    // aksi.formData.kelas.set('error', null)
+                    aksi.kelas.tutup.set('error', null)
+
+                    modal.show('modal_tutup_kelas')
+                },
                 submit: async (e) => {
                     try {
                         e.preventDefault()
 
                         aksi.kelas.tutup.set('error', null)
                         aksi.jadwal.loading('tutup')
+                        const url = `kelas-kuliah/dosen/close/${listData.kelas.kelas_kuliah_id}`
+                        console.log({
+                            url,
+                            kelas: listData.kelas
+                        })
 
                         const response = await api_handler.post({
                             base_url,
                             token,
-                            url: `kelas-kuliah/dosen/close/${listData.kelas.kelas_kuliah_id}`,
+                            url,
                             payload: {
                                 berita_acara: formData.tutup.berita_acara
                             }
@@ -1161,7 +1177,7 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                                     }
                                                                                                 </p>
                                                                                             </Button>
-                                                                                            <Button variant="contained" disabled={listData.kelas.loading.buka || listData.kelas.absen.loading.refresh} onClick={() => modal.show('modal_tutup_kelas')} size="small" className="text-xs w-full sm:w-fit">
+                                                                                            <Button variant="contained" disabled={listData.kelas.loading.buka || listData.kelas.absen.loading.refresh} onClick={() => aksi.kelas.tutup.init(item['data_kelas']['kelas_kuliah_id'])} size="small" className="text-xs w-full sm:w-fit">
                                                                                             <p className="font-jakarta text-xs">
                                                                                                     {(listData.kelas.loading.buka || listData.kelas.absen.loading.refresh)
                                                                                                         ? 'Loading...'
@@ -1343,7 +1359,7 @@ function JadwalMahasiswa({ token, base_url, role }) {
                             url: 'kelas-kuliah/mahasiswa/presensi',
                             token,
                             payload: {
-                                kelas_kuliah_id: String(formData.absen.kelas_kuliah_id),
+                                kelas_kuliah_id: formData.absen.kelas_kuliah_id,
                                 pin: formData.absen.pin
                             }
                         })

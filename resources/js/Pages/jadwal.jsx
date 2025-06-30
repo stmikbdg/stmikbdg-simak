@@ -1188,14 +1188,21 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                         </div>
                                                                                     )
                                                                                     : (
-                                                                                        <Button variant="contained" disabled={listData.jadwal.loading.fetch || aksi.jadwal.kelas_lain_dibuka()} onClick={() => aksi.kelas.buka(item['data_kelas']['kelas_kuliah_id'])} size="small" className="text-xs w-full sm:w-fit">
-                                                                                            <p className="font-jakarta text-xs">
-                                                                                                {aksi.jadwal.kelas_lain_dibuka()
-                                                                                                    ? 'Kelas lain sedang dibuka'
-                                                                                                    : 'Buka kelas'
-                                                                                                }
-                                                                                            </p>
-                                                                                        </Button>
+                                                                                        <>
+                                                                                            {/* <Button variant="contained" disabled={listData.jadwal.loading.fetch || aksi.jadwal.kelas_lain_dibuka()} onClick={() => aksi.kelas.buka(item['data_kelas']['kelas_kuliah_id'])} size="small" className="text-xs w-full sm:w-fit">
+                                                                                                <p className="font-jakarta text-xs">
+                                                                                                    {aksi.jadwal.kelas_lain_dibuka()
+                                                                                                        ? 'Kelas lain sedang dibuka'
+                                                                                                        : 'Buka kelas'
+                                                                                                    }
+                                                                                                </p>
+                                                                                            </Button> */}
+                                                                                            <Button variant="contained" disabled={listData.jadwal.loading.fetch} onClick={() => aksi.kelas.buka(item['data_kelas']['kelas_kuliah_id'])} size="small" className="text-xs w-full sm:w-fit">
+                                                                                                <p className="font-jakarta text-xs">
+                                                                                                    Buka Kelas
+                                                                                                </p>
+                                                                                            </Button>
+                                                                                        </>
                                                                                     )
                                                                                     : (
                                                                                         <CustomUpload buttonProps={{ size: 'small', variant: 'contained' }} text="upload kontrak/silabus" onUploaded={(files) => aksi.kelas.kontrak.upload(files[0], item['data_kelas']['kelas_kuliah_id'])} startIcon={<Upload />} loading={listData.kelas.loading.upload_kontrak} />

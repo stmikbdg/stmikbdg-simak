@@ -973,7 +973,7 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                         onChange={(e, value) => aksi.dosen.select(value)}
                         disabled={listData.tahun_ajaran.loading.fetch || listData.dosen.loading.fetch || !listData.tahun_ajaran.select}
                     />
-                    <CustomSelect 
+                    {/* <CustomSelect 
                         label={listData.dosen.select ? "Cari dan Pilih Mata Kuliah" : "Silahkan pilih Dosen Mengajar terlebih dahulu"}
                         placeholder="Nama Mata Kuliah disini"
                         loading={listData.matkul.loading || listData.dosen.loading.fetch}
@@ -984,13 +984,13 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                         value={listData.matkul.select}
                         onChange={(e, value) => aksi.matkul.select(value)}
                         disabled={listData.matkul.loading || listData.dosen.loading.fetch || !listData.dosen.select}
-                    />
+                    /> */}
                     <div className="grid sm:grid-cols-2 gap-4">
                         <DatePicker 
                             label="Dari Tanggal"
                             value={listData.tanggal.from}
                             onChange={(value) => aksi.tanggal.from(value)}
-                            disabled={!listData.matkul.select}
+                            disabled={!listData.dosen.select}
                             slotProps={{
                                 field: {
                                     clearable: true

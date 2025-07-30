@@ -266,7 +266,8 @@ class WebController extends Controller {
         // Ambil data dosen dan matakuliah pertama sebagai representatif
         $first = $dataPertemuan[0];
 
-        $dosenNama = trim($first['kelas_kuliah']['dosen']['nm_dosen']) . ', ' . $first['kelas_kuliah']['dosen']['gelar'];
+        // $dosenNama = trim($first['kelas_kuliah']['dosen']['nm_dosen']) . ', ' . $first['kelas_kuliah']['dosen']['gelar'];
+        $dosenNama = trim($first['kelas_kuliah']['dosen']['nm_dosen']);
         $matakuliahNama = $first['kelas_kuliah']['matakuliah']['nm_mk'];
 
         $kehadiran = [];

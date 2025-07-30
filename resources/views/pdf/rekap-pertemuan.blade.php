@@ -1,130 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{ $title }}</title>
+    <title>Rekap Kehadiran Dosen</title>
     <style>
-        .page-break {
-            page-break-after: always;
-        }
-
-        table {
+        body { font-family: sans-serif; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #000; padding: 4px; text-align: center; }
+        .ttd { margin-top: 40px; text-align: center; }
+        .text-left { text-align: left; }
+        .no-border td { border: none; }
+        .header {
+            text-align: end;
+            margin-bottom: 12px;
             width: 100%;
-            border-collapse: collapse;
-            border: 1px solid #000;
-            font-size: 13px;
-            margin-top: 30px;
         }
 
+        .title {
+            font-size: 15px;
+            /* font-weight: bold; */
+        }
 
-        table th, table td {
-            border: 1px solid #000;
-            padding: 8px;
+        .info {
+            margin-top: 12px;
+        }
+
+        .signature {
             text-align: left;
         }
 
-        table thead th {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .column-text-center {
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        header {
-            width: 100%;
-        }
-
-        header h1 {
-            font-size: 16px;
-            margin: 0;
-        }
-
-        header p {
-            font-size: 14px;
-            margin: 12px 0;
-        }
-
-        header .title {
-            font-weight: bold;
-            font-size: 14px;
-            margin: 4px;
-        }
-
-        header .header-content {
-            border-bottom: 2px solid black;
+        .header-container {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            position: relative;
             width: 100%;
         }
 
-        header .image-wrapper {
-            max-width: 100px;
+        .container {
+            border: 1px solid #000;
+            padding: 2rem 1.25rem;
         }
-
-        header .text-wrapper {
-            flex-grow: 1;
-            text-align: center;
-            margin-top: 30px;
-        }
-
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            {{-- Gambar Masih bermasalah --}}
-            {{-- <div class="image-wrapper">
-                <img src="{{ public_path('/images/favicons/android-chrome-512x512.png') }}" width="100">
-            </div> --}}
-            <div class="text-wrapper">
-                <h1>SEKOLAH TINGGI MANAJEMEN INFORMATIKA DAN KOMPUTER BANDUNG</h1>
-                <p>JL. Cikutra 113 Bandung - Jawa Barat - Indonesia</p>
-                <p class="title">REKAP PERTEMUAN PER DOSEN DAN MATAKULIAH</p>
-                <p class="title">PERIODE: {{ $from  . ' - ' . $to }}</p>
-                <p class="title">DOSEN: {{ strtoupper(trim($data['dosen']['nm_dosen'])) }}</p>
+    <div style="width: 100%; position: relative; padding-bottom: 5rem;">
+        <img src="{{ $image }}" alt="STMIK Bandung" style="width: 100px; position: absolute; top: 0; left: 0;" />
+        <div style="position: absolute; top: 0; right: 0; width: 80%">
+            <div style="text-align: center; width: 100%;">
+                <p>
+                    <span class="title">
+                        Sekolah Tinggi Manajemen Informatika dan Komputer Bandung
+                    </span>
+                    <br>
+                    <span class="title">
+                        Jl. Cikutra 113 Bandung - Jawa Barat - Indonesia
+                    </span>
+                    <br>
+                    <span class="title" >
+                        <b>
+                            REKAP PERKULIAHAN PER DOSEN
+                        </b>
+                    </span>
+                    <br>
+                    <span class="title" >
+                        <b>
+                            PERIODE : {{ $from }} - {{ $to }}
+                        </b>
+                    </span>
+                </p>
             </div>
         </div>
-    </header>
-    <table class="table table-hover" id="tableRekapPertemuan">
+        
+    </div>
+    {{-- <h4 style="text-align: center;">
+        REKAP KEHADIRAN PER DOSEN<br>
+        KELAS REGULER<br>
+        PERIODE: 26/04/2025 - 25/05/2025
+    </h4> --}}
+
+    <p>
+        <strong>
+            Dosen: {{ $dosen }}
+        </strong>
+    </p>
+    {{-- <p><strong>Mata Kuliah:</strong> {{ $matakuliah }}</p> --}}
+
+    <table>
         <thead>
             <tr>
-                <th class="column-text-center">No.</th>
-                <th class="column-text-center">Tanggal</th>
-                <th class="column-text-center">SKS</th>
-                <th class="column-text-center">Jenis Mahasiswa</th>
-                <th class="column-text-center">Kode Kampus</th>
-                <th class="column-text-center">Mata Kuliah</th>
+                <th style="">
+                    Tanggal
+                </th>
+                <th style="">
+                    SKS
+                </th>
+                <th style="">
+                    Kelas Program
+                </th>
+                <th style="">
+                    Kelas
+                </th>
+                <th style="width: 100%">
+                    Nama Mata Kuliah
+                </th>
             </tr>
         </thead>
         <tbody>
-            @php
-                $totalSKS = 0;
-            @endphp
-            @foreach ($data['rekap_pertemuan'] as $item)
+            @foreach ($kehadiran as $data)
                 <tr>
-                    <td class="column-text-center">{{ $loop->iteration }}</td>
-                    <td class="column-text-center">{{ $item['tanggal'] }}</td>
-                    <td class="column-text-center">{{ $data['matakuliah']['sks'] }}</td>
-                    <td class="column-text-center">{{ $data['tahun_ajaran'][0]['jns_mhs'] }}</td>
-                    <td class="column-text-center">{{ $data['tahun_ajaran'][0]['kd_kampus'] }}</td>
-                    <td class="column-text-center">{{ trim($data['matakuliah']['nm_mk']) }}</td>
+                    <td>{{ $data['tanggal'] }}</td>
+                    <td>{{ $data['sks'] }}</td>
+                    <td>{{ $data['program'] }}</td>
+                    <td>{{ $data['kegiatan'] }}</td>
+                    <td>{{ $data['kelas'] }}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>
-    <script type="text/php">
-        if ( isset($pdf) ) {
-            $date = date('d-m-Y');
-            $pdf->page_text(500, 800, "Halaman: {PAGE_NUM} dari {PAGE_COUNT}", null, 8, array(0,0,0));
-            $pdf->page_text(396, 810, "Dicetak otomatis melalui sistem pada: $date", null, 8, array(0,0,0));
-        }
-    </script>
+
+    {{-- <hr style="opacity: 0%"> --}}
+    
+    <table class="no-border">
+        <tr >
+            <td style="width: calc(1/3 * 100%);">
+                <p style="text-align: left;">
+                    <strong>
+                        Jumlah SKS:
+                    </strong>
+                    {{ $totalSks }}
+                </p>
+            </td>
+            <td style="width: calc(1/3 * 100%);">
+                
+            </td>
+            <td style="width: calc(1/3 * 100%);">
+                <p style="text-align: center;">
+                    <strong>
+                        Bandung, {{ $tanggal }}
+                    </strong>
+                </p>
+            </td>
+        </tr>
+        <tr >
+            <td style="width: calc(1/3 * 100%);">
+                <p>
+                    <strong>
+                        Wakil Ketua II
+                    </strong>
+                </p>
+            </td>
+            <td style="width: calc(1/3 * 100%);">
+                <p>
+                    <strong>
+                        Dosen
+                    </strong>
+                </p>
+            </td>
+            <td style="width: calc(1/3 * 100%);">
+                <p>
+                    <strong>
+                        Pembuat Laporan
+                    </strong>
+                </p>
+            </td>
+        </tr>
+        <tr><td colspan="3" style="height: 50px;"></td></tr>
+        <tr >
+            <td style="width: calc(1/3 * 100%);">
+                <p>
+                    <strong>
+                        ( {{ $wakilKetua }} )
+                    </strong>
+                </p>
+            </td>
+            <td style="width: calc(1/3 * 100%);">
+                <p>
+                    <strong>
+                        ( {{ $dosen }} )
+                    </strong>
+                </p>
+            </td>
+            <td style="width: calc(1/3 * 100%);">
+                <p>
+                    <strong>
+                        ( {{ $pembuat }} )
+                    </strong>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <p style="text-align: right; font-style: italic; opacity: 70%">
+                    * Catatan: Bila ada kesalahan, segera menghubungi BAAK
+                </p>
+            </td>
+        </tr>
+    </table>
+    
+
+    
 </body>
 </html>

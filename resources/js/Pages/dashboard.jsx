@@ -19,6 +19,7 @@ import {
     Close,
     CollectionsBookmarkOutlined,
     Delete,
+    DescriptionOutlined,
     Download,
     East,
     EastOutlined,
@@ -872,7 +873,7 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
             }
         },
         detail: {
-            get: async (matkul) => {
+            get: async () => {
                 try {
                     if(!listData.tanggal.from || !listData.tanggal.to) {
                         return
@@ -881,22 +882,22 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                     aksi.detail.set('loading', true)
 
                     const response = await api_handler.get({
-                        url: `rekap/pertemuan?kelas_kuliah_id=${matkul?.kelas_kuliah_id}&from=${dayjs(listData.tanggal.from).format('YYYY-MM-DD')}&to=${dayjs(listData.tanggal.to).format('YYYY-MM-DD')}`,  
+                        url: `rekap/pertemuan/v2?pengajar_id=${listData.dosen.select?.dosen_id}&tahun_id=${listData.tahun_ajaran.select?.tahun_id}&from=${dayjs(listData.tanggal.from).format('YYYY-MM-DD')}&to=${dayjs(listData.tanggal.to).format('YYYY-MM-DD')}`,  
                         base_url,
-                        token  
+                        token,
+                        debug: false  
                     })
 
                     aksi.detail.set('loading', false)
-
-                    if(!response?.success) {
+                    
+                    console.log(response)
+                    if(response?.success) {
+                        aksi.detail.set('data', response?.data)
+                    }else{
                         customSwal.toast.error({
                             message: response?.message
                         })
-
-                        return
                     }
-
-                    aksi.detail.set('data', response?.data)
                 } catch (error) {
                     customSwal.toast.error({
                         message: error?.message
@@ -939,12 +940,12 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
     }, [])
 
     useEffect(() => {
-        if(listData.tanggal.from && listData.tanggal.to) {
+        if(listData.tanggal.from && listData.tanggal.to && listData.tahun_ajaran.select && listData.dosen.select) {
             aksi.detail.get(listData.matkul.select)
         }else{
             aksi.detail.set('data', null)
         }
-    }, [listData.tanggal.from, listData.tanggal.to])
+    }, [listData.tanggal.from, listData.tanggal.to, listData.tahun_ajaran.select, listData.dosen.select])
 
     return (
         <div className="divide-y divide-zinc-300">
@@ -973,18 +974,6 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                         onChange={(e, value) => aksi.dosen.select(value)}
                         disabled={listData.tahun_ajaran.loading.fetch || listData.dosen.loading.fetch || !listData.tahun_ajaran.select}
                     />
-                    {/* <CustomSelect 
-                        label={listData.dosen.select ? "Cari dan Pilih Mata Kuliah" : "Silahkan pilih Dosen Mengajar terlebih dahulu"}
-                        placeholder="Nama Mata Kuliah disini"
-                        loading={listData.matkul.loading || listData.dosen.loading.fetch}
-                        loadingText="Loading.."
-                        // optionLabel="uraian"
-                        getOptionLabel={(option) => option?.matakuliah?.nm_mk}
-                        options={listData.matkul.data}
-                        value={listData.matkul.select}
-                        onChange={(e, value) => aksi.matkul.select(value)}
-                        disabled={listData.matkul.loading || listData.dosen.loading.fetch || !listData.dosen.select}
-                    /> */}
                     <div className="grid sm:grid-cols-2 gap-4">
                         <DatePicker 
                             label="Dari Tanggal"
@@ -1002,7 +991,7 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                             label="Hingga Tanggal"
                             value={listData.tanggal.to}
                             onChange={(value) => aksi.tanggal.to(value)}
-                            disabled={!listData.matkul.select}
+                            disabled={!listData.dosen.select}
                             slotProps={{
                                 field: {
                                     clearable: true
@@ -1012,7 +1001,7 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                     </div>
                 </div>
             </div>
-            {!listData.tahun_ajaran.select || !listData.dosen.select || !listData.matkul.select
+            {!listData.tahun_ajaran.select || !listData.dosen.select
                 ? (
                     <div className="flex items-center justify-center h-80">
                         Silahkan Isi Kolom diatas terlebih dahulu
@@ -1031,19 +1020,63 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                             </div>
                         ) 
                         : (
-                            <div className="p-4 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="font-medium text-lg">
-                                        Tanggal Daftar Pertemuan
+                            <div className="divide-y divide-zinc-300">
+                                <div className="p-4">
+                                    <div className="flex items-center gap-4">
+                                        <Button variant="contained" color="error" startIcon={<DescriptionOutlined />} onClick={() => window.location.href = `/rekap/pertemuan/download/${listData.dosen.select?.dosen_id}/${listData.tahun_ajaran.select?.tahun_id}/${dayjs(listData.tanggal.from).format('YYYY-MM-DD')}/${dayjs(listData.tanggal.to).format('YYYY-MM-DD')}`}>
+                                            <p className="font-jakarta text-xs font-extrabold">
+                                                Unduh sebagai PDF
+                                            </p>
+                                        </Button>
+                                        <Button variant="text" startIcon={<RefreshOutlined />} onClick={() => aksi.detail.get()}>
+                                            <p className="font-jakarta text-xs font-extrabold">
+                                                Refresh
+                                            </p>
+                                        </Button>
                                     </div>
                                 </div>
-                                <div className="flex flex-wrap gap-2 font-medium">
-                                    {listData.detail.data?.rekap_pertemuan?.map(item => (
-                                        <p key={item?.tanggal} className="w-fit px-5 py-3 rounded-full bg-zinc-100">
-                                            {dayjs(item?.tanggal).locale('id').format('DD MMMM YYYY')}
-                                        </p>
-                                    ))}
-                                </div>
+                                <CustomDataTable
+                                    getRowId={(row) => row?.pertemuan_id}
+                                    rows={listData.detail.data}
+                                    columns={[
+                                        {
+                                            field: 'create_time',
+                                            headerName: 'Tanggal',
+                                            valueGetter: (value, row) => dayjs(value).locale('id').format('DD MMMM YYYY, HH:mm:ss'),
+                                            minWidth: 200
+                                        },
+                                        {
+                                            field: 'sks',
+                                            headerName: 'SKS',
+                                            minWidth: 150,
+                                            headerAlign: 'center',
+                                            align: 'center',
+                                            valueGetter: (value, row) => row?.kelas_kuliah?.matakuliah?.sks
+                                        },
+                                        {
+                                            field: 'jenis_kelas',
+                                            headerName: 'Kelas Program',
+                                            minWidth: 150,
+                                            headerAlign: 'center',
+                                            align: 'center',
+                                            valueGetter: (value, row) => row?.kelas_kuliah?.jns_mhs === 'R' ? 'Reguler' : 'Karyawan'
+                                        },
+                                        {
+                                            field: 'kelas',
+                                            headerName: 'Kelas',
+                                            minWidth: 150,
+                                            headerAlign: 'center',
+                                            align: 'center',
+                                            valueGetter: (value, row) => row?.kelas_kuliah?.kelas_kuliah
+                                        },
+                                        {
+                                            field: 'nama_mk',
+                                            headerName: 'Mata Kuliah',
+                                            minWidth: 300,
+                                            valueGetter: (value, row) => row?.kelas_kuliah?.matakuliah?.nm_mk
+                                        }
+                                    ]}
+                                />
                             </div>
                         )
             }

@@ -6,7 +6,8 @@ const api_handler = {
         base_url = `${import.meta.env.VITE_API_BASE_URL}`,
         payload,
         headers = {},
-        token
+        token,
+        debug = false
     }) => {
         try {
             const response = payload
@@ -29,8 +30,11 @@ const api_handler = {
                     timeout: 60000,
                     timeoutErrorMessage: 'Tampaknya ada masalah di server, silahkan coba lagi'
                 })
+            if(debug) {
+                console.log(response)
+            }
 
-            if(response?.data?.status === 'success') {
+            if(response?.data?.status === 'success' || response?.data?.success) {
                 return {
                     success: true,
                     data: response?.data?.data,

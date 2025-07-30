@@ -242,6 +242,73 @@ class WebController extends Controller {
 
         return view('pdf/ksm-preview', $data);
     }
+
+    public function rekap_pertemuan(string $options, int $pengajar_id, int $tahun_id, string $from, string $to) {
+
+        $user = Session::get('profile');
+
+        Carbon::setLocale('id');
+
+        $response = $this->service->get(null, 'rekap/pertemuan/v2?pengajar_id='.$pengajar_id.'&tahun_id='.$tahun_id.'&from='.$from.'&to='.$to)->getData('data');
+
+        // dd($response);
+
+        if($response['status'] != 'success') {
+            return abort(404);
+        }
+
+        $dataPertemuan = $response['data'];
+
+        if (empty($dataPertemuan)) {
+            return abort(404);
+        }
+
+        // Ambil data dosen dan matakuliah pertama sebagai representatif
+        $first = $dataPertemuan[0];
+
+        $dosenNama = trim($first['kelas_kuliah']['dosen']['nm_dosen']) . ', ' . $first['kelas_kuliah']['dosen']['gelar'];
+        $matakuliahNama = $first['kelas_kuliah']['matakuliah']['nm_mk'];
+
+        $kehadiran = [];
+        $totalSks = 0;
+
+        // dd($user);
+
+        foreach ($dataPertemuan as $item) {
+            $kehadiran[] = [
+                'tanggal' => Carbon::parse($item['tanggal'])->format('d/m/Y'),
+                'sks' => $item['kelas_kuliah']['matakuliah']['sks'],
+                'program' => $item['kelas_kuliah']['jns_mhs'],
+                'kegiatan' => $item['kelas_kuliah']['kelas_kuliah'],
+                'kelas' => $item['kelas_kuliah']['matakuliah']['nm_mk'],
+            ];
+
+            $totalSks += $item['kelas_kuliah']['matakuliah']['sks'];
+        }
+        
+        $data = [
+            'dosen' => $dosenNama,
+            'matakuliah' => $matakuliahNama,
+            'kehadiran' => $kehadiran,
+            'totalSks' => $totalSks,
+            'catatan' => 'Tidak ada',
+            'tanggalCetak' => now()->translatedFormat('d F Y'),
+            'wakilKetua' => 'Linda Apriyanti, S.Kom., M.T',
+            'pembuat' => $user['nama_dan_gelar'],
+            'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
+            'image' => $options === 'download' ? public_path('images/stmik.png') : asset('images/stmik.png'),
+            'from' => Carbon::parse($from)->translatedFormat('d F Y'),
+            'to' => Carbon::parse($to)->translatedFormat('d F Y'),
+            // 'jenis_kelas' => '',
+        ];
+
+        if($options === 'download') {
+            $pdf = Pdf::loadView('pdf/rekap-pertemuan', $data)->setPaper('a4', 'portrait');
+            return $pdf->stream('REKAP PERTEMUAN DOSEN - '.$dosenNama.' - '.$from.' to '.$to.'.pdf');
+        }else{
+            return view('pdf.rekap-pertemuan', $data);
+        }
+    }
 }
 
 ?>

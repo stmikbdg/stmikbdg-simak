@@ -1,7 +1,7 @@
 import { Avatar, Button, Checkbox, CircularProgress, Collapse, Fade, IconButton, Link, Tab, Tabs, TextField, Tooltip } from "@mui/material"
 import { useSidebar } from "../context/SidebarContext"
 import MainLayout from "../layouts/MainLayout"
-import { AccessTimeOutlined, Check, CheckBox, CheckBoxOutlineBlankTwoTone, CheckBoxTwoTone, Close, CollectionsBookmarkOutlined, CropSquareOutlined, Delete, Download, DownloadOutlined, IndeterminateCheckBoxTwoTone, InfoOutlined, LocationOnOutlined, MenuOutlined, PersonOutline, Pin, QrCode, RefreshOutlined, Remove, SendOutlined, Star, SubjectOutlined, Upload, VisibilityOutlined, VisibilityTwoTone, Warning } from "@mui/icons-material"
+import { AccessTimeOutlined, Check, CheckBox, CheckBoxOutlineBlankTwoTone, CheckBoxTwoTone, Close, CollectionsBookmarkOutlined, CropSquareOutlined, Delete, DescriptionOutlined, Download, DownloadOutlined, IndeterminateCheckBoxTwoTone, InfoOutlined, LocationOnOutlined, MenuOutlined, MoreHoriz, PersonOutline, Pin, QrCode, RefreshOutlined, Remove, SendOutlined, Star, SubjectOutlined, Upload, VisibilityOutlined, VisibilityTwoTone, Warning } from "@mui/icons-material"
 import { CustomTabItem, CustomTabs } from "../components/CustomTabs"
 import CustomDropdown, { CustomDropdown2 } from "../components/CustomDropdown"
 import { useUser } from "../context/UserContext"
@@ -1507,7 +1507,7 @@ function JadwalMahasiswa({ token, base_url, role }) {
                                                                                         </p>
                                                                                     </div>
                                                                                 )}
-                                                                                {item['kontrak_kuliah'] && (
+                                                                                {/* {item['kontrak_kuliah'] && (
                                                                                     <div className="flex items-center gap-3 opacity-70">
                                                                                         <Button variant="text" size="small" href={`${item['kontrak_kuliah']['file_link']}`} target="_blank" loading={false} loadingPosition="start" startIcon={<VisibilityOutlined />}>
                                                                                             <p className="text-xs font-bold font-jakarta">
@@ -1515,7 +1515,7 @@ function JadwalMahasiswa({ token, base_url, role }) {
                                                                                             </p>
                                                                                         </Button>
                                                                                     </div>
-                                                                                )}
+                                                                                )} */}
                                                                             </div>
                                                                             <div className="flex items-center w-full flex-wrap">
                                                                                 {item['riwayat_presensi'].map((absen, index) => absen['masuk']
@@ -1562,7 +1562,7 @@ function JadwalMahasiswa({ token, base_url, role }) {
                                                                                     </>
                                                                                 )}
                                                                             </div>
-                                                                            <div className="flex justify-end">
+                                                                            <div className="flex justify-end gap-4 items-center">
                                                                                 <Button disabled={!item['kelas_dibuka']} onClick={() => aksi.formData.absen.init(item['data_kelas']['kelas_kuliah_id'])} variant="contained" size="small" className="text-xs w-full sm:w-fit">
                                                                                     {item['kelas_dibuka'] 
                                                                                         ? (
@@ -1577,6 +1577,24 @@ function JadwalMahasiswa({ token, base_url, role }) {
                                                                                         )
                                                                                     }
                                                                                 </Button>
+                                                                                <CustomDropdown
+                                                                                    // className="w-full sm:w-fit" 
+                                                                                    buttonComponent={(
+                                                                                        <Button variant="outlined" size="small" className="text-xs sm:w-fit w-full" startIcon={<MoreHoriz />}>
+                                                                                            <p className="font-jakarta text-xs">
+                                                                                                Lainnya
+                                                                                            </p>
+                                                                                        </Button>
+                                                                                    )}
+                                                                                    menuItems={[
+                                                                                        {
+                                                                                            label: 'Silabus',
+                                                                                            icon: <DescriptionOutlined />,
+                                                                                            onClick: () => window.location.href = `${item['kontrak_kuliah']['file_link']}`,
+                                                                                            render: item['kontrak_kuliah']
+                                                                                        }
+                                                                                    ]}
+                                                                                />
                                                                             </div>
                                                                         </div>
                                                                     </div>

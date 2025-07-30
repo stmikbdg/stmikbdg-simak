@@ -33,6 +33,7 @@ Route::middleware(['auth.token'])
         Route::get('/surat/detail/{id}', 'surat_detail_by_id');
         Route::get('/ksm/download/semester/{semester}', 'ksm_download_per_semester');
         Route::get('/ksm/preview/semester/{semester}', 'ksm_preview_per_semester');
+        Route::get('/rekap/pertemuan/{options}/{pengajar_id}/{tahun_id}/{from}/{to}', 'rekap_pertemuan');
     });
 
 /**

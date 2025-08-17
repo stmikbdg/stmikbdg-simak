@@ -829,7 +829,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                                                             </p>
                                                             <Button variant="contained" color="error" onClick={() => window.open('https://wa.me/+628112332113', '_blank')}>
                                                                 <p className="font-jakarta font-bold text-xs">
-                                                                    Hubungi Ibu Eva
+                                                                    Hubungi Administrasi
                                                                 </p>
                                                             </Button>
                                                         </div>
@@ -845,7 +845,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                                                                 </p>
                                                                 <Button variant="contained" color="error" onClick={() => window.open('https://wa.me/+6287739859278', '_blank')}>
                                                                     <p className="font-jakarta font-bold text-xs">
-                                                                        Hubungi Pak Tantra
+                                                                        Hubungi Administrasi
                                                                     </p>
                                                                 </Button>
                                                             </div>
@@ -989,6 +989,12 @@ function TabSemester({
                         field: 'nm_mk',
                         headerName: 'Nama',
                         minWidth: 250
+                    },
+                    {
+                        field: 'mk_id',
+                        headerName: 'Kode',
+                        minWidth: 150,
+                        valueGetter: (value, row) => row.kd_mk
                     },
                     {
                         field: 'status',

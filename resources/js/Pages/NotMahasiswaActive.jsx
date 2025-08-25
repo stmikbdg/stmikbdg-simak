@@ -36,7 +36,7 @@ export default function NotMahasiswaActive({ token, base_url, role }) {
                 </div>
 
                 
-                <div class="flex justify-center items-center gap-5 pb-6">
+                <div class="flex justify-center flex-col sm:flex-row items-center gap-2 sm:gap-5 pb-6">
                     <button onClick={() => goTo('/logout')} class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full font-semibold cursor-pointer">
                         Keluar dari Aplikasi
                     </button>

@@ -16,9 +16,12 @@ class WebController extends Controller {
         $this->service = new WebService();
     }
 
-    private function render(string $component, array $props = []) {
+    private function render(string $component, array $props = [], $cekMahasiswaActive = false, $cekKeuangan = false) {
         $token = Session::get('token');
         $role = Session::get('role');
+
+        $profile = Session::get('profile');
+        $account = Session::get('account');
 
         $props['token'] = $token ?? null;
         $props['role'] = [
@@ -118,6 +121,21 @@ class WebController extends Controller {
             // ],            
         ];
 
+        if($cekMahasiswaActive) {
+            if(strpos($account['kd_user'], "MHS-") !== false) {
+                if(isset($account['is_mhs'])) {
+                    if($account['is_mhs']) {
+                        if($role['is_mhs']) {
+                            if($profile['sts_mhs'] != 'A') {
+                                return Inertia::render('NotMahasiswaActive', $props);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
         return Inertia::render($component, $props);
     }
 
@@ -126,50 +144,50 @@ class WebController extends Controller {
     }
 
     public function dashboard() {
-        return $this->render('dashboard');
+        return $this->render('dashboard', [], true);
     }
 
     public function absenqr() {
-        return $this->render('absenqr');
+        return $this->render('absenqr', [], true);
     }
 
     public function khs() {
-        return $this->render('khs');
+        return $this->render('khs', [], true);
     }
 
     public function khs_per_semester(string $semester) {
         return $this->render('khs_per_semester', [
             'semester' => $semester
-        ]);
+        ], true);
     }
 
     public function profil() {
-        return $this->render('profil');
+        return $this->render('profil', [], true);
     }
 
     public function jadwal() {
-        return $this->render('jadwal');
+        return $this->render('jadwal', [], true);
     }
 
     public function krs() {
-        return $this->render('krs');
+        return $this->render('krs', [], true);
     }
 
     public function krs_approve_by_dosen_wali(Int $mhs_id, Int $krs_id) {
         return $this->render('krs_approve_by_dosen_wali', [
             'mhs_id' => $mhs_id,
             'krs_id' => $krs_id
-        ]);
+        ], true);
     }
 
     public function surat() {
-        return $this->render('surat');
+        return $this->render('surat', [], true);
     }
 
     public function surat_detail_by_id(Int $id) {
         return $this->render('surat_detail_by_id', [
             'id' => $id
-        ]);
+        ], true);
     }
 
     public function ksm_download_per_semester(int $semester) {

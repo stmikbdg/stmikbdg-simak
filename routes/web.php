@@ -31,9 +31,10 @@ Route::middleware(['auth.token'])
         Route::get('/krs', 'krs');
         Route::get('/krs/approve/{mhs_id}/{krs_id}', 'krs_approve_by_dosen_wali');
         Route::get('/surat/detail/{id}', 'surat_detail_by_id');
-        Route::get('/ksm/download/semester/{semester}', 'ksm_download_per_semester');
-        Route::get('/ksm/preview/semester/{semester}', 'ksm_preview_per_semester');
+        Route::get('/ksm/download/krs_id/{krs_id}', 'ksm_download_per_krs_id');
+        Route::get('/ksm/preview/krs_id/{krs_id}', 'ksm_preview_per_krs_id');
         Route::get('/rekap/pertemuan/{options}/{pengajar_id}/{tahun_id}/{from}/{to}', 'rekap_pertemuan');
+        Route::get('/berita-acara/{kelas_kuliah_id}', 'bap_dosen_rekap');
     });
 
 /**

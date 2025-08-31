@@ -206,40 +206,46 @@ class WebController extends Controller {
         ]);
     }
 
-    public function ksm_download_per_semester(int $semester) {
+    public function ksm_download_per_krs_id(int $krs_id) {
 
         $user = Session::get('profile');
 
         Carbon::setLocale('id');
 
-        $response = $this->service->get(null, 'krs/ip/semester?s='.$semester)->getData('data');
+        $response = $this->service->get(null, 'krs/riwayat?krs_id='.$krs_id)->getData('data');
 
         if($response['status'] != 'success') {
             return abort(404);
         }
 
-        if(!isset($response['data']['matakuliah'])) {
-            return abort(404);
-        }
+        // if(!isset($response['data']['matakuliah'])) {
+        //     return abort(404);
+        // }
 
         $response_data = $response['data'];
+
+        // dd($response_data);
+
+        $krs_matkul = $response_data['krs_matkul'];
+        $total_sks = 0;
+        foreach ($krs_matkul as $item) {
+            $total_sks += $item['mata_kuliah']['sks'];
+        }
 
         $data = [
             'nim' => $user['nim'],
             'nama' => $user['nama'],
             'dosen_wali' => $user['dosen_wali'],
             'matakuliah' => array_map(function($item) {
-                $item['kelas'] = '-';
-
-                return $item;
-            }, $response_data['matakuliah']),
-            'total_sks' => $response_data['total_sks'],
+                return $item['mata_kuliah'];
+            }, $krs_matkul),
+            'total_sks' => $total_sks,
             'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
             'image' => public_path('images/stmik.png')
         ];
 
         $pdf = Pdf::loadView('pdf/ksm-download', $data)->setPaper('A4', 'portrait');
-        return $pdf->stream('Kartu Studi Mahasiswa - '.$user['nim'].' - '.$user['nama'].' - Semester - '.$semester.'.pdf');
+        return $pdf->stream('Kartu Studi Mahasiswa - '.$user['nim'].' - '.$user['nama'].' - Semester '.$response_data['semester'].'.pdf');
     }
 
     public function ksm_preview_per_semester(int $semester) {

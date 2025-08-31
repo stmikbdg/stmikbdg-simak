@@ -22,6 +22,7 @@ class WebController extends Controller {
 
         $profile = Session::get('profile');
         $account = Session::get('account');
+        $keuangan = Session::get('keuangan');
 
         $props['token'] = $token ?? null;
         $props['role'] = [
@@ -135,6 +136,21 @@ class WebController extends Controller {
             }
         }
 
+        if($cekMahasiswaActive) {
+            if(strpos($account['kd_user'], "MHS-") !== false) {
+                if(isset($account['is_mhs'])) {
+                    if($account['is_mhs']) {
+                        if($role['is_mhs']) {
+                            if(isset($keuangan)) {
+                                if(!$keuangan['success']) {
+                                    return Inertia::render('BelumBayar', array_merge($props, $keuangan));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         return Inertia::render($component, $props);
     }
@@ -144,50 +160,50 @@ class WebController extends Controller {
     }
 
     public function dashboard() {
-        return $this->render('dashboard', [], true);
+        return $this->render('dashboard', [], true, true);
     }
 
     public function absenqr() {
-        return $this->render('absenqr', [], true);
+        return $this->render('absenqr', [], true, true);
     }
 
     public function khs() {
-        return $this->render('khs', [], true);
+        return $this->render('khs', [], true, true);
     }
 
     public function khs_per_semester(string $semester) {
         return $this->render('khs_per_semester', [
             'semester' => $semester
-        ], true);
+        ], true, true);
     }
 
     public function profil() {
-        return $this->render('profil', [], true);
+        return $this->render('profil', [], true, true);
     }
 
     public function jadwal() {
-        return $this->render('jadwal', [], true);
+        return $this->render('jadwal', [], true, true);
     }
 
     public function krs() {
-        return $this->render('krs', [], true);
+        return $this->render('krs', [], true, true);
     }
 
     public function krs_approve_by_dosen_wali(Int $mhs_id, Int $krs_id) {
         return $this->render('krs_approve_by_dosen_wali', [
             'mhs_id' => $mhs_id,
             'krs_id' => $krs_id
-        ], true);
+        ]);
     }
 
     public function surat() {
-        return $this->render('surat', [], true);
+        return $this->render('surat', []);
     }
 
     public function surat_detail_by_id(Int $id) {
         return $this->render('surat_detail_by_id', [
             'id' => $id
-        ], true);
+        ]);
     }
 
     public function ksm_download_per_semester(int $semester) {
@@ -327,6 +343,12 @@ class WebController extends Controller {
         }else{
             return view('pdf.rekap-pertemuan', $data);
         }
+    }
+
+    public function bap_dosen_rekap(int $kelas_kuliah_id) {
+        return $this->render('berita_acara', [
+            'kelas_kuliah_id' => $kelas_kuliah_id
+        ]);
     }
 }
 

@@ -50,8 +50,10 @@ function JadwalDosen({ token, base_url, role }) {
             data: null,
             loading: {
                 buka: false,
-                upload_kontrak: false
+                upload_kontrak: false,
+                bap: false
             },
+            bap: [],
             kontrak: null,
             absen: {
                 error: null,
@@ -597,6 +599,25 @@ function JadwalDosen({ token, base_url, role }) {
                         })
                     }
                 }
+            },
+            bap: async (kelas_kuliah_id) => {
+                modal.show('bap')
+
+                aksi.kelas.loading('bap')
+
+                const response = await api_handler.get({
+                    url: `rekap/berita-acara/dosen/kelas-kuliah/${kelas_kuliah_id}`,
+                    base_url,
+                    token
+                })
+
+                aksi.kelas.loading('bap')
+
+                if(response?.success) {
+                    aksi.kelas.set('bap', response?.data)
+                }else{
+
+                }
             }
         },
         tabs: {
@@ -859,9 +880,54 @@ function JadwalDosen({ token, base_url, role }) {
                         </div>
                     </ModalForm>
 
-                    <Modal title="Berita Acara Perkuliahan" modalId="bap">
+                    <Modal title="Berita Acara Perkuliahan" modalId="bap" modalBoxClassname="max-w-screen-md">
+                        {/* <div className="p-4 flex items-center gap-4 ">
+                            <Button variant="contained" size="small" color="success" startIcon={<Download />}>
+                                <p className="font-jakarta font-bold">
+                                    Excel
+                                </p>
+                            </Button>
+                            <Button variant="contained" size="small" color="error" startIcon={<Download />}>
+                                <p className="font-jakarta font-bold">
+                                    PDF
+                                </p>
+                            </Button>
+                        </div> */}
                         <CustomDataTable 
                             pageSize={100}
+                            pagination={false}
+                            toolbar={{
+                                density: false,
+                                column: false
+                            }}
+                            rows={listData.kelas.bap}
+                            loading={listData.kelas.loading.bap}
+                            getRowId={(row) => row?.berita_acara_id}
+                            columns={[
+                                {
+                                    field: 'created_at',
+                                    headerName: 'Tanggal',
+                                    minWidth: 180,
+                                    valueGetter: (value, row) => dayjs(value).locale('id').format('DD MMMM YYYY, HH:mm:ss')
+                                },
+                                {
+                                    field: 'berita_acara',
+                                    headerName: 'Berita Acara',
+                                    minWidth: 250
+                                },
+                                {
+                                    field: 'mhs_hdr',
+                                    headerName: 'Jumlah Kehadiran',
+                                    minWidth: 150,
+                                    valueGetter: (value, row) => `${row?.mhs_hdr}/${row?.jml_mhs}`
+                                },
+                                {
+                                    field: 'jml_mhs',
+                                    headerName: 'Persentase Kehadiran',
+                                    minWidth: 150,
+                                    valueGetter: (value, row) => `${Number((row?.mhs_hdr/row?.jml_mhs)*100)}%`
+                                }
+                            ]}
                         />
                     </Modal>
 
@@ -982,16 +1048,10 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                                         render: true
                                                                                                     },
                                                                                                     {
-                                                                                                        label: 'Persentase Minimal Kehadiran',
-                                                                                                        sublabel: 'Mengubah minimal persentase kehadiran mahasiswa',
-                                                                                                        render: true,
-                                                                                                        onClick: () => aksi.formData.min_presensi.init(item)
-                                                                                                    },
-                                                                                                    {
                                                                                                         label: 'Berita Acara Perkuliahan',
                                                                                                         sublabel: 'Rekap Berita Acara Perkuliahan',
                                                                                                         render: true,
-                                                                                                        onClick: () => modal.show('bap')
+                                                                                                        onClick: () => aksi.kelas.bap(item['data_kelas']['kelas_kuliah_id'])
                                                                                                     }
                                                                                                 ]}
                                                                                             />
@@ -1007,14 +1067,7 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                     )
                                                                                     : (
                                                                                         <>
-                                                                                            {/* <Button variant="contained" disabled={listData.jadwal.loading.fetch || aksi.jadwal.kelas_lain_dibuka()} onClick={() => aksi.kelas.buka(item['data_kelas']['kelas_kuliah_id'])} size="small" className="text-xs w-full sm:w-fit">
-                                                                                                <p className="font-jakarta text-xs">
-                                                                                                    {aksi.jadwal.kelas_lain_dibuka()
-                                                                                                        ? 'Kelas lain sedang dibuka'
-                                                                                                        : 'Buka kelas'
-                                                                                                    }
-                                                                                                </p>
-                                                                                            </Button> */}
+                                                                                            
                                                                                             <div className="flex items-center gap-4">
                                                                                                 <CustomDropdown 
                                                                                                     buttonComponent={(
@@ -1026,16 +1079,10 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                                     )}
                                                                                                     menuItems={[
                                                                                                         {
-                                                                                                            label: 'Persentase Minimal Kehadiran',
-                                                                                                            sublabel: 'Mengubah minimal persentase kehadiran mahasiswa',
-                                                                                                            render: true,
-                                                                                                            onClick: () => aksi.formData.min_presensi.init(item)
-                                                                                                        },
-                                                                                                        {
                                                                                                             label: 'Berita Acara Perkuliahan',
                                                                                                             sublabel: 'Rekap Berita Acara Perkuliahan',
                                                                                                             render: true,
-                                                                                                            onClick: () => modal.show('bap')
+                                                                                                            onClick: () => aksi.kelas.bap(item['data_kelas']['kelas_kuliah_id'])
                                                                                                         }
                                                                                                     ]}
                                                                                                 />

@@ -136,21 +136,21 @@ class WebController extends Controller {
             }
         }
 
-        if($cekMahasiswaActive) {
-            if(strpos($account['kd_user'], "MHS-") !== false) {
-                if(isset($account['is_mhs'])) {
-                    if($account['is_mhs']) {
-                        if($role['is_mhs']) {
-                            if(isset($keuangan)) {
-                                if(!$keuangan['success']) {
-                                    return Inertia::render('BelumBayar', array_merge($props, $keuangan));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        // if($cekMahasiswaActive) {
+        //     if(strpos($account['kd_user'], "MHS-") !== false) {
+        //         if(isset($account['is_mhs'])) {
+        //             if($account['is_mhs']) {
+        //                 if($role['is_mhs']) {
+        //                     if(isset($keuangan)) {
+        //                         if(!$keuangan['success']) {
+        //                             return Inertia::render('BelumBayar', array_merge($props, $keuangan));
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         return Inertia::render($component, $props);
     }

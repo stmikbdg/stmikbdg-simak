@@ -326,6 +326,23 @@ class WebController extends Controller {
 
             $totalSks += $item['kelas_kuliah']['matakuliah']['sks'];
         }
+
+        // sort by kegiatan then tanggal
+        usort($kehadiran, function ($a, $b) {
+            // first sort by kegiatan
+            $cmp = strcmp($a['kegiatan'], $b['kegiatan']);
+            if ($cmp === 0) {
+                // then sort by date
+                return Carbon::parse($a['tanggal_raw'])->timestamp <=> Carbon::parse($b['tanggal_raw'])->timestamp;
+            }
+            return $cmp;
+        });
+
+        // remove tanggal_raw after sorting
+        $kehadiran = array_map(function($item) {
+            unset($item['tanggal_raw']);
+            return $item;
+        }, $kehadiran);
         
         $data = [
             'dosen' => $dosenNama,

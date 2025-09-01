@@ -316,33 +316,32 @@ class WebController extends Controller {
         // dd($user);
 
         foreach ($dataPertemuan as $item) {
+            $raw = $item['tanggal']; // keep original for sorting
             $kehadiran[] = [
-                'tanggal' => Carbon::parse($item['tanggal'])->format('d/m/Y'),
-                'sks' => $item['kelas_kuliah']['matakuliah']['sks'],
-                'program' => $item['kelas_kuliah']['jns_mhs'],
-                'kegiatan' => $item['kelas_kuliah']['kelas_kuliah'],
-                'kelas' => $item['kelas_kuliah']['matakuliah']['nm_mk'],
+                'tanggal'      => Carbon::parse($raw)->format('d/m/Y'),
+                'tanggal_raw'  => $raw, // <-- add this
+                'sks'          => $item['kelas_kuliah']['matakuliah']['sks'],
+                'program'      => $item['kelas_kuliah']['jns_mhs'],
+                'kegiatan'     => $item['kelas_kuliah']['kelas_kuliah'],
+                'kelas'        => $item['kelas_kuliah']['matakuliah']['nm_mk'],
             ];
 
             $totalSks += $item['kelas_kuliah']['matakuliah']['sks'];
         }
 
-        // sort by kegiatan then tanggal
+        // sort by kegiatan (A→Z), then by tanggal (oldest→newest)
         usort($kehadiran, function ($a, $b) {
-            // first sort by kegiatan
             $cmp = strcmp($a['kegiatan'], $b['kegiatan']);
-            if ($cmp === 0) {
-                // then sort by date
-                return Carbon::parse($a['tanggal'])->timestamp <=> Carbon::parse($b['tanggal'])->timestamp;
-            }
-            return $cmp;
+            if ($cmp !== 0) return $cmp;
+
+            return Carbon::parse($a['tanggal_raw'])->timestamp <=> Carbon::parse($b['tanggal_raw'])->timestamp;
         });
 
-        // // remove tanggal_raw after sorting
-        // $kehadiran = array_map(function($item) {
-        //     unset($item['tanggal']);
-        //     return $item;
-        // }, $kehadiran);
+        // clean up helper field
+        $kehadiran = array_map(function ($item) {
+            unset($item['tanggal_raw']);
+            return $item;
+        }, $kehadiran);
         
         $data = [
             'dosen' => $dosenNama,

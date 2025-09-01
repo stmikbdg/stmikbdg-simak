@@ -965,8 +965,8 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                             {item['matakuliah']['kd_mk']}
                                                                                         </p>
                                                                                     )}
-                                                                                    <div className="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
-                                                                                        0% - Min. Presensi
+                                                                                    <div className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">
+                                                                                        {item['minimal_presensi']['persentase']}% - Min. Presensi
                                                                                     </div>
                                                                                 </div>
                                                                                 <h1 className="font-bold text-lg">
@@ -1379,11 +1379,16 @@ function JadwalMahasiswa({ token, base_url, role }) {
                                                                         </div>
                                                                         <div className=" space-y-4 w-full">
                                                                             <div className="space-y-2">
-                                                                                {item['matakuliah']['kd_mk'] && (
-                                                                                    <p className="text-xs font-medium opacity-70">
-                                                                                        {item['matakuliah']['kd_mk']}
-                                                                                    </p>
-                                                                                )}
+                                                                                <div className="flex items-center gap-2">
+                                                                                    {item['matakuliah']['kd_mk'] && (
+                                                                                        <p className="text-xs font-medium opacity-70">
+                                                                                            {item['matakuliah']['kd_mk']}
+                                                                                        </p>
+                                                                                    )}
+                                                                                    <div className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">
+                                                                                        {item['minimal_presensi']['persentase']}% - Min. Presensi
+                                                                                    </div>
+                                                                                </div>
                                                                                 <h1 className="font-bold text-lg">
                                                                                     {item['matakuliah']['nm_mk']}
                                                                                 </h1>
@@ -1479,7 +1484,7 @@ function JadwalMahasiswa({ token, base_url, role }) {
                                                                                     menuItems={[
                                                                                         {
                                                                                             label: 'Silabus',
-                                                                                            icon: <DescriptionOutlined />,
+                                                                                            icon: <DescriptionOutlined fontSize="small" color="primary" />,
                                                                                             onClick: () => window.location.href = `${item['kontrak_kuliah']['file_link']}`,
                                                                                             render: item['kontrak_kuliah']
                                                                                         }

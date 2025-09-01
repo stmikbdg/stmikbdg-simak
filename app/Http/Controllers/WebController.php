@@ -331,7 +331,7 @@ class WebController extends Controller {
 
         // sort by kegiatan (A→Z), then by tanggal (oldest→newest)
         usort($kehadiran, function ($a, $b) {
-            $cmp = strcmp($a['kegiatan'], $b['kegiatan']);
+            $cmp = strcmp($a['kelas'], $b['kelas']);
             if ($cmp !== 0) return $cmp;
 
             return Carbon::parse($a['tanggal_raw'])->timestamp <=> Carbon::parse($b['tanggal_raw'])->timestamp;

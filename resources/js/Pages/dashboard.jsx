@@ -5617,10 +5617,9 @@ function AdminPage_MinimalPersentasePresensi({ token, base_url, role }) {
 
                     console.log(response)
                     if(response?.success) {
-                        customSwal.toast.success({
-                            message: 'sukses'
-                        })
+                        aksi.formData.persentase.set(response?.data?.persentase)
                     }else{
+                        aksi.formData.persentase.set(0)
                         customSwal.toast.error({
                             message: response?.message
                         })
@@ -5651,6 +5650,36 @@ function AdminPage_MinimalPersentasePresensi({ token, base_url, role }) {
                         ...state,
                         persentase: value
                     }))
+                },
+                submit: async (e) => {
+                    e.preventDefault()
+
+                    const payload = {
+                        fk_tahun_ajaran: listData.tahun_ajaran.select?.tahun_id,
+                        persentase: formData.persentase
+                    }
+
+                    aksi.persentase.loading('submit')
+
+                    const response = await api_handler.post({
+                        url: 'kelas-kuliah/minimal-presensi/admin',
+                        base_url,
+                        token,
+                        payload
+                    })
+
+                    aksi.persentase.loading('submit')
+
+                    if(response?.success) {
+                        aksi.persentase.get(listData.tahun_ajaran.select?.tahun_id)
+                        customSwal.toast.success({
+                            message: 'Berhasil menambahkan minimal persentase tersebut.'
+                        })
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })   
+                    }
                 }
             }
         }
@@ -5663,7 +5692,7 @@ function AdminPage_MinimalPersentasePresensi({ token, base_url, role }) {
     return (
         <div className="divide-y divide-zinc-300">
             <form 
-                onSubmit={() => {}} 
+                onSubmit={aksi.formData.persentase.submit} 
             >
                 <div className="p-4 space-y-4 max-w-2xl">
 
@@ -5687,12 +5716,19 @@ function AdminPage_MinimalPersentasePresensi({ token, base_url, role }) {
                         type="number"
                         value={formData.persentase}
                         onChange={e => aksi.formData.persentase.set(e.target.value)}
-                        disabled={!listData.tahun_ajaran.select}
+                        disabled={!listData.tahun_ajaran.select || listData.persentase.loading.fetch}
                         slotProps={{
                             input: {
                                 startAdornment: (
                                     <InputAdornment position="start">
                                         %
+                                    </InputAdornment>
+                                ),
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        {listData.persentase.loading.fetch && (
+                                            <CircularProgress size={20} className="grayscale" />
+                                        )}
                                     </InputAdornment>
                                 )
                             }
@@ -5707,6 +5743,24 @@ function AdminPage_MinimalPersentasePresensi({ token, base_url, role }) {
                     </div>
                 </div>
             </form>
+            {/* <div className="p-2">
+                <CustomDataTable 
+                    columns={[
+                        {
+                            field: 'thn_ajaran',
+                            headerName: 'Tahun Ajaran',
+                            minWidth: 300
+                        },
+                        {
+                            field: 'persentase',
+                            headerName: 'Persentase (%)',
+                            minWidth: 200,
+                            headerAlign: 'center',
+                            align: 'center'
+                        }
+                    ]}
+                />
+            </div> */}
         </div>
     )
 }

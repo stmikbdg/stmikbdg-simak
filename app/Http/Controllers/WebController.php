@@ -333,16 +333,16 @@ class WebController extends Controller {
             $cmp = strcmp($a['kegiatan'], $b['kegiatan']);
             if ($cmp === 0) {
                 // then sort by date
-                return Carbon::parse($a['tanggal_raw'])->timestamp <=> Carbon::parse($b['tanggal_raw'])->timestamp;
+                return Carbon::parse($a['tanggal'])->timestamp <=> Carbon::parse($b['tanggal'])->timestamp;
             }
             return $cmp;
         });
 
-        // remove tanggal_raw after sorting
-        $kehadiran = array_map(function($item) {
-            unset($item['tanggal_raw']);
-            return $item;
-        }, $kehadiran);
+        // // remove tanggal_raw after sorting
+        // $kehadiran = array_map(function($item) {
+        //     unset($item['tanggal']);
+        //     return $item;
+        // }, $kehadiran);
         
         $data = [
             'dosen' => $dosenNama,

@@ -932,8 +932,8 @@ function JadwalDosen({ token, base_url, role }) {
                     </Modal>
 
                     <CustomControlledTabs value={tabs.jadwal} onChange={aksi.tabs.set}>
-                        {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map(hari => (
-                            <CustomControlledTabItem key={hari} label={hari} value={hari}>
+                        {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu', 'Unknown'].map(hari => (
+                            <CustomControlledTabItem key={hari} label={hari !== 'Unknown' ? hari : 'belum ada hari'} value={hari}>
                                 <CustomLoading loading={loadingUserdata} renderIf={userdata}>
                                     <div className="p-4">
                                         <CustomLoading 

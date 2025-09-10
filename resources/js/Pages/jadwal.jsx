@@ -108,9 +108,9 @@ function JadwalDosen({ token, base_url, role }) {
 
                     aksi.jadwal.loading('fetch')
 
-                    console.log({
-                        response
-                    })
+                    // console.log({
+                    //     response
+                    // })
 
                     if(response.success) {
                         aksi.jadwal.set('data', response?.data?.kelas_kuliah)
@@ -209,10 +209,10 @@ function JadwalDosen({ token, base_url, role }) {
                         aksi.kelas.tutup.set('error', null)
                         aksi.jadwal.loading('tutup')
                         const url = `kelas-kuliah/dosen/close/${listData.kelas.kelas_kuliah_id}`
-                        console.log({
-                            url,
-                            kelas: listData.kelas
-                        })
+                        // console.log({
+                        //     url,
+                        //     kelas: listData.kelas
+                        // })
 
                         const response = await api_handler.post({
                             base_url,
@@ -505,7 +505,7 @@ function JadwalDosen({ token, base_url, role }) {
                                 }))
                             })
 
-                            console.log(response)
+                            // console.log(response)
 
                             aksi.kelas.absen.daftar.loading('hapus')
 
@@ -558,7 +558,7 @@ function JadwalDosen({ token, base_url, role }) {
                 },
                 view: (kontrak_kuliah) => {
                     aksi.kelas.set('kontrak', kontrak_kuliah)
-                    console.log(kontrak_kuliah)
+                    // console.log(kontrak_kuliah)
 
                     modal.show('kontrak')
                 },
@@ -631,7 +631,7 @@ function JadwalDosen({ token, base_url, role }) {
         formData: {
             min_presensi: {
                 init: (kelas) => {
-                    console.log(kelas)
+                    // console.log(kelas)
                     modal.show('min_presensi')
                 }
             }

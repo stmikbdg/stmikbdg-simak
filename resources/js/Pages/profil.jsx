@@ -34,7 +34,7 @@ export default function Profil({ token, role, base_url }) {
 
                     setLoadingUserdata(false)
 
-                    console.log(response)
+                    // console.log(response)
 
                     if(response?.success) {
                         setUserdata(response?.data)

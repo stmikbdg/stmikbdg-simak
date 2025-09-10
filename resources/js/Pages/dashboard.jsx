@@ -894,7 +894,7 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
 
                     aksi.detail.set('loading', false)
                     
-                    console.log(response)
+                    // console.log(response)
                     if(response?.success) {
                         aksi.detail.set('data', response?.data)
                     }else{
@@ -4001,7 +4001,7 @@ function DosenPage({ token, base_url, role, app }) {
                                         })),
                             });
 
-                            console.log(response);
+                            // console.log(response);
 
                             aksi.kelas.absen.daftar.loading("hapus");
 
@@ -4056,7 +4056,7 @@ function DosenPage({ token, base_url, role, app }) {
                 },
                 view: (kontrak_kuliah) => {
                     aksi.kelas.set('kontrak', kontrak_kuliah)
-                    console.log(kontrak_kuliah)
+                    // console.log(kontrak_kuliah)
 
                     modal.show('kontrak')
                 }
@@ -5289,7 +5289,7 @@ function DosenPagePengumumanKelas({ token, base_url, role }) {
                             image: null
                         }
                         
-                        console.log(payload)
+                        // console.log(payload)
 
                         if(!payload.target) {
                             aksi.formData.pengumuman.set('error', 'Kelas belum dipilih!')
@@ -5615,7 +5615,7 @@ function AdminPage_MinimalPersentasePresensi({ token, base_url, role }) {
 
                     aksi.persentase.loading('fetch')
 
-                    console.log(response)
+                    // console.log(response)
                     if(response?.success) {
                         aksi.formData.persentase.set(response?.data?.persentase)
                     }else{

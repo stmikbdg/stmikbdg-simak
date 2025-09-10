@@ -459,7 +459,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
             selected: {
                 total_sks: () => {
                     const mk_id = formData.pengajuan_krs.mata_kuliah.length > 0 ? formData.pengajuan_krs.mata_kuliah?.map(item => item?.mk_id).join(',').split(',') : []
-                    console.log(mk_id)
+                    // console.log(mk_id)
 
                     let data = 0
                     // let matkul = listData.matakuliah.data.find(item => item?.mata_kuliah?.find(mk => mk_id?.includes(String(mk?.mk_id))))
@@ -963,7 +963,7 @@ function Mahasiswa_KRSPage_Riwayat({ token, base_url, role }) {
                         url: 'krs/riwayat'
                     })
 
-                    console.log(response)
+                    // console.log(response)
 
                     aksi.riwayat.loading('fetch')
 

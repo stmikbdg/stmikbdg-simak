@@ -1368,134 +1368,191 @@ function JadwalMahasiswa({ token, base_url, role }) {
                                             
                                                 {aksi.jadwal.hari.get(hari).length > 0 
                                                     ? <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                                        {aksi.jadwal.hari.get(hari).map(item => (
-                                                            <div key={item['data_kelas']['kelas_kuliah_id']} className={`rounded-md shadow border-l-4 ${item['kelas_dibuka'] ? 'border-blue-500' : 'border-zinc-500'}`}>
-                                                                <div className="flex flex-col justify-between">
-                                                                    <div className="flex gap-4 p-4">
-                                                                        <div className="">
-                                                                            <div className={`w-7 sm:w-8 lg:w-10 aspect-square rounded-md flex items-center justify-center ${item['kelas_dibuka'] ? 'bg-blue-100 text-blue-500' : 'bg-zinc-100 text-zinc-500'}`}>
-                                                                                <CollectionsBookmarkOutlined fontSize="small" />
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className=" space-y-4 w-full">
-                                                                            <div className="space-y-2">
-                                                                                <div className="flex items-center gap-2">
-                                                                                    {item['matakuliah']['kd_mk'] && (
-                                                                                        <p className="text-xs font-medium opacity-70">
-                                                                                            {item['matakuliah']['kd_mk']}
-                                                                                        </p>
-                                                                                    )}
-                                                                                    <div className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">
-                                                                                        {item['minimal_presensi']['persentase']}% - Min. Presensi
+                                                        {aksi.jadwal.hari.get(hari).map(item => 
+                                                            item['kelas_kuliah_id_exist']
+                                                                ? (
+                                                                    <div key={item['data_kelas']['kelas_kuliah_id']} className={`rounded-md shadow border-l-4 ${item['kelas_dibuka'] ? 'border-blue-500' : 'border-zinc-500'}`}>
+                                                                        <div className="flex flex-col justify-between">
+                                                                            <div className="flex gap-4 p-4">
+                                                                                <div className="">
+                                                                                    <div className={`w-7 sm:w-8 lg:w-10 aspect-square rounded-md flex items-center justify-center ${item['kelas_dibuka'] ? 'bg-blue-100 text-blue-500' : 'bg-zinc-100 text-zinc-500'}`}>
+                                                                                        <CollectionsBookmarkOutlined fontSize="small" />
                                                                                     </div>
                                                                                 </div>
-                                                                                <h1 className="font-bold text-lg">
-                                                                                    {item['matakuliah']['nm_mk']}
-                                                                                </h1>
-                                                                            </div>
-                                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                                                {item['dosen'] && (
-                                                                                    <div className="flex items-center gap-3 opacity-70">
-                                                                                        <PersonOutline sx={{ fontSize: 16 }} />
-                                                                                        <p className="text-xs font-medium">
-                                                                                            {item['dosen']['nm_dosen']}
-                                                                                        </p>
+                                                                                <div className=" space-y-4 w-full">
+                                                                                    <div className="space-y-2">
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            {item['matakuliah']['kd_mk'] && (
+                                                                                                <p className="text-xs font-medium opacity-70">
+                                                                                                    {item['matakuliah']['kd_mk']}
+                                                                                                </p>
+                                                                                            )}
+                                                                                            <div className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">
+                                                                                                {item['minimal_presensi']['persentase']}% - Min. Presensi
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <h1 className="font-bold text-lg">
+                                                                                            {item['matakuliah']['nm_mk']}
+                                                                                        </h1>
                                                                                     </div>
-                                                                                )}
-                                                                                {/* {item['kontrak_kuliah'] && (
-                                                                                    <div className="flex items-center gap-3 opacity-70">
-                                                                                        <Button variant="text" size="small" href={`${item['kontrak_kuliah']['file_link']}`} target="_blank" loading={false} loadingPosition="start" startIcon={<VisibilityOutlined />}>
-                                                                                            <p className="text-xs font-bold font-jakarta">
-                                                                                                Silabus
-                                                                                            </p>
-                                                                                        </Button>
+                                                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                                                        {item['dosen'] && (
+                                                                                            <div className="flex items-center gap-3 opacity-70">
+                                                                                                <PersonOutline sx={{ fontSize: 16 }} />
+                                                                                                <p className="text-xs font-medium">
+                                                                                                    {item['dosen']['nm_dosen'] || 'Belum ada pengajar mata kuliah'}
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        )}
+                                                                                        {/* {item['kontrak_kuliah'] && (
+                                                                                            <div className="flex items-center gap-3 opacity-70">
+                                                                                                <Button variant="text" size="small" href={`${item['kontrak_kuliah']['file_link']}`} target="_blank" loading={false} loadingPosition="start" startIcon={<VisibilityOutlined />}>
+                                                                                                    <p className="text-xs font-bold font-jakarta">
+                                                                                                        Silabus
+                                                                                                    </p>
+                                                                                                </Button>
+                                                                                            </div>
+                                                                                        )} */}
                                                                                     </div>
-                                                                                )} */}
+                                                                                    {hari !== 'Unknown' && (
+                                                                                        <div className="flex items-center w-full flex-wrap">
+                                                                                            {item['riwayat_presensi'].map((absen, index) => absen['masuk']
+                                                                                                ? (
+                                                                                                    <Tooltip key={index} arrow title={dayjs(absen['masuk']).locale('id').format('HH:mm:ss, DD MMMM YYYY')}>
+                                                                                                        <CheckBoxTwoTone fontSize="small" color="primary" />
+                                                                                                    </Tooltip>
+                                                                                                )
+                                                                                                : (
+                                                                                                    <Tooltip key={index} arrow title={"Anda tidak absen!"}>
+                                                                                                        <IndeterminateCheckBoxTwoTone fontSize="small" color="error" />
+                                                                                                    </Tooltip>
+                                                                                                )
+                                                                                            )}
+                                                                                            {Array.from({ length: parseInt(item['riwayat_presensi_maks'] - item['riwayat_presensi'].length) }).map((_, index) => (
+                                                                                                <Tooltip key={index} arrow title="">
+                                                                                                    <CheckBoxOutlineBlankTwoTone fontSize="small" />
+                                                                                                </Tooltip>
+                                                                                            ))}
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
                                                                             </div>
-                                                                            <div className="flex items-center w-full flex-wrap">
-                                                                                {item['riwayat_presensi'].map((absen, index) => absen['masuk']
+                                                                            <div className={`${item['kelas_dibuka'] ? 'bg-blue-50' : 'bg-zinc-50'} p-4`}>
+                                                                                {hari === 'Unknown'
                                                                                     ? (
-                                                                                        <Tooltip key={index} arrow title={dayjs(absen['masuk']).locale('id').format('HH:mm:ss, DD MMMM YYYY')}>
-                                                                                            <CheckBoxTwoTone fontSize="small" color="primary" />
-                                                                                        </Tooltip>
+                                                                                        <div className="w-full flex items-center justify-center gap-4">
+                                                                                            <WarningAmberOutlined fontSize="small" color="warning" />
+                                                                                            <div className="text-center">
+                                                                                                <p className="font-bold">
+                                                                                                    Mata Kuliah ini belum memiliki jadwal.
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        </div>
                                                                                     )
                                                                                     : (
-                                                                                        <Tooltip key={index} arrow title={"Anda tidak absen!"}>
-                                                                                            <IndeterminateCheckBoxTwoTone fontSize="small" color="error" />
-                                                                                        </Tooltip>
+                                                                                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                                                                                            <div className="flex items-center justify-between sm:justify-start gap-6">
+                                                                                                {item['jadwal'] && (
+                                                                                                    <>
+                                                                                                        {item['jadwal']['jam'] && (
+                                                                                                            <div className="flex items-center gap-3">
+                                                                                                                <AccessTimeOutlined sx={{ fontSize: 16 }} className={`${item['kelas_dibuka'] ? 'text-blue-700' : 'text-zinc-700'}`} />
+                                                                                                                <p className="text-xs font-semibold opacity-70">
+                                                                                                                    {item['jadwal']['jam']}
+                                                                                                                </p>
+                                                                                                            </div>
+                                                                                                        )}
+                                                                                                        {item['jadwal']['kd_ruang'] && (
+                                                                                                            <div className="flex items-center gap-3">
+                                                                                                                <LocationOnOutlined sx={{ fontSize: 16 }} className={`${item['kelas_dibuka'] ? 'text-blue-700' : 'text-zinc-700'}`} />
+                                                                                                                <p className="text-xs font-semibold opacity-70">
+                                                                                                                    Ruang {item['jadwal']['kd_ruang']}
+                                                                                                                </p>
+                                                                                                            </div>
+                                                                                                        )}
+                                                                                                    </>
+                                                                                                )}
+                                                                                            </div>
+                                                                                            <div className="flex justify-end gap-4 items-center">
+                                                                                                <Button disabled={!item['kelas_dibuka']} onClick={() => aksi.formData.absen.init(item['data_kelas']['kelas_kuliah_id'])} variant="contained" size="small" className="text-xs w-full sm:w-fit">
+                                                                                                    {item['kelas_dibuka'] 
+                                                                                                        ? (
+                                                                                                            <p className="font-jakarta text-xs">
+                                                                                                                Absen
+                                                                                                            </p>
+                                                                                                        )
+                                                                                                        : (
+                                                                                                            <p className="font-jakarta text-xs">
+                                                                                                                Kelas belum dibuka
+                                                                                                            </p>
+                                                                                                        )
+                                                                                                    }
+                                                                                                </Button>
+                                                                                                <CustomDropdown
+                                                                                                    // className="w-full sm:w-fit" 
+                                                                                                    buttonComponent={(
+                                                                                                        <Button variant="outlined" size="small" className="text-xs sm:w-fit w-full" startIcon={<MoreHoriz />}>
+                                                                                                            <p className="font-jakarta text-xs">
+                                                                                                                Lainnya
+                                                                                                            </p>
+                                                                                                        </Button>
+                                                                                                    )}
+                                                                                                    menuItems={[
+                                                                                                        {
+                                                                                                            label: 'Silabus',
+                                                                                                            icon: <DescriptionOutlined fontSize="small" color="primary" />,
+                                                                                                            onClick: () => window.location.href = `${item['kontrak_kuliah']['file_link']}`,
+                                                                                                            render: true
+                                                                                                        }
+                                                                                                    ]}
+                                                                                                />
+                                                                                            </div>
+                                                                                        </div>
                                                                                     )
-                                                                                )}
-                                                                                {Array.from({ length: parseInt(item['riwayat_presensi_maks'] - item['riwayat_presensi'].length) }).map((_, index) => (
-                                                                                    <Tooltip key={index} arrow title="">
-                                                                                        <CheckBoxOutlineBlankTwoTone fontSize="small" />
-                                                                                    </Tooltip>
-                                                                                ))}
+                                                                                }
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    <div className={`${item['kelas_dibuka'] ? 'bg-blue-50' : 'bg-zinc-50'} p-4`}>
-                                                                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                                                                            <div className="flex items-center justify-between sm:justify-start gap-6">
-                                                                                {item['jadwal'] && (
-                                                                                    <>
-                                                                                        {item['jadwal']['jam'] && (
-                                                                                            <div className="flex items-center gap-3">
-                                                                                                <AccessTimeOutlined sx={{ fontSize: 16 }} className={`${item['kelas_dibuka'] ? 'text-blue-700' : 'text-zinc-700'}`} />
-                                                                                                <p className="text-xs font-semibold opacity-70">
-                                                                                                    {item['jadwal']['jam']}
+                                                                )
+                                                                : (
+                                                                    <div key={item['matakuliah']['mk_id']} className={`rounded-md shadow border-l-4 border-red-500`}>
+                                                                        <div className="flex flex-col justify-between">
+                                                                            <div className="flex gap-4 p-4">
+                                                                                <div className="">
+                                                                                    <div className={`w-7 sm:w-8 lg:w-10 aspect-square rounded-md flex items-center justify-center bg-red-100 text-red-500`}>
+                                                                                        <CollectionsBookmarkOutlined fontSize="small" />
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className=" space-y-4 w-full">
+                                                                                    <div className="space-y-2">
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            {item['matakuliah']['kd_mk'] && (
+                                                                                                <p className="text-xs font-medium opacity-70">
+                                                                                                    {item['matakuliah']['kd_mk']}
                                                                                                 </p>
-                                                                                            </div>
-                                                                                        )}
-                                                                                        {item['jadwal']['kd_ruang'] && (
-                                                                                            <div className="flex items-center gap-3">
-                                                                                                <LocationOnOutlined sx={{ fontSize: 16 }} className={`${item['kelas_dibuka'] ? 'text-blue-700' : 'text-zinc-700'}`} />
-                                                                                                <p className="text-xs font-semibold opacity-70">
-                                                                                                    Ruang {item['jadwal']['kd_ruang']}
-                                                                                                </p>
-                                                                                            </div>
-                                                                                        )}
-                                                                                    </>
-                                                                                )}
+                                                                                            )}
+                                                                                        </div>
+                                                                                        <h1 className="font-bold text-lg">
+                                                                                            {item['matakuliah']['nm_mk']}
+                                                                                        </h1>
+                                                                                    </div>
+                                                                                    
+                                                                                </div>
                                                                             </div>
-                                                                            <div className="flex justify-end gap-4 items-center">
-                                                                                <Button disabled={!item['kelas_dibuka']} onClick={() => aksi.formData.absen.init(item['data_kelas']['kelas_kuliah_id'])} variant="contained" size="small" className="text-xs w-full sm:w-fit">
-                                                                                    {item['kelas_dibuka'] 
-                                                                                        ? (
-                                                                                            <p className="font-jakarta text-xs">
-                                                                                                Absen
-                                                                                            </p>
-                                                                                        )
-                                                                                        : (
-                                                                                            <p className="font-jakarta text-xs">
-                                                                                                Kelas belum dibuka
-                                                                                            </p>
-                                                                                        )
-                                                                                    }
-                                                                                </Button>
-                                                                                <CustomDropdown
-                                                                                    // className="w-full sm:w-fit" 
-                                                                                    buttonComponent={(
-                                                                                        <Button variant="outlined" size="small" className="text-xs sm:w-fit w-full" startIcon={<MoreHoriz />}>
-                                                                                            <p className="font-jakarta text-xs">
-                                                                                                Lainnya
-                                                                                            </p>
-                                                                                        </Button>
-                                                                                    )}
-                                                                                    menuItems={[
-                                                                                        {
-                                                                                            label: 'Silabus',
-                                                                                            icon: <DescriptionOutlined fontSize="small" color="primary" />,
-                                                                                            onClick: () => window.location.href = `${item['kontrak_kuliah']['file_link']}`,
-                                                                                            render: item['kontrak_kuliah']
-                                                                                        }
-                                                                                    ]}
-                                                                                />
+                                                                            <div className={`bg-red-50 p-4`}>
+                                                                                <div className="w-full flex items-center justify-center gap-4 text-red-700">
+                                                                                    <WarningAmberOutlined fontSize="small" color="warning" />
+                                                                                    <div className="text-center">
+                                                                                        <p className="font-bold">
+                                                                                            Mata Kuliah ini belum memiliki kelas kuliah. Hubungi Administrator
+                                                                                        </p>
+                                                                                    </div>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
+                                                                )
+                                                        )}
                                                     </div>
                                                     : (
                                                         <div className="flex items-center justify-center min-h-screen">

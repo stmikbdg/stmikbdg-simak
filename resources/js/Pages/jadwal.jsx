@@ -618,6 +618,14 @@ function JadwalDosen({ token, base_url, role }) {
                 }else{
 
                 }
+            },
+            jam: {
+                available: (jam) => {
+                    const [start, end] = jam.split('-').map(item => dayjs(item, 'HH:mm'))
+
+                    const now = dayjs()
+                    return now.isAfter(start) && now.isBefore(end)
+                }
             }
         },
         tabs: {
@@ -1086,11 +1094,13 @@ function JadwalDosen({ token, base_url, role }) {
                                                                                                         }
                                                                                                     ]}
                                                                                                 />
-                                                                                                <Button variant="contained" disabled={listData.jadwal.loading.fetch} onClick={() => aksi.kelas.buka(item['data_kelas']['kelas_kuliah_id'])} size="small" className="text-xs w-full sm:w-fit">
-                                                                                                    <p className="font-jakarta text-xs">
-                                                                                                        Buka Kelas
-                                                                                                    </p>
-                                                                                                </Button>
+                                                                                                <Tooltip arrow title={!aksi.kelas.jam.available(item['jadwal']['jam']) && "Kelas hanya bisa dibuka pada jam yang tertera di jadwal"}>
+                                                                                                    <Button variant="contained" disabled={listData.jadwal.loading.fetch || !aksi.kelas.jam.available(item['jadwal']['jam'])} onClick={() => aksi.kelas.buka(item['data_kelas']['kelas_kuliah_id'])} size="small" className="text-xs w-full sm:w-fit">
+                                                                                                        <p className="font-jakarta text-xs">
+                                                                                                            Buka Kelas
+                                                                                                        </p>
+                                                                                                    </Button>
+                                                                                                </Tooltip>
                                                                                             </div>
                                                                                         </>
                                                                                     )

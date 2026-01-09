@@ -64,13 +64,13 @@ class WebController extends Controller {
                 'icon' => 'SchoolTwoTone',
                 'color' => 'indigo'
             ],
-            [
-                'name' => 'Keuangan',
-                'deskripsi' => 'Sistem Informasi dan layanan pembayaran keuangan',
-                'label' => 'keuangan',
-                'icon' => 'PaymentsTwoTone',
-                'color' => 'blue'
-            ],
+            // [
+            //     'name' => 'Keuangan',
+            //     'deskripsi' => 'Sistem Informasi dan layanan pembayaran keuangan',
+            //     'label' => 'keuangan',
+            //     'icon' => 'PaymentsTwoTone',
+            //     'color' => 'blue'
+            // ],
             [
                 'name' => 'LMS',
                 'deskripsi' => 'Sistem Pembelajaran dan Ujian Daring (Learning Management System)',

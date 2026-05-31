@@ -196,6 +196,60 @@ class WebController extends Controller {
         ]);
     }
 
+    public function khs_download() {
+
+        $user = Session::get('profile');
+
+        Carbon::setLocale('id');
+
+        $summaryResponse = $this->service->get(null, 'krs/ip/semester')->getData('data');
+
+        if($summaryResponse['status'] != 'success') {
+            return abort(404);
+        }
+
+        $summary = $summaryResponse['data'];
+
+        if(! $summary) {
+            return abort(404);
+        }
+
+        $semesters = [];
+
+        for($semester = 1; $semester <= 8; $semester++) {
+            $detailResponse = $this->service->get(null, 'krs/ip/semester?s='.$semester)->getData('data');
+
+            if($detailResponse['status'] != 'success') {
+                continue;
+            }
+
+            $detail = $detailResponse['data'];
+            $matakuliah = $detail['matakuliah'] ?? [];
+
+            if($detail && count($matakuliah) > 0) {
+                $detail['matakuliah'] = $matakuliah;
+                $semesters[] = $detail;
+            }
+        }
+
+        if(count($semesters) < 1) {
+            return abort(404);
+        }
+
+        $data = [
+            'nim' => $user['nim'] ?? '-',
+            'nama' => $user['nama'] ?? '-',
+            'dosen_wali' => $user['dosen_wali'] ?? '-',
+            'summary' => $summary,
+            'semesters' => $semesters,
+            'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
+            'image' => public_path('images/stmik.png')
+        ];
+
+        $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
+        return $pdf->stream('Kartu Hasil Studi - '.($user['nim'] ?? '-').' - '.($user['nama'] ?? '-').'.pdf');
+    }
+
     public function khs_download_per_semester(int $semester) {
 
         if($semester < 1 || $semester > 8) {

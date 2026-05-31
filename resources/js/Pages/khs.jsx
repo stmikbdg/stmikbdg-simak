@@ -1,7 +1,7 @@
 import { Button, IconButton } from "@mui/material"
 import { useRedirect } from "../context/RedirectContext"
 import { useSidebar } from "../context/SidebarContext"
-import { AssignmentOutlined, AutoGraphOutlined, East, MenuOutlined, StickyNote2Outlined } from "@mui/icons-material"
+import { AssignmentOutlined, AutoGraphOutlined, DownloadOutlined, East, MenuOutlined, StickyNote2Outlined } from "@mui/icons-material"
 import MainLayout from "../layouts/MainLayout"
 import { useEffect, useState } from "react"
 import { customSwal } from "../components/CustomSwal"
@@ -74,7 +74,7 @@ export default function KHS({ token, base_url, role }) {
 
                     {/* Header */}
                     <div className="p-2 lg:p-4">
-                        <div className="flex justify-between items-center ">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div className="flex items-center lg:gap-3">
                                 <div className="lg:hidden">
                                     <IconButton onClick={() => setShowSidebar(state => !state)}>
@@ -85,6 +85,15 @@ export default function KHS({ token, base_url, role }) {
                                     Kartu Hasil Studi
                                 </h1>
                             </div>
+                            <Button
+                                size="small"
+                                variant="contained"
+                                startIcon={<DownloadOutlined fontSize="small" />}
+                                disabled={listData.khs.loading || !listData.khs.data}
+                                onClick={() => window.location.href = '/khs/download'}
+                            >
+                                <p className="font-jakarta text-xs">Unduh KHS PDF</p>
+                            </Button>
                         </div>
                     </div>
 

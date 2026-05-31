@@ -868,16 +868,18 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                                                     }
                                                     
                                                     <div className="flex items-center gap-2 *:grow *:sm:grow-0">
-                                                        {/* {aksi.krs.is_aktif() && (
-                                                            <>
-
-                                                                <Button startIcon={<DownloadOutlined />} variant="contained" size="small">
-                                                                    <p className="font-jakarta text-xs">
-                                                                        Unduh KSM
-                                                                    </p>
-                                                                </Button>
-                                                            </>
-                                                        )} */}
+                                                        {listData.krs.data?.krs?.krs_id && listData.krs.data?.krs?.sts_krs === 'S' && (
+                                                            <Button
+                                                                startIcon={<DownloadOutlined fontSize="small" />}
+                                                                variant="outlined"
+                                                                size="small"
+                                                                onClick={() => window.location.href = `/ksm/download/krs_id/${listData.krs.data?.krs?.krs_id}`}
+                                                            >
+                                                                <p className="font-jakarta text-xs">
+                                                                    Unduh KSM
+                                                                </p>
+                                                            </Button>
+                                                        )}
                                                         <Button disabled={aksi.krs.pengajuan.is_disabled()} onClick={() => modal.show('modal_pengajuan_krs')} startIcon={<SendOutlined />} variant="contained" size="small">
                                                             <p className="font-jakarta text-xs">
                                                                 Ajukan

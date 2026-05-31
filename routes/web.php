@@ -28,6 +28,8 @@ Route::middleware(['auth.token'])
         Route::get('/khs/semester/{semester}', 'khs_per_semester');
         Route::get('/khs/download', 'khs_download');
         Route::get('/khs/download/semester/{semester}', 'khs_download_per_semester');
+        Route::get('/khs/preview', 'khs_preview');
+        Route::get('/khs/preview/semester/{semester}', 'khs_preview_per_semester');
         Route::get('/profil', 'profil');
         Route::get('/jadwal', 'jadwal');
         Route::get('/notfound', 'index');

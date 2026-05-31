@@ -99,15 +99,25 @@ export default function KHSPerSemester({ semester, token, base_url, role }) {
                                     Semester {semester}
                                 </h1>
                             </div>
-                            <Button
-                                size="small"
-                                variant="contained"
-                                startIcon={<DownloadOutlined fontSize="small" />}
-                                disabled={listData.khs.loading || !listData.khs.data?.matakuliah?.length}
-                                onClick={() => window.location.href = `/khs/download/semester/${semester}`}
-                            >
-                                <p className="font-jakarta text-xs">Unduh PDF</p>
-                            </Button>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <Button
+                                    size="small"
+                                    variant="outlined"
+                                    disabled={listData.khs.loading || !listData.khs.data?.matakuliah?.length}
+                                    onClick={() => window.open(`/khs/preview/semester/${semester}`, '_blank', 'noopener,noreferrer')}
+                                >
+                                    <p className="font-jakarta text-xs">Preview</p>
+                                </Button>
+                                <Button
+                                    size="small"
+                                    variant="contained"
+                                    startIcon={<DownloadOutlined fontSize="small" />}
+                                    disabled={listData.khs.loading || !listData.khs.data?.matakuliah?.length}
+                                    onClick={() => window.location.href = `/khs/download/semester/${semester}`}
+                                >
+                                    <p className="font-jakarta text-xs">Unduh PDF</p>
+                                </Button>
+                            </div>
                         </div>
                     </div>
 

@@ -5,13 +5,14 @@
     <title>Kartu Hasil Studi</title>
     <style>
         @page {
-            margin: 18mm 14mm;
+            margin: 12mm 12mm 14mm;
         }
 
         body {
             font-family: Arial, sans-serif;
-            font-size: 10.5px;
+            font-size: 9px;
             color: #111;
+            margin: 0;
         }
 
         table {
@@ -21,87 +22,89 @@
         }
 
         th, td {
-            border: 1px solid #222;
-            padding: 5px 6px;
+            border: 0.7px solid #222;
+            padding: 3px 4px;
             vertical-align: top;
             word-wrap: break-word;
-            overflow-wrap: break-word;
-            word-break: break-word;
         }
 
         th {
-            background: #f1f5f9;
+            background: #eef2f6;
             font-weight: bold;
-        }
-
-        .container {
-            border: 1px solid #000;
-            padding: 18px;
+            text-align: center;
         }
 
         .header-container {
             position: relative;
-            width: 100%;
-            min-height: 72px;
-            margin-bottom: 14px;
-            border-bottom: 2px solid #111;
-            padding-bottom: 10px;
+            min-height: 54px;
+            border-bottom: 1.5px solid #111;
+            margin-bottom: 8px;
+            padding-bottom: 7px;
         }
 
         .logo {
             position: absolute;
             top: 0;
             left: 0;
-            width: 86px;
+            width: 68px;
         }
 
         .header {
+            margin-left: 78px;
             text-align: right;
-            margin-left: 96px;
+            line-height: 1.25;
         }
 
         .campus-name {
-            font-size: 14px;
+            font-size: 11px;
             font-weight: bold;
         }
 
         .title {
             text-align: center;
-            margin: 12px 0;
+            margin: 8px 0 7px;
         }
 
         .title h1 {
-            font-size: 15px;
-            margin: 0 0 4px;
+            font-size: 12px;
+            margin: 0;
             text-decoration: underline;
         }
 
-        .no-border {
-            margin-top: 8px;
+        .profile-table {
+            margin-top: 4px;
+            margin-bottom: 7px;
         }
 
-        .no-border td {
+        .profile-table td {
             border: none;
-            padding: 2px 4px;
+            padding: 1.5px 3px;
         }
 
         .summary-table {
-            margin-top: 12px;
+            margin-bottom: 9px;
         }
 
         .semester-block {
-            page-break-inside: avoid;
-            margin-top: 14px;
+            margin-top: 8px;
+        }
+
+        .semester-block:first-of-type {
+            margin-top: 6px;
         }
 
         .semester-title {
-            font-size: 12px;
+            font-size: 9.5px;
             font-weight: bold;
-            margin: 0 0 6px;
+            margin: 0 0 4px;
         }
 
         .semester-summary {
-            margin-bottom: 6px;
+            margin-bottom: 4px;
+        }
+
+        .course-table tbody tr {
+            page-break-inside: avoid;
         }
 
         .text-center {
@@ -112,69 +115,107 @@
             text-align: right;
         }
 
+        .nowrap {
+            white-space: nowrap;
+        }
+
+        .semester-total td {
+            background: #fafafa;
+            font-weight: bold;
+        }
+
         .footer {
-            margin-top: 18px;
+            margin-top: 12px;
             text-align: right;
+            line-height: 1.35;
         }
 
         .page-number {
             position: fixed;
-            bottom: -8mm;
+            bottom: -9mm;
             right: 0;
-            font-size: 9px;
-            color: #555;
-            text-align: right;
+            font-size: 8px;
+            color: #666;
         }
 
         .page-number:after {
-            content: "Halaman " counter(page) " dari " counter(pages);
+            content: "Halaman " counter(page);
         }
     </style>
 </head>
 <body>
     <div class="page-number"></div>
-    <div class="container">
-        <div class="header-container">
-            @if($image)
-            <img src="{{ $image }}" alt="STMIK Bandung" class="logo" />
-            @endif
-            <div class="header">
-                <div class="campus-name">SEKOLAH TINGGI MANAJEMEN INFORMATIKA DAN KOMPUTER BANDUNG</div>
-                <div>Jl. Cikutra 113 Telp. (022) 7207777 Fax. (022) 7207777</div>
-                <div>BANDUNG - JAWA BARAT - INDONESIA</div>
-                <div>Email: <span style="text-decoration: underline; color: blue">info@stmik-bandung.ac.id</span> | Website: https://www.stmik-bandung.ac.id</div>
-            </div>
+
+    <div class="header-container">
+        @if($image)
+        <img src="{{ $image }}" alt="STMIK Bandung" class="logo" />
+        @endif
+        <div class="header">
+            <div class="campus-name">SEKOLAH TINGGI MANAJEMEN INFORMATIKA DAN KOMPUTER BANDUNG</div>
+            <div>Jl. Cikutra 113 Telp. (022) 7207777 Fax. (022) 7207777</div>
+            <div>BANDUNG - JAWA BARAT - INDONESIA</div>
+            <div>Email: <span style="text-decoration: underline; color: blue">info@stmik-bandung.ac.id</span> | Website: https://www.stmik-bandung.ac.id</div>
         </div>
+    </div>
 
-        <div class="title">
-            <h1>KARTU HASIL STUDI</h1>
-        </div>
+    <div class="title">
+        <h1>KARTU HASIL STUDI</h1>
+    </div>
 
-        <table class="no-border">
-            <tbody>
-                <tr>
-                    <td style="width: 90px"><strong>NIM</strong></td>
-                    <td style="width: 8px">:</td>
-                    <td>{{ filled($nim ?? null) ? $nim : '-' }}</td>
-                </tr>
-                <tr>
-                    <td><strong>NAMA</strong></td>
-                    <td>:</td>
-                    <td>{{ filled($nama ?? null) ? $nama : '-' }}</td>
-                </tr>
-                <tr>
-                    <td><strong>DOSEN WALI</strong></td>
-                    <td>:</td>
-                    <td>{{ filled($dosen_wali ?? null) ? $dosen_wali : '-' }}</td>
-                </tr>
-            </tbody>
-        </table>
+    <table class="profile-table">
+        <tbody>
+            <tr>
+                <td style="width: 92px"><strong>NIM</strong></td>
+                <td style="width: 8px">:</td>
+                <td>{{ filled($nim ?? null) ? $nim : '-' }}</td>
+            </tr>
+            <tr>
+                <td><strong>NAMA</strong></td>
+                <td>:</td>
+                <td>{{ filled($nama ?? null) ? $nama : '-' }}</td>
+            </tr>
+            <tr>
+                <td><strong>DOSEN WALI</strong></td>
+                <td>:</td>
+                <td>{{ filled($dosen_wali ?? null) ? $dosen_wali : '-' }}</td>
+            </tr>
+        </tbody>
+    </table>
 
-        <table class="summary-table">
+    <table class="summary-table">
+        <thead>
+            <tr>
+                <th>Total SKS</th>
+                <th>IPK</th>
+                <th>Nilai A</th>
+                <th>Nilai B</th>
+                <th>Nilai C</th>
+                <th>Nilai D</th>
+                <th>Nilai E</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="text-center">
+                <td>{{ $summary['total_sks'] ?? 0 }}</td>
+                <td>{{ number_format((float) ($summary['total_semua_ip'] ?? 0), 2, '.', '') }}</td>
+                <td>{{ $summary['total_nilai_a'] ?? 0 }}</td>
+                <td>{{ $summary['total_nilai_b'] ?? 0 }}</td>
+                <td>{{ $summary['total_nilai_c'] ?? 0 }}</td>
+                <td>{{ $summary['total_nilai_d'] ?? 0 }}</td>
+                <td>{{ $summary['total_nilai_e'] ?? 0 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    @foreach($semesters as $semesterData)
+    <div class="semester-block">
+        <p class="semester-title">Semester {{ filled($semesterData['semester'] ?? null) ? $semesterData['semester'] : '-' }}</p>
+
+        <table class="semester-summary">
             <thead>
                 <tr>
-                    <th>Total SKS</th>
-                    <th>IPK</th>
+                    <th>SKS Semester</th>
+                    <th>IPS</th>
                     <th>Nilai A</th>
                     <th>Nilai B</th>
                     <th>Nilai C</th>
@@ -184,82 +225,52 @@
             </thead>
             <tbody>
                 <tr class="text-center">
-                    <td>{{ $summary['total_sks'] ?? 0 }}</td>
-                    <td>{{ number_format((float) ($summary['total_semua_ip'] ?? 0), 2, '.', '') }}</td>
-                    <td>{{ $summary['total_nilai_a'] ?? 0 }}</td>
-                    <td>{{ $summary['total_nilai_b'] ?? 0 }}</td>
-                    <td>{{ $summary['total_nilai_c'] ?? 0 }}</td>
-                    <td>{{ $summary['total_nilai_d'] ?? 0 }}</td>
-                    <td>{{ $summary['total_nilai_e'] ?? 0 }}</td>
+                    <td>{{ $semesterData['total_sks'] ?? 0 }}</td>
+                    <td>{{ number_format((float) ($semesterData['total_ip'] ?? 0), 2, '.', '') }}</td>
+                    <td>{{ $semesterData['total_nilai_a'] ?? 0 }}</td>
+                    <td>{{ $semesterData['total_nilai_b'] ?? 0 }}</td>
+                    <td>{{ $semesterData['total_nilai_c'] ?? 0 }}</td>
+                    <td>{{ $semesterData['total_nilai_d'] ?? 0 }}</td>
+                    <td>{{ $semesterData['total_nilai_e'] ?? 0 }}</td>
                 </tr>
             </tbody>
         </table>
 
-        @foreach($semesters as $semesterData)
-        <div class="semester-block">
-            <p class="semester-title">Semester {{ filled($semesterData['semester'] ?? null) ? $semesterData['semester'] : '-' }}</p>
+        <table class="course-table">
+            <thead>
+                <tr>
+                    <th style="width: 28px">No</th>
+                    <th style="width: 64px">Kode</th>
+                    <th>Mata Kuliah</th>
+                    <th style="width: 34px">SKS</th>
+                    <th style="width: 42px">Nilai</th>
+                    <th style="width: 48px">Mutu</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(($semesterData['matakuliah'] ?? []) as $index => $mk)
+                <tr>
+                    <td class="text-center nowrap">{{ $index + 1 }}</td>
+                    <td class="nowrap">{{ filled($mk['kd_mk'] ?? null) ? $mk['kd_mk'] : '-' }}</td>
+                    <td>{{ filled($mk['nm_mk'] ?? null) ? $mk['nm_mk'] : '-' }}</td>
+                    <td class="text-center nowrap">{{ $mk['sks'] ?? 0 }}</td>
+                    <td class="text-center nowrap">{{ filled($mk['nilai'] ?? null) ? $mk['nilai'] : '-' }}</td>
+                    <td class="text-center nowrap">{{ is_numeric($mk['mutu'] ?? null) ? number_format((float) $mk['mutu'], 2, '.', '') : '-' }}</td>
+                </tr>
+                @endforeach
+                <tr class="semester-total">
+                    <td colspan="3" class="text-right">Jumlah SKS Semester</td>
+                    <td class="text-center">{{ $semesterData['total_sks'] ?? 0 }}</td>
+                    <td colspan="2"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    @endforeach
 
-            <table class="semester-summary">
-                <thead>
-                    <tr>
-                        <th>SKS Semester</th>
-                        <th>IPS</th>
-                        <th>Nilai A</th>
-                        <th>Nilai B</th>
-                        <th>Nilai C</th>
-                        <th>Nilai D</th>
-                        <th>Nilai E</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="text-center">
-                        <td>{{ $semesterData['total_sks'] ?? 0 }}</td>
-                        <td>{{ number_format((float) ($semesterData['total_ip'] ?? 0), 2, '.', '') }}</td>
-                        <td>{{ $semesterData['total_nilai_a'] ?? 0 }}</td>
-                        <td>{{ $semesterData['total_nilai_b'] ?? 0 }}</td>
-                        <td>{{ $semesterData['total_nilai_c'] ?? 0 }}</td>
-                        <td>{{ $semesterData['total_nilai_d'] ?? 0 }}</td>
-                        <td>{{ $semesterData['total_nilai_e'] ?? 0 }}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 32px" class="text-center">No</th>
-                        <th style="width: 90px">Kode</th>
-                        <th>Mata Kuliah</th>
-                        <th style="width: 42px" class="text-center">SKS</th>
-                        <th style="width: 48px" class="text-center">Nilai</th>
-                        <th style="width: 48px" class="text-center">Mutu</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach(($semesterData['matakuliah'] ?? []) as $index => $mk)
-                    <tr>
-                        <td class="text-center">{{ $index + 1 }}</td>
-                        <td>{{ filled($mk['kd_mk'] ?? null) ? $mk['kd_mk'] : '-' }}</td>
-                        <td>{{ filled($mk['nm_mk'] ?? null) ? $mk['nm_mk'] : '-' }}</td>
-                        <td class="text-center">{{ $mk['sks'] ?? 0 }}</td>
-                        <td class="text-center">{{ filled($mk['nilai'] ?? null) ? $mk['nilai'] : '-' }}</td>
-                        <td class="text-center">{{ is_numeric($mk['mutu'] ?? null) ? number_format((float) $mk['mutu'], 2, '.', '') : '-' }}</td>
-                    </tr>
-                    @endforeach
-                    <tr>
-                        <td colspan="3" class="text-right"><strong>Jumlah SKS Semester</strong></td>
-                        <td class="text-center"><strong>{{ $semesterData['total_sks'] ?? 0 }}</strong></td>
-                        <td colspan="2"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        @endforeach
-
-        <div class="footer">
-            Bandung, {{ filled($tanggal ?? null) ? $tanggal : '-' }}<br>
-            Dicetak melalui SIMAK STMIK Bandung
-        </div>
+    <div class="footer">
+        Bandung, {{ filled($tanggal ?? null) ? $tanggal : '-' }}<br>
+        Dicetak melalui SIMAK STMIK Bandung
     </div>
 </body>
 </html>

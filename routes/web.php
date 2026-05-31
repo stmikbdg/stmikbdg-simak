@@ -25,6 +25,7 @@ Route::middleware(['auth.token'])
         Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/absenqr', 'absenqr')->name('absenqr');
         Route::get('/khs/semester/{semester}', 'khs_per_semester');
+        Route::get('/khs/download/semester/{semester}', 'khs_download_per_semester');
         Route::get('/profil', 'profil');
         Route::get('/jadwal', 'jadwal');
         Route::get('/notfound', 'index');

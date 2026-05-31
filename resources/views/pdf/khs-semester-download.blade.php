@@ -17,12 +17,16 @@
         table {
             border-collapse: collapse;
             width: 100%;
+            table-layout: fixed;
         }
 
         th, td {
             border: 1px solid #222;
             padding: 5px 6px;
             vertical-align: top;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         th {
@@ -112,7 +116,9 @@
 <body>
     <div class="container">
         <div class="header-container">
+            @if($image)
             <img src="{{ $image }}" alt="STMIK Bandung" class="logo" />
+            @endif
             <div class="header">
                 <div class="campus-name">SEKOLAH TINGGI MANAJEMEN INFORMATIKA DAN KOMPUTER BANDUNG</div>
                 <div>Jl. Cikutra 113 Telp. (022) 7207777 Fax. (022) 7207777</div>
@@ -123,7 +129,7 @@
 
         <div class="title">
             <h1>KARTU HASIL STUDI</h1>
-            <p>Semester {{ $semester }}</p>
+            <p>Semester {{ filled($semester ?? null) ? $semester : '-' }}</p>
         </div>
 
         <table class="no-border">
@@ -131,17 +137,17 @@
                 <tr>
                     <td style="width: 90px"><strong>NIM</strong></td>
                     <td style="width: 8px">:</td>
-                    <td>{{ $nim ?? '-' }}</td>
+                    <td>{{ filled($nim ?? null) ? $nim : '-' }}</td>
                 </tr>
                 <tr>
                     <td><strong>NAMA</strong></td>
                     <td>:</td>
-                    <td>{{ $nama ?? '-' }}</td>
+                    <td>{{ filled($nama ?? null) ? $nama : '-' }}</td>
                 </tr>
                 <tr>
                     <td><strong>DOSEN WALI</strong></td>
                     <td>:</td>
-                    <td>{{ $dosen_wali ?? '-' }}</td>
+                    <td>{{ filled($dosen_wali ?? null) ? $dosen_wali : '-' }}</td>
                 </tr>
             </tbody>
         </table>
@@ -186,11 +192,11 @@
                 @foreach($matakuliah as $index => $mk)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $mk['kd_mk'] ?? '-' }}</td>
-                    <td>{{ $mk['nm_mk'] ?? '-' }}</td>
+                    <td>{{ filled($mk['kd_mk'] ?? null) ? $mk['kd_mk'] : '-' }}</td>
+                    <td>{{ filled($mk['nm_mk'] ?? null) ? $mk['nm_mk'] : '-' }}</td>
                     <td class="text-center">{{ $mk['sks'] ?? 0 }}</td>
-                    <td class="text-center">{{ $mk['nilai'] ?? '-' }}</td>
-                    <td class="text-center">{{ $mk['mutu'] ?? '-' }}</td>
+                    <td class="text-center">{{ filled($mk['nilai'] ?? null) ? $mk['nilai'] : '-' }}</td>
+                    <td class="text-center">{{ is_numeric($mk['mutu'] ?? null) ? number_format((float) $mk['mutu'], 2, '.', '') : '-' }}</td>
                 </tr>
                 @endforeach
                 <tr>
@@ -202,7 +208,7 @@
         </table>
 
         <div class="footer">
-            Bandung, {{ $tanggal }}<br>
+            Bandung, {{ filled($tanggal ?? null) ? $tanggal : '-' }}<br>
             Dicetak melalui SIMAK STMIK Bandung
         </div>
     </div>

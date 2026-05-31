@@ -189,6 +189,12 @@ class WebController extends Controller {
         return $this->render('krs', [], true, true);
     }
 
+    private function pdfLogoPath(): ?string {
+        $logoPath = public_path('images/stmik.png');
+
+        return file_exists($logoPath) ? $logoPath : null;
+    }
+
     public function krs_approve_by_dosen_wali(Int $mhs_id, Int $krs_id) {
         return $this->render('krs_approve_by_dosen_wali', [
             'mhs_id' => $mhs_id,
@@ -243,7 +249,7 @@ class WebController extends Controller {
             'summary' => $summary,
             'semesters' => $semesters,
             'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
-            'image' => public_path('images/stmik.png')
+            'image' => $this->pdfLogoPath()
         ];
 
         $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
@@ -287,7 +293,7 @@ class WebController extends Controller {
             'total_nilai_e' => $response_data['total_nilai_e'] ?? 0,
             'matakuliah' => $matakuliah,
             'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
-            'image' => public_path('images/stmik.png')
+            'image' => $this->pdfLogoPath()
         ];
 
         $pdf = Pdf::loadView('pdf/khs-semester-download', $data)->setPaper('A4', 'portrait');
@@ -324,26 +330,32 @@ class WebController extends Controller {
 
         // dd($response_data);
 
-        $krs_matkul = $response_data['krs_matkul'];
+        $krs_matkul = $response_data['krs_matkul'] ?? [];
+
+        if(count($krs_matkul) < 1) {
+            return abort(404);
+        }
+
         $total_sks = 0;
         foreach ($krs_matkul as $item) {
-            $total_sks += $item['mata_kuliah']['sks'];
+            $total_sks += $item['mata_kuliah']['sks'] ?? 0;
         }
 
         $data = [
-            'nim' => $user['nim'],
-            'nama' => $user['nama'],
-            'dosen_wali' => $user['dosen_wali'],
+            'nim' => $user['nim'] ?? '-',
+            'nama' => $user['nama'] ?? '-',
+            'dosen_wali' => $user['dosen_wali'] ?? '-',
+            'semester' => $response_data['semester'] ?? '-',
             'matakuliah' => array_map(function($item) {
-                return $item['mata_kuliah'];
+                return $item['mata_kuliah'] ?? [];
             }, $krs_matkul),
             'total_sks' => $total_sks,
             'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
-            'image' => public_path('images/stmik.png')
+            'image' => $this->pdfLogoPath()
         ];
 
         $pdf = Pdf::loadView('pdf/ksm-download', $data)->setPaper('A4', 'portrait');
-        return $pdf->stream('Kartu Studi Mahasiswa - '.$user['nim'].' - '.$user['nama'].' - Semester '.$response_data['semester'].'.pdf');
+        return $pdf->stream('Kartu Studi Mahasiswa - '.($user['nim'] ?? '-').' - '.($user['nama'] ?? '-').' - Semester '.($response_data['semester'] ?? '-').'.pdf');
     }
 
     public function ksm_preview_per_semester(int $semester) {
@@ -473,4 +485,3 @@ class WebController extends Controller {
 }
 
 ?>
-

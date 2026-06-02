@@ -78,9 +78,12 @@
         }
 
         .profile-table {
+<<<<<<< HEAD
             width: auto;
             min-width: 360px;
             table-layout: auto;
+=======
+>>>>>>> 8fdd0e2 (Revert "Revert "Fanfan"")
             margin-top: 4px;
             margin-bottom: 9px;
         }
@@ -90,6 +93,7 @@
             padding: 1.5px 3px;
         }
 
+<<<<<<< HEAD
         .profile-label {
             width: 76px;
             white-space: nowrap;
@@ -104,6 +108,8 @@
             width: 250px;
         }
 
+=======
+>>>>>>> 8fdd0e2 (Revert "Revert "Fanfan"")
         .summary-table {
             margin-bottom: 10px;
         }
@@ -157,6 +163,7 @@
     <table class="profile-table">
         <tbody>
             <tr>
+<<<<<<< HEAD
                 <td class="profile-label"><strong>NIM</strong></td>
                 <td class="profile-separator">:</td>
                 <td class="profile-value">{{ filled($nim ?? null) ? $nim : '-' }}</td>
@@ -170,6 +177,21 @@
                 <td class="profile-label"><strong>DOSEN WALI</strong></td>
                 <td class="profile-separator">:</td>
                 <td class="profile-value">{{ filled($dosen_wali ?? null) ? $dosen_wali : '-' }}</td>
+=======
+                <td style="width: 92px"><strong>NIM</strong></td>
+                <td style="width: 8px">:</td>
+                <td>{{ filled($nim ?? null) ? $nim : '-' }}</td>
+            </tr>
+            <tr>
+                <td><strong>NAMA</strong></td>
+                <td>:</td>
+                <td>{{ filled($nama ?? null) ? $nama : '-' }}</td>
+            </tr>
+            <tr>
+                <td><strong>DOSEN WALI</strong></td>
+                <td>:</td>
+                <td>{{ filled($dosen_wali ?? null) ? $dosen_wali : '-' }}</td>
+>>>>>>> 8fdd0e2 (Revert "Revert "Fanfan"")
             </tr>
         </tbody>
     </table>

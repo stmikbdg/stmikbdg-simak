@@ -1,8 +1,8 @@
-import { Button, CircularProgress, IconButton, InputAdornment, TextField } from "@mui/material"
+import { Button, CircularProgress, IconButton, InputAdornment, TextField, Tooltip } from "@mui/material"
 import { useSidebar } from "../context/SidebarContext"
 import { useUser } from "../context/UserContext"
 import MainLayout from "../layouts/MainLayout"
-import { AccessTimeOutlined, AssignmentOutlined, AutoGraphOutlined, CalendarMonthOutlined, Cancel, Check, CheckCircle, CheckCircleOutline, Close, DangerousTwoTone, DescriptionOutlined, DownloadOutlined, DownloadTwoTone, East, EastOutlined, FormatAlignLeftOutlined, InfoOutlined, MenuOutlined, SendOutlined, StickyNote2Outlined, WarningTwoTone } from "@mui/icons-material"
+import { AccessTimeOutlined, AssignmentOutlined, AutoGraphOutlined, CalendarMonthOutlined, Cancel, Check, CheckCircle, CheckCircleOutline, Close, DangerousTwoTone, DescriptionOutlined, Download, DownloadOutlined, DownloadTwoTone, East, EastOutlined, FormatAlignLeftOutlined, InfoOutlined, MenuOutlined, SendOutlined, StickyNote2Outlined, Visibility, WarningTwoTone } from "@mui/icons-material"
 import { CustomTabItem, CustomTabs } from "../components/CustomTabs"
 import FileUploadComponent from "../components/CustomUpload"
 import CustomDataTable from "../components/CustomDataTable"
@@ -459,7 +459,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
             selected: {
                 total_sks: () => {
                     const mk_id = formData.pengajuan_krs.mata_kuliah.length > 0 ? formData.pengajuan_krs.mata_kuliah?.map(item => item?.mk_id).join(',').split(',') : []
-                    console.log(mk_id)
+                    // console.log(mk_id)
 
                     let data = 0
                     // let matkul = listData.matakuliah.data.find(item => item?.mata_kuliah?.find(mk => mk_id?.includes(String(mk?.mk_id))))
@@ -644,7 +644,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                     }
                 }))
             }
-        }
+        },
     }
 
     useEffect(() => {
@@ -816,105 +816,114 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                     <CustomLoading loading={loadingUserdata} renderIf={userdata}>
                         <CustomTabs>
                             <CustomTabItem label="KRS">
-                                <div className="p-4">
-                                    <CustomLoading loading={listData.krs.loading.fetch} renderIf={listData.krs.fetched}>
-                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                            {!listData.krs.data?.krs?.sts_tiket
-                                                ? (
-                                                    <div className="flex gap-4 p-3 rounded-lg bg-red-50 text-red-700">
-                                                        <DangerousTwoTone fontSize="small" color="error" className=" shrink-0" />
-                                                        <div className="space-y-3">
-                                                            <p className="text-sm">
-                                                                Anda belum melakukan aktivasi keuangan. Silahkan hubungi bagian Administrasi Keuangan. 
-                                                            </p>
-                                                            <Button variant="contained" color="error" onClick={() => window.open('https://wa.me/+628112332113', '_blank')}>
-                                                                <p className="font-jakarta font-bold text-xs">
-                                                                    Hubungi Ibu Eva
+                                <CustomTabs>
+                                    <CustomTabItem label="Pengajuan">
+                                        <div className="p-4">
+                                            <CustomLoading loading={listData.krs.loading.fetch} renderIf={listData.krs.fetched}>
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                                    {!listData.krs.data?.krs?.sts_tiket
+                                                        ? (
+                                                            <div className="flex gap-4 p-3 rounded-lg bg-red-50 text-red-700">
+                                                                <DangerousTwoTone fontSize="small" color="error" className=" shrink-0" />
+                                                                <div className="space-y-3">
+                                                                    <p className="text-sm">
+                                                                        Anda belum melakukan aktivasi keuangan. Silahkan hubungi bagian Administrasi Keuangan. 
+                                                                    </p>
+                                                                    <Button variant="contained" color="error" onClick={() => window.open('https://wa.me/+628112332113', '_blank')}>
+                                                                        <p className="font-jakarta font-bold text-xs">
+                                                                            Hubungi Administrasi
+                                                                        </p>
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                        : dayjs().isAfter(dayjs(listData.krs.data?.tahun_ajaran?.du_sampai)) || dayjs().isSame(dayjs(listData.krs.data?.tahun_ajaran?.du_sampai))
+                                                            ? (
+                                                                <div className="flex gap-4 bg-red-50 text-red-700 p-3 rounded-lg">
+                                                                    <WarningTwoTone fontSize="small" color="error" className=" shrink-0" />
+                                                                    <div className="space-y-3 text-sm">
+                                                                        <p>
+                                                                            Anda tidak bisa melakukan Pengajuan karena <b>sudah melewati batas pengajuan KRS.</b>
+                                                                        </p>
+                                                                        <Button variant="contained" color="error" onClick={() => window.open('https://wa.me/+6287739859278', '_blank')}>
+                                                                            <p className="font-jakarta font-bold text-xs">
+                                                                                Hubungi Administrasi
+                                                                            </p>
+                                                                        </Button>
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                            : (
+                                                                <div className="flex gap-4">
+                                                                    <InfoOutlined fontSize="small" color="primary" className=" shrink-0" />
+                                                                    <div className="space-y-3 text-sm">
+                                                                        {aksi.krs.pengajuan.is_disabled()
+                                                                            ? aksi.krs.pengajuan.message()
+                                                                            : 'Silahkan pilih mata kuliah untuk KRS anda'
+                                                                        }
+
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                    }
+                                                    
+                                                    <div className="flex items-center gap-2 *:grow *:sm:grow-0">
+                                                        {listData.krs.data?.krs?.krs_id && listData.krs.data?.krs?.sts_krs === 'S' && (
+                                                            <Button
+                                                                startIcon={<DownloadOutlined fontSize="small" />}
+                                                                variant="outlined"
+                                                                size="small"
+                                                                onClick={() => window.location.href = `/ksm/download/krs_id/${listData.krs.data?.krs?.krs_id}`}
+                                                            >
+                                                                <p className="font-jakarta text-xs">
+                                                                    Unduh KSM
                                                                 </p>
                                                             </Button>
-                                                        </div>
+                                                        )}
+                                                        <Button disabled={aksi.krs.pengajuan.is_disabled()} onClick={() => modal.show('modal_pengajuan_krs')} startIcon={<SendOutlined />} variant="contained" size="small">
+                                                            <p className="font-jakarta text-xs">
+                                                                Ajukan
+                                                            </p>
+                                                        </Button>
                                                     </div>
-                                                )
-                                                : dayjs().isAfter(dayjs(listData.krs.data?.tahun_ajaran?.du_sampai)) || dayjs().isSame(dayjs(listData.krs.data?.tahun_ajaran?.du_sampai))
+                                                </div>
+                                            </CustomLoading>
+                                        </div>
+                                        <CustomTabs>
+                                            <CustomTabItem label="Semua Semester">
+                                                {listData.krs.loading.fetch 
                                                     ? (
-                                                        <div className="flex gap-4 bg-red-50 text-red-700 p-3 rounded-lg">
-                                                            <WarningTwoTone fontSize="small" color="error" className=" shrink-0" />
-                                                            <div className="space-y-3 text-sm">
-                                                                <p>
-                                                                    Anda tidak bisa melakukan Pengajuan karena <b>sudah melewati batas pengajuan KRS.</b>
-                                                                </p>
-                                                                <Button variant="contained" color="error" onClick={() => window.open('https://wa.me/+6287739859278', '_blank')}>
-                                                                    <p className="font-jakarta font-bold text-xs">
-                                                                        Hubungi Pak Tantra
-                                                                    </p>
-                                                                </Button>
-                                                            </div>
+                                                        <div className="flex items-center justify-center w-full h-80">
+                                                            <CircularProgress size={30} color="primary" />
                                                         </div>
                                                     )
                                                     : (
-                                                        <div className="flex gap-4">
-                                                            <InfoOutlined fontSize="small" color="primary" className=" shrink-0" />
-                                                            <div className="space-y-3 text-sm">
-                                                                {aksi.krs.pengajuan.is_disabled()
-                                                                    ? aksi.krs.pengajuan.message()
-                                                                    : 'Silahkan pilih mata kuliah untuk KRS anda'
-                                                                }
-
-                                                            </div>
+                                                        <div className="divide-y divide-zinc-300">
+                                                            {Array.from({ length: 8 }).map((_, index) => index + 1).map(semester => (
+                                                                
+                                                                <TabSemester key={semester} semester={semester} maksimal_sks={21} total_sks={21} loading={listData.matakuliah.loading.fetch} matakuliah={listData.matakuliah.data} krs_disabled={aksi.krs.pengajuan.is_disabled()} status_krs={listData.krs.data?.krs?.sts_krs} selected_matakuliah={formData.pengajuan_krs.mata_kuliah} onSelect_matakuliah={(value) => aksi.formData.pengajuan_krs.matakuliah.set(semester, value)} />
+                                                            ))}
                                                         </div>
                                                     )
-                                            }
-                                            
-                                            <div className="flex items-center gap-2 *:grow *:sm:grow-0">
-                                                {/* {aksi.krs.is_aktif() && (
-                                                    <>
-
-                                                        <Button startIcon={<DownloadOutlined />} variant="contained" size="small">
-                                                            <p className="font-jakarta text-xs">
-                                                                Unduh KSM
-                                                            </p>
-                                                        </Button>
-                                                    </>
-                                                )} */}
-                                                <Button disabled={aksi.krs.pengajuan.is_disabled()} onClick={() => modal.show('modal_pengajuan_krs')} startIcon={<SendOutlined />} variant="contained" size="small">
-                                                    <p className="font-jakarta text-xs">
-                                                        Ajukan
-                                                    </p>
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </CustomLoading>
-                                </div>
-                                <CustomTabs>
-                                    <CustomTabItem label="Semua Semester">
-                                        {listData.krs.loading.fetch 
-                                            ? (
-                                                <div className="flex items-center justify-center w-full h-80">
-                                                    <CircularProgress size={30} color="primary" />
-                                                </div>
-                                            )
-                                            : (
-                                                <div className="divide-y divide-zinc-300">
-                                                    {Array.from({ length: 8 }).map((_, index) => index + 1).map(semester => (
-                                                        
-                                                        <TabSemester key={semester} semester={semester} maksimal_sks={21} total_sks={21} loading={listData.matakuliah.loading.fetch} matakuliah={listData.matakuliah.data} krs_disabled={aksi.krs.pengajuan.is_disabled()} status_krs={listData.krs.data?.krs?.sts_krs} selected_matakuliah={formData.pengajuan_krs.mata_kuliah} onSelect_matakuliah={(value) => aksi.formData.pengajuan_krs.matakuliah.set(semester, value)} />
-                                                    ))}
-                                                </div>
-                                            )
-                                        }
+                                                }
+                                            </CustomTabItem>
+                                            <CustomTabItem label="Per Semester">
+                                                <CustomControlledTabs value={listData.tabs.current} onChange={aksi.tabs.set}>
+                                                    <CustomControlledTabItem label="1" value={1}></CustomControlledTabItem>
+                                                    <CustomControlledTabItem label="2" value={2}></CustomControlledTabItem>
+                                                    <CustomControlledTabItem label="3" value={3}></CustomControlledTabItem>
+                                                    <CustomControlledTabItem label="4" value={4}></CustomControlledTabItem>
+                                                    <CustomControlledTabItem label="5" value={5}></CustomControlledTabItem>
+                                                    <CustomControlledTabItem label="6" value={6}></CustomControlledTabItem>
+                                                    <CustomControlledTabItem label="7" value={7}></CustomControlledTabItem>
+                                                    <CustomControlledTabItem label="8" value={8}></CustomControlledTabItem>
+                                                </CustomControlledTabs>
+                                                <TabSemester semester={listData.tabs.current} maksimal_sks={21} total_sks={21} loading={listData.matakuliah.loading.fetch} matakuliah={listData.matakuliah.data} krs_disabled={aksi.krs.pengajuan.is_disabled()} status_krs={listData.krs.data?.krs?.sts_krs} selected_matakuliah={formData.pengajuan_krs.mata_kuliah} onSelect_matakuliah={(value) => aksi.formData.pengajuan_krs.matakuliah.set(listData.tabs.current, value)} />
+                                            </CustomTabItem>
+                                        </CustomTabs>
                                     </CustomTabItem>
-                                    <CustomTabItem label="Per Semester">
-                                        <CustomControlledTabs value={listData.tabs.current} onChange={aksi.tabs.set}>
-                                            <CustomControlledTabItem label="1" value={1}></CustomControlledTabItem>
-                                            <CustomControlledTabItem label="2" value={2}></CustomControlledTabItem>
-                                            <CustomControlledTabItem label="3" value={3}></CustomControlledTabItem>
-                                            <CustomControlledTabItem label="4" value={4}></CustomControlledTabItem>
-                                            <CustomControlledTabItem label="5" value={5}></CustomControlledTabItem>
-                                            <CustomControlledTabItem label="6" value={6}></CustomControlledTabItem>
-                                            <CustomControlledTabItem label="7" value={7}></CustomControlledTabItem>
-                                            <CustomControlledTabItem label="8" value={8}></CustomControlledTabItem>
-                                        </CustomControlledTabs>
-                                        <TabSemester semester={listData.tabs.current} maksimal_sks={21} total_sks={21} loading={listData.matakuliah.loading.fetch} matakuliah={listData.matakuliah.data} krs_disabled={aksi.krs.pengajuan.is_disabled()} status_krs={listData.krs.data?.krs?.sts_krs} selected_matakuliah={formData.pengajuan_krs.mata_kuliah} onSelect_matakuliah={(value) => aksi.formData.pengajuan_krs.matakuliah.set(listData.tabs.current, value)} />
+                                    <CustomTabItem label="Riwayat">
+                                        <Mahasiswa_KRSPage_Riwayat token={token} base_url={base_url} role={role} />
                                     </CustomTabItem>
                                 </CustomTabs>
                             </CustomTabItem>
@@ -927,6 +936,243 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                 </div>
             </div>
         </MainLayout>
+    )
+}
+
+function Mahasiswa_KRSPage_Riwayat({ token, base_url, role }) {
+
+    const [listData, setListData] = useState({
+        
+        riwayat: {
+            data: [],
+            loading: {
+                fetch: false,
+                download: false
+            },
+            matkul: []
+        }
+    })
+
+    const aksi = {
+        riwayat: {
+            get: async () => {
+                try {
+                    aksi.riwayat.loading('fetch')
+
+                    const response = await api_handler.get({
+                        base_url,
+                        token,
+                        url: 'krs/riwayat'
+                    })
+
+                    // console.log(response)
+
+                    aksi.riwayat.loading('fetch')
+
+                    if(response?.success) {
+                        aksi.riwayat.set('data', response?.data)
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData(state => ({
+                    ...state,
+                    riwayat: {
+                        ...state.riwayat,
+                        [column]: value
+                    }
+                }))
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    riwayat: {
+                        ...state.riwayat,
+                        loading: {
+                            ...state.riwayat.loading,
+                            [column]: !state.riwayat.loading[column]
+                        }
+                    }
+                }))
+            },
+            matkul: (matkul) => {
+                modal.show('matkul')
+
+                aksi.riwayat.set('matkul', matkul?.map(v => v['mata_kuliah']))
+            }
+        }
+    }
+
+    useEffect(() => {
+        aksi.riwayat.get()
+    }, [])
+
+    return (
+        <div className="p-2">
+            <Modal title="Detail Mata Kuliah" modalId="matkul">
+                <CustomDataTable 
+                    getRowId={(row) => row?.mk_id}
+                    pagination={false}
+                    toolbar={{
+                        column: false,
+                        density: false,
+                        search: true
+                    }}
+                    rows={listData.riwayat.matkul}
+                    columns={[
+                        {
+                            field: 'kd_mk',
+                            headerName: 'Kode',
+                            minWidth: 150
+                        },
+                        {
+                            field: 'nm_mk',
+                            headerName: 'Nama',
+                            minWidth: 200
+                        },
+                        {
+                            field: 'sks',
+                            headerName: 'SKS',
+                            headerAlign: 'center',
+                            align: 'center',
+                            minWidth: 100
+                        },
+                        {
+                            field: 'sts_mk',
+                            headerName: 'Status',
+                            align: 'center',
+                            headerAlign: 'center',
+                            minWidth: 200,
+                            renderCell: ({ row }) => (
+                                <div className="flex items-center justify-center w-full h-full">
+                                    <div className="flex items-center gap-2 rounded-full px-2 py-0.5 text-white font-medium tracking-tighter text-xs">
+                                        <CheckCircle sx={{ fontSize: 4 }} />
+                                        <p>
+                                            Aktif
+                                        </p>
+                                    </div>
+                                </div>
+                            )
+                        }
+                    ]}
+                />
+            </Modal>
+            <CustomDataTable
+                rows={listData.riwayat.data}
+                loading={listData.riwayat.loading.fetch}
+                getRowId={(row) => row?.krs_id} 
+                columns={[
+                    {
+                        field: 'semester',
+                        headerName: 'Semester',
+                        headerAlign: 'center',
+                        align: 'center',
+                        minWidth: 100
+                    },
+                    {
+                        field: 'sts_krs',
+                        headerName: 'Status',
+                        minWidth: 150,
+                        renderCell: ({ row }) => (
+                            <div className="flex items-center w-full h-full">
+                                {row?.sts_krs === 'S'
+                                    ? (
+                                        <div className="px-3 py-0.5 rounded-full text-xs font-bold bg-green-700 text-white shadow">
+                                            Disetujui
+                                        </div>
+                                    ) : row?.sts_krs === 'P'
+                                        ? (
+                                            <div className="px-3 py-0.5 rounded-full text-xs font-bold bg-blue-700 text-white shadow">
+                                                Pengajuan
+                                            </div>
+                                        ) : (
+                                            <div className="px-3 py-0.5 rounded-full text-xs font-bold bg-red-700 text-white shadow">
+                                                Draft / Ditolak
+                                            </div>
+                                        )}
+                            </div>
+                        )   
+                    },
+                    {
+                        field: 'sts_tolak',
+                        headerName: 'Pernah ditolak',
+                        minWidth: 300,
+                        renderCell: ({ row }) => (
+                            <div className="flex items-center h-full w-full">
+                                {row?.ditolak_tanggal
+                                    ? (
+                                        <div className="flex gap-2">
+                                            <Check fontSize="small" color="success" />
+                                            <div className="space-y-1">
+                                                <p className="italic text-xs opacity-50 tracking-tighter">
+                                                    {dayjs(row?.ditolak_tanggal).locale('id').format('dddd, DD MMMM YYYY, HH:mm:ss')}
+                                                </p>
+                                                <p className="italic text-xs font-medium tracking-tighter">
+                                                    {row?.ditolak_alasan}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="italic text-xs opacity-50 tracking-tighter">
+                                            Belum Pernah
+                                        </p>
+                                    )
+                                }
+                            </div>
+                        )
+                    },
+                    {
+                        field: 'pengajuan_catatan',
+                        headerName: 'Catatan',
+                        minWidth: 200,
+                        renderCell: ({ row }) => (
+                            <div className="flex items-center h-full w-full">
+                                {row?.pengajuan_catatan ?? (
+                                    <p className="italic text-xs opacity-50 tracking-tighter">
+                                        Tidak ada catatan
+                                    </p>
+                                )}
+                            </div>
+                        )
+                    },
+                    {
+                        field: 'tanggal',
+                        headerName: 'Tanggal',
+                        minWidth: 200,
+                        valueGetter: (value, row) => dayjs(value).locale('id').format('dddd, DD MMMM YYYY')
+                    },
+                    {
+                        field: 'aksi',
+                        headerName: '',
+                        align: 'center',
+                        renderCell: ({ row }) => (
+                            <div className="flex items-center justify-center w-full h-full gap-2">
+                                <Tooltip arrow title="Lihat Mata Kuliah">
+                                    <IconButton size="small" color="primary" onClick={() => aksi.riwayat.matkul(row?.krs_matkul)}>
+                                        <Visibility fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                                {row?.sts_krs === 'S' && (
+                                    <Tooltip arrow title="Unduh KSM">
+                                        <IconButton size="small" color="primary" onClick={() => window.location.href = `/ksm/download/krs_id/${row?.krs_id}`}>
+                                            <Download fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
+                            </div>
+                        )
+                    }
+                ]}
+            />
+        </div>
     )
 }
 
@@ -989,6 +1235,12 @@ function TabSemester({
                         field: 'nm_mk',
                         headerName: 'Nama',
                         minWidth: 250
+                    },
+                    {
+                        field: 'mk_id',
+                        headerName: 'Kode',
+                        minWidth: 150,
+                        valueGetter: (value, row) => row.kd_mk
                     },
                     {
                         field: 'status',
@@ -1180,6 +1432,17 @@ function KHSPage({ token, base_url, role}) {
         <div className="divide-y divide-zinc-300">
             <div className="p-4">
                 <CustomLoading loading={loadingUserdata} renderIf={userdata}>
+                    <div className="flex justify-end mb-4">
+                        <Button
+                            size="small"
+                            variant="contained"
+                            startIcon={<DownloadOutlined fontSize="small" />}
+                            disabled={listData.khs.loading || !listData.khs.data?.ip_per_semester?.length}
+                            onClick={() => window.location.href = '/khs/download'}
+                        >
+                            <p className="font-jakarta text-xs">Unduh KHS PDF</p>
+                        </Button>
+                    </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div className="grid sm:grid-cols-2 gap-4">
                             <CustomLoading loading={listData.khs.loading} renderIf={listData.khs.data}>
@@ -1264,13 +1527,13 @@ function KHSPage({ token, base_url, role}) {
 
             <Modal modalId="detail_semester" title="Detail Semester" modalBoxClassname="max-w-3xl">
                 <div className="divide-y divide-zinc-300">
-                    <div className="p-4">
+                    {/* <div className="p-4">
                         <Button variant="contained" onClick={() => window.open(`/ksm/download/semester/${listData.semester.data?.semester}`)} startIcon={<DownloadTwoTone />} fullWidth>
                             <p className="font-jakarta font-medium">  
                                 Unduh KSM
                             </p>
                         </Button>
-                    </div>
+                    </div> */}
                     <CustomDataTable 
                         toolbar={{ search: true, export: false, import: false, column: false, density: false }}
                         pageSize={25}

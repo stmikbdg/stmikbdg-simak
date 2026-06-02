@@ -152,7 +152,7 @@ export default function Home({ token, base_url, role, app, apps }) {
 
                     aksi.pengumuman.loading('fetch')
 
-                    console.log(response)
+                    // console.log(response)
 
                     if(response?.success) {
                         aksi.pengumuman.set('data', response?.data?.list_pengumuman)
@@ -243,7 +243,7 @@ export default function Home({ token, base_url, role, app, apps }) {
 
                     aksi.user_sites.loading('fetch')
 
-                    console.log(response)
+                    // console.log(response)
 
                     if(response?.success) {
                         aksi.user_sites.set('data', response?.data?.user_sites)

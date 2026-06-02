@@ -80,84 +80,78 @@ const StyledGridOverlay = styled('div')(({ theme }) => ({
 }
 
 const CustomDataTable = ({
-    id = 'data-table',
-    rows = [],
-    columns = defaultColumns,
-    checkbox = false,
-    dynamicPageSize = true,
-    pageSize = 5,
-    onModal = '',
-    toolbar = {
-        search: true,
-        export: {
-            xlsx: true,
-            csv: true,
-
-        },
-        import: {
-            xlsx: true,
-            csv: true
-        },
-        column: true,
-        density: true
-    },
-    loading = false,
-    rowSelect = {
-        onChange: () => {},
-        value: []
-    },
-    isRowSelectable = (params) => true,
-    getRowId = (row) => row.id
+  id = 'data-table',
+  rows = [],
+  columns = defaultColumns,
+  checkbox = false,
+  dynamicPageSize = true,
+  pageSize = 5,
+  onModal = '',
+  pagination = true, // <-- new prop (default true)
+  toolbar = {
+    search: true,
+    export: { xlsx: true, csv: true },
+    import: { xlsx: true, csv: true },
+    column: true,
+    density: true,
+  },
+  loading = false,
+  rowSelect = {
+    onChange: () => {},
+    value: [],
+  },
+  isRowSelectable = (params) => true,
+  getRowId = (row) => row.id,
 }) => {
-    return (
-      <DataGrid
-        getRowId={getRowId}
-        rows={rows}
-        columns={columns}
-        pageSizeOptions={[5, 10, 25, 50, 100]}
-        pagination
-        autosizeOnMount={loading}
-        disableColumnMenu
-        disableRowSelectionOnClick
-        checkboxSelection={checkbox}
-        loading={loading}
-        isRowSelectable={isRowSelectable}
-        initialState={{
+  return (
+    <DataGrid
+      getRowId={getRowId}
+      rows={rows}
+      columns={columns}
+      {...(pagination && {
+        pageSizeOptions: [5, 10, 25, 50, 100],
+        pagination: true,
+        initialState: {
           pagination: {
-            paginationModel: {
-              pageSize
-            }
-          }
-        }}
-        
-        slots={{
-            toolbar: () => (
-                <GridToolbarContainer className='w-full'>
-                    {toolbar.search && (
-                        <GridToolbarQuickFilter variant='outlined' size={'small'} color={'primary'} placeholder='Cari disini' />
-                    )}
-                    {toolbar.column && (
-                        <GridToolbarColumnsButton  />
-                    )}
-                    {toolbar.density && (
-                        <GridToolbarDensitySelector />
-                    )}
-                </GridToolbarContainer>
-            ),
-            noRowsOverlay: CustomNoRowsOverlay,
-            noResultsOverlay: CustomNoRowsOverlay
-        }}
-        slotProps={{
-            loadingOverlay: {
-                variant: 'skeleton',
-                noRowsVariant: 'skeleton'
-            }
-        }}
-        
-        onRowSelectionModelChange={rowSelect.onChange}
-        rowSelectionModel={rowSelect.value}
-      />
-    )
-}
+            paginationModel: { pageSize },
+          },
+        },
+      })}
+      autosizeOnMount={loading}
+      disableColumnMenu
+      disableRowSelectionOnClick
+      checkboxSelection={checkbox}
+      loading={loading}
+      isRowSelectable={isRowSelectable}
+      slots={{
+        toolbar: () => (
+          <GridToolbarContainer className="w-full">
+            {toolbar.search && (
+              <GridToolbarQuickFilter
+                variant="outlined"
+                size="small"
+                color="primary"
+                placeholder="Cari disini"
+              />
+            )}
+            {toolbar.column && <GridToolbarColumnsButton />}
+            {toolbar.density && <GridToolbarDensitySelector />}
+          </GridToolbarContainer>
+        ),
+        noRowsOverlay: CustomNoRowsOverlay,
+        noResultsOverlay: CustomNoRowsOverlay,
+      }}
+      slotProps={{
+        loadingOverlay: {
+          variant: 'skeleton',
+          noRowsVariant: 'skeleton',
+        },
+      }}
+      onRowSelectionModelChange={rowSelect.onChange}
+      rowSelectionModel={rowSelect.value}
+    />
+  );
+};
+
 
 export default CustomDataTable

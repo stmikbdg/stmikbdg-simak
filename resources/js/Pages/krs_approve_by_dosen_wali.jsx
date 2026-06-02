@@ -170,7 +170,7 @@ function Page({ token, base_url, role, krs_id, mhs_id }) {
                             }))
                         }
 
-                        console.log(payload)
+                        // console.log(payload)
 
                         const response = await api_handler.put({
                             base_url,

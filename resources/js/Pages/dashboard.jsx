@@ -19,6 +19,7 @@ import {
     Close,
     CollectionsBookmarkOutlined,
     Delete,
+    DescriptionOutlined,
     Download,
     East,
     EastOutlined,
@@ -31,6 +32,7 @@ import {
     LocationOnOutlined,
     MenuBookTwoTone,
     MenuOutlined,
+    MoreHoriz,
     PeopleAltTwoTone,
     PersonOutline,
     Refresh,
@@ -55,6 +57,7 @@ import {
     CircularProgress,
     Fade,
     IconButton,
+    InputAdornment,
     TextField,
     Tooltip,
 } from "@mui/material";
@@ -78,6 +81,8 @@ import DOMPurify from "isomorphic-dompurify";
 import CustomSelectAjax from "../components/CustomSelectAjax";
 import CustomSelect from "../components/CustomSelect";
 import { DatePicker } from "@mui/x-date-pickers";
+import { useBackdrop } from "../context/BackdropContext";
+import CustomDropdown from "../components/CustomDropdown";
 
 export default function Home({ token, base_url, role, app }) {
 
@@ -872,7 +877,7 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
             }
         },
         detail: {
-            get: async (matkul) => {
+            get: async () => {
                 try {
                     if(!listData.tanggal.from || !listData.tanggal.to) {
                         return
@@ -881,22 +886,22 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                     aksi.detail.set('loading', true)
 
                     const response = await api_handler.get({
-                        url: `rekap/pertemuan?kelas_kuliah_id=${matkul?.kelas_kuliah_id}&from=${dayjs(listData.tanggal.from).format('YYYY-MM-DD')}&to=${dayjs(listData.tanggal.to).format('YYYY-MM-DD')}`,  
+                        url: `rekap/pertemuan/v2?pengajar_id=${listData.dosen.select?.dosen_id}&tahun_id=${listData.tahun_ajaran.select?.tahun_id}&from=${dayjs(listData.tanggal.from).format('YYYY-MM-DD')}&to=${dayjs(listData.tanggal.to).format('YYYY-MM-DD')}`,  
                         base_url,
-                        token  
+                        token,
+                        debug: false  
                     })
 
                     aksi.detail.set('loading', false)
-
-                    if(!response?.success) {
+                    
+                    // console.log(response)
+                    if(response?.success) {
+                        aksi.detail.set('data', response?.data)
+                    }else{
                         customSwal.toast.error({
                             message: response?.message
                         })
-
-                        return
                     }
-
-                    aksi.detail.set('data', response?.data)
                 } catch (error) {
                     customSwal.toast.error({
                         message: error?.message
@@ -939,12 +944,12 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
     }, [])
 
     useEffect(() => {
-        if(listData.tanggal.from && listData.tanggal.to) {
+        if(listData.tanggal.from && listData.tanggal.to && listData.tahun_ajaran.select && listData.dosen.select) {
             aksi.detail.get(listData.matkul.select)
         }else{
             aksi.detail.set('data', null)
         }
-    }, [listData.tanggal.from, listData.tanggal.to])
+    }, [listData.tanggal.from, listData.tanggal.to, listData.tahun_ajaran.select, listData.dosen.select])
 
     return (
         <div className="divide-y divide-zinc-300">
@@ -973,24 +978,12 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                         onChange={(e, value) => aksi.dosen.select(value)}
                         disabled={listData.tahun_ajaran.loading.fetch || listData.dosen.loading.fetch || !listData.tahun_ajaran.select}
                     />
-                    <CustomSelect 
-                        label={listData.dosen.select ? "Cari dan Pilih Mata Kuliah" : "Silahkan pilih Dosen Mengajar terlebih dahulu"}
-                        placeholder="Nama Mata Kuliah disini"
-                        loading={listData.matkul.loading || listData.dosen.loading.fetch}
-                        loadingText="Loading.."
-                        // optionLabel="uraian"
-                        getOptionLabel={(option) => option?.matakuliah?.nm_mk}
-                        options={listData.matkul.data}
-                        value={listData.matkul.select}
-                        onChange={(e, value) => aksi.matkul.select(value)}
-                        disabled={listData.matkul.loading || listData.dosen.loading.fetch || !listData.dosen.select}
-                    />
                     <div className="grid sm:grid-cols-2 gap-4">
                         <DatePicker 
                             label="Dari Tanggal"
                             value={listData.tanggal.from}
                             onChange={(value) => aksi.tanggal.from(value)}
-                            disabled={!listData.matkul.select}
+                            disabled={!listData.dosen.select}
                             slotProps={{
                                 field: {
                                     clearable: true
@@ -1002,7 +995,7 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                             label="Hingga Tanggal"
                             value={listData.tanggal.to}
                             onChange={(value) => aksi.tanggal.to(value)}
-                            disabled={!listData.matkul.select}
+                            disabled={!listData.dosen.select}
                             slotProps={{
                                 field: {
                                     clearable: true
@@ -1012,7 +1005,7 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                     </div>
                 </div>
             </div>
-            {!listData.tahun_ajaran.select || !listData.dosen.select || !listData.matkul.select
+            {!listData.tahun_ajaran.select || !listData.dosen.select
                 ? (
                     <div className="flex items-center justify-center h-80">
                         Silahkan Isi Kolom diatas terlebih dahulu
@@ -1031,19 +1024,63 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
                             </div>
                         ) 
                         : (
-                            <div className="p-4 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="font-medium text-lg">
-                                        Tanggal Daftar Pertemuan
+                            <div className="divide-y divide-zinc-300">
+                                <div className="p-4">
+                                    <div className="flex items-center gap-4">
+                                        <Button variant="contained" color="error" startIcon={<DescriptionOutlined />} onClick={() => window.location.href = `/rekap/pertemuan/download/${listData.dosen.select?.dosen_id}/${listData.tahun_ajaran.select?.tahun_id}/${dayjs(listData.tanggal.from).format('YYYY-MM-DD')}/${dayjs(listData.tanggal.to).format('YYYY-MM-DD')}`}>
+                                            <p className="font-jakarta text-xs font-extrabold">
+                                                Unduh sebagai PDF
+                                            </p>
+                                        </Button>
+                                        <Button variant="text" startIcon={<RefreshOutlined />} onClick={() => aksi.detail.get()}>
+                                            <p className="font-jakarta text-xs font-extrabold">
+                                                Refresh
+                                            </p>
+                                        </Button>
                                     </div>
                                 </div>
-                                <div className="flex flex-wrap gap-2 font-medium">
-                                    {listData.detail.data?.rekap_pertemuan?.map(item => (
-                                        <p key={item?.tanggal} className="w-fit px-5 py-3 rounded-full bg-zinc-100">
-                                            {dayjs(item?.tanggal).locale('id').format('DD MMMM YYYY')}
-                                        </p>
-                                    ))}
-                                </div>
+                                <CustomDataTable
+                                    getRowId={(row) => row?.pertemuan_id}
+                                    rows={listData.detail.data}
+                                    columns={[
+                                        {
+                                            field: 'create_time',
+                                            headerName: 'Tanggal',
+                                            valueGetter: (value, row) => dayjs(value).locale('id').format('DD MMMM YYYY, HH:mm:ss'),
+                                            minWidth: 200
+                                        },
+                                        {
+                                            field: 'sks',
+                                            headerName: 'SKS',
+                                            minWidth: 150,
+                                            headerAlign: 'center',
+                                            align: 'center',
+                                            valueGetter: (value, row) => row?.kelas_kuliah?.matakuliah?.sks
+                                        },
+                                        {
+                                            field: 'jenis_kelas',
+                                            headerName: 'Kelas Program',
+                                            minWidth: 150,
+                                            headerAlign: 'center',
+                                            align: 'center',
+                                            valueGetter: (value, row) => row?.kelas_kuliah?.jns_mhs === 'R' ? 'Reguler' : 'Karyawan'
+                                        },
+                                        {
+                                            field: 'kelas',
+                                            headerName: 'Kelas',
+                                            minWidth: 150,
+                                            headerAlign: 'center',
+                                            align: 'center',
+                                            valueGetter: (value, row) => row?.kelas_kuliah?.kelas_kuliah
+                                        },
+                                        {
+                                            field: 'nama_mk',
+                                            headerName: 'Mata Kuliah',
+                                            minWidth: 300,
+                                            valueGetter: (value, row) => row?.kelas_kuliah?.matakuliah?.nm_mk
+                                        }
+                                    ]}
+                                />
                             </div>
                         )
             }
@@ -1510,9 +1547,9 @@ function ProdiPage({ token, base_url, role, app }) {
                         <CustomTabItem label="Presensi">
                             <ProdiPage_Rekap_Presensi token={token} base_url={base_url} role={role} />
                         </CustomTabItem>
-                        <CustomTabItem label="pertemuan">
+                        {/* <CustomTabItem label="pertemuan">
                             <ProdiPage_Rekap_Pertemuan token={token} base_url={base_url} role={role} />
-                        </CustomTabItem>
+                        </CustomTabItem> */}
                         <CustomTabItem label="Berita Acara">
                             <ProdiPage_Rekap_BeritaAcara token={token} base_url={base_url} role={role} />
                         </CustomTabItem>
@@ -3447,6 +3484,7 @@ function DosenPage({ token, base_url, role, app }) {
     const { setShowSidebar } = useSidebar();
 
     const { userdata, loadingUserdata } = useUser();
+    const { showBackdrop, setShowBackdrop } = useBackdrop()
 
     const [listData, setListData] = useState({
         khs: {
@@ -3466,8 +3504,10 @@ function DosenPage({ token, base_url, role, app }) {
             data: null,
             loading: {
                 buka: false,
-                upload_kontrak: false
+                upload_kontrak: false,
+                bap: false
             },
+            bap: [],
             kontrak: null,
             absen: {
                 error: null,
@@ -3961,7 +4001,7 @@ function DosenPage({ token, base_url, role, app }) {
                                         })),
                             });
 
-                            console.log(response);
+                            // console.log(response);
 
                             aksi.kelas.absen.daftar.loading("hapus");
 
@@ -4016,9 +4056,28 @@ function DosenPage({ token, base_url, role, app }) {
                 },
                 view: (kontrak_kuliah) => {
                     aksi.kelas.set('kontrak', kontrak_kuliah)
-                    console.log(kontrak_kuliah)
+                    // console.log(kontrak_kuliah)
 
                     modal.show('kontrak')
+                }
+            },
+            bap: async (kelas_kuliah_id) => {
+                modal.show('bap')
+
+                aksi.kelas.loading('bap')
+
+                const response = await api_handler.get({
+                    url: `rekap/berita-acara/dosen/kelas-kuliah/${kelas_kuliah_id}`,
+                    base_url,
+                    token
+                })
+
+                aksi.kelas.loading('bap')
+
+                if(response?.success) {
+                    aksi.kelas.set('bap', response?.data)
+                }else{
+
                 }
             }
         },
@@ -4069,6 +4128,57 @@ function DosenPage({ token, base_url, role, app }) {
                             </div> */}
                             <iframe src={listData.kelas.kontrak?.file_link} className="w-full min-h-screen h-full" />
                         </div>
+                    </Modal>
+
+                    <Modal title="Berita Acara Perkuliahan" modalId="bap" modalBoxClassname="max-w-screen-md">
+                        {/* <div className="p-4 flex items-center gap-4 ">
+                            <Button variant="contained" size="small" color="success" startIcon={<Download />}>
+                                <p className="font-jakarta font-bold">
+                                    Excel
+                                </p>
+                            </Button>
+                            <Button variant="contained" size="small" color="error" startIcon={<Download />}>
+                                <p className="font-jakarta font-bold">
+                                    PDF
+                                </p>
+                            </Button>
+                        </div> */}
+                        <CustomDataTable 
+                            pageSize={100}
+                            pagination={false}
+                            toolbar={{
+                                density: false,
+                                column: false
+                            }}
+                            rows={listData.kelas.bap}
+                            loading={listData.kelas.loading.bap}
+                            getRowId={(row) => row?.berita_acara_id}
+                            columns={[
+                                {
+                                    field: 'created_at',
+                                    headerName: 'Tanggal',
+                                    minWidth: 180,
+                                    valueGetter: (value, row) => dayjs(value).locale('id').format('DD MMMM YYYY, HH:mm:ss')
+                                },
+                                {
+                                    field: 'berita_acara',
+                                    headerName: 'Berita Acara',
+                                    minWidth: 250
+                                },
+                                {
+                                    field: 'mhs_hdr',
+                                    headerName: 'Jumlah Kehadiran',
+                                    minWidth: 150,
+                                    valueGetter: (value, row) => `${row?.mhs_hdr}/${row?.jml_mhs}`
+                                },
+                                {
+                                    field: 'jml_mhs',
+                                    headerName: 'Persentase Kehadiran',
+                                    minWidth: 150,
+                                    valueGetter: (value, row) => `${Number((row?.mhs_hdr/row?.jml_mhs)*100)}%`
+                                }
+                            ]}
+                        />
                     </Modal>
 
                     <CustomTabs centered>
@@ -4600,71 +4710,36 @@ function DosenPage({ token, base_url, role, app }) {
                                                                 .format("dddd"),
                                                         )
                                                         .map((item) => (
-                                                            <div
-                                                                key={
-                                                                    item[
-                                                                        "data_kelas"
-                                                                    ][
-                                                                        "kelas_kuliah_id"
-                                                                    ]
-                                                                }
-                                                                className={`rounded-md shadow border-l-4 ${item["kelas_dibuka"] ? "border-blue-500" : "border-zinc-500"}`}
-                                                            >
+                                                            <div key={item['data_kelas']['kelas_kuliah_id']} className={`rounded-md shadow border-l-4 ${item['kelas_dibuka'] ? 'border-blue-500' : 'border-zinc-500'}`}>
                                                                 <div className="flex flex-col justify-between">
                                                                     <div className="flex gap-4 p-4">
                                                                         <div className="">
-                                                                            <div
-                                                                                className={`w-7 sm:w-8 lg:w-10 aspect-square rounded-md flex items-center justify-center ${item["kelas_dibuka"] ? "bg-blue-100 text-blue-500" : "bg-zinc-100 text-zinc-500"}`}
-                                                                            >
+                                                                            <div className={`w-7 sm:w-8 lg:w-10 aspect-square rounded-md flex items-center justify-center ${item['kelas_dibuka'] ? 'bg-blue-100 text-blue-500' : 'bg-zinc-100 text-zinc-500'}`}>
                                                                                 <CollectionsBookmarkOutlined fontSize="small" />
                                                                             </div>
                                                                         </div>
                                                                         <div className=" space-y-4 w-full">
                                                                             <div className="space-y-2">
-                                                                                {item[
-                                                                                    "matakuliah"
-                                                                                ][
-                                                                                    "kd_mk"
-                                                                                ] && (
-                                                                                    <p className="text-xs font-medium opacity-70">
-                                                                                        {
-                                                                                            item[
-                                                                                                "matakuliah"
-                                                                                            ][
-                                                                                                "kd_mk"
-                                                                                            ]
-                                                                                        }
-                                                                                    </p>
-                                                                                )}
+                                                                                <div className="flex items-center gap-2">
+                                                                                    {item['matakuliah']['kd_mk'] && (
+                                                                                        <p className="text-xs font-medium opacity-70">
+                                                                                            {item['matakuliah']['kd_mk']}
+                                                                                        </p>
+                                                                                    )}
+                                                                                    <div className="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
+                                                                                        0% - Min. Presensi
+                                                                                    </div>
+                                                                                </div>
                                                                                 <h1 className="font-bold text-lg">
-                                                                                    {
-                                                                                        item[
-                                                                                            "matakuliah"
-                                                                                        ][
-                                                                                            "nm_mk"
-                                                                                        ]
-                                                                                    }
+                                                                                    {item['matakuliah']['nm_mk']}
                                                                                 </h1>
                                                                             </div>
                                                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                                                {item[
-                                                                                    "dosen"
-                                                                                ] && (
+                                                                                {item['dosen'] && (
                                                                                     <div className="flex items-center gap-3 opacity-70">
-                                                                                        <SubjectOutlined
-                                                                                            sx={{
-                                                                                                fontSize: 16,
-                                                                                            }}
-                                                                                        />
+                                                                                        <SubjectOutlined sx={{ fontSize: 16 }} />
                                                                                         <p className="text-xs font-medium">
-                                                                                            Semester{" "}
-                                                                                            {
-                                                                                                item[
-                                                                                                    "matakuliah"
-                                                                                                ][
-                                                                                                    "semester"
-                                                                                                ]
-                                                                                            }
+                                                                                            Semester {item['matakuliah']['semester']}
                                                                                         </p>
                                                                                     </div>
                                                                                 )}
@@ -4677,111 +4752,37 @@ function DosenPage({ token, base_url, role, app }) {
                                                                                 </div>
                                                                             </div>
                                                                             <div className="flex items-center flex-wrap">
-                                                                                {item[
-                                                                                    "riwayat_pertemuan"
-                                                                                ].map(
-                                                                                    (
-                                                                                        absen,
-                                                                                        index,
-                                                                                    ) => (
-                                                                                        <Tooltip
-                                                                                            key={
-                                                                                                index
-                                                                                            }
-                                                                                            arrow
-                                                                                            title={`${absen["jns_pert"]} - ${dayjs(absen["create_time"]).locale("id").format("HH:mm:ss, DD MMMM YYYY")}`}
-                                                                                        >
-                                                                                            <CheckBoxTwoTone
-                                                                                                fontSize="small"
-                                                                                                color="primary"
-                                                                                            />
-                                                                                        </Tooltip>
-                                                                                    ),
-                                                                                )}
-                                                                                {Array.from(
-                                                                                    {
-                                                                                        length: parseInt(
-                                                                                            item[
-                                                                                                "riwayat_pertemuan_maks"
-                                                                                            ] -
-                                                                                                item[
-                                                                                                    "riwayat_pertemuan"
-                                                                                                ]
-                                                                                                    .length,
-                                                                                        ),
-                                                                                    },
-                                                                                ).map(
-                                                                                    (
-                                                                                        _,
-                                                                                        index,
-                                                                                    ) => (
-                                                                                        <Tooltip
-                                                                                            key={
-                                                                                                index
-                                                                                            }
-                                                                                            arrow
-                                                                                            title=""
-                                                                                        >
-                                                                                            <CheckBoxOutlineBlankTwoTone fontSize="small" />
-                                                                                        </Tooltip>
-                                                                                    ),
-                                                                                )}
+                                                                                {item['riwayat_pertemuan'].map((absen, index) => (
+                                                                                    <Tooltip key={index} arrow title={`${absen['jns_pert']} - ${dayjs(absen['create_time']).locale('id').format('HH:mm:ss, DD MMMM YYYY')}`}>
+                                                                                        <CheckBoxTwoTone fontSize="small" color="primary" />
+                                                                                    </Tooltip>
+                                                                                ))}
+                                                                                {Array.from({ length: parseInt(item['riwayat_pertemuan_maks'] - item['riwayat_pertemuan'].length) }).map((_, index) => (
+                                                                                    <Tooltip key={index} arrow title="">
+                                                                                        <CheckBoxOutlineBlankTwoTone fontSize="small" />
+                                                                                    </Tooltip>
+                                                                                ))}
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    <div
-                                                                        className={`${item["kelas_dibuka"] ? "bg-blue-50/50" : "bg-zinc-50"} p-4`}
-                                                                    >
+                                                                    <div className={`${item['kelas_dibuka'] ? 'bg-blue-50/50' : 'bg-zinc-50'} p-4`}>
                                                                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                                                                             <div className="flex items-center justify-between sm:justify-start gap-6">
-                                                                                {item[
-                                                                                    "jadwal"
-                                                                                ] && (
+                                                                                {item['jadwal'] && (
                                                                                     <>
-                                                                                        {item[
-                                                                                            "jadwal"
-                                                                                        ][
-                                                                                            "jam"
-                                                                                        ] && (
+                                                                                        {item['jadwal']['jam'] && (
                                                                                             <div className="flex items-center gap-3">
-                                                                                                <AccessTimeOutlined
-                                                                                                    sx={{
-                                                                                                        fontSize: 16,
-                                                                                                    }}
-                                                                                                    className={`${item["kelas_dibuka"] ? "text-blue-700" : "text-zinc-700"}`}
-                                                                                                />
+                                                                                                <AccessTimeOutlined sx={{ fontSize: 16 }} className={`${item['kelas_dibuka'] ? 'text-blue-700' : 'text-zinc-700'}`} />
                                                                                                 <p className="text-xs font-semibold opacity-70">
-                                                                                                    {
-                                                                                                        item[
-                                                                                                            "jadwal"
-                                                                                                        ][
-                                                                                                            "jam"
-                                                                                                        ]
-                                                                                                    }
+                                                                                                    {item['jadwal']['jam']}
                                                                                                 </p>
                                                                                             </div>
                                                                                         )}
-                                                                                        {item[
-                                                                                            "jadwal"
-                                                                                        ][
-                                                                                            "kd_ruang"
-                                                                                        ] && (
+                                                                                        {item['jadwal']['kd_ruang'] && (
                                                                                             <div className="flex items-center gap-3">
-                                                                                                <LocationOnOutlined
-                                                                                                    sx={{
-                                                                                                        fontSize: 16,
-                                                                                                    }}
-                                                                                                    className={`${item["kelas_dibuka"] ? "text-blue-700" : "text-zinc-700"}`}
-                                                                                                />
+                                                                                                <LocationOnOutlined sx={{ fontSize: 16 }} className={`${item['kelas_dibuka'] ? 'text-blue-700' : 'text-zinc-700'}`} />
                                                                                                 <p className="text-xs font-semibold opacity-70">
-                                                                                                    Ruang{" "}
-                                                                                                    {
-                                                                                                        item[
-                                                                                                            "jadwal"
-                                                                                                        ][
-                                                                                                            "kd_ruang"
-                                                                                                        ]
-                                                                                                    }
+                                                                                                    Ruang {item['jadwal']['kd_ruang']}
                                                                                                 </p>
                                                                                             </div>
                                                                                         )}
@@ -4789,126 +4790,75 @@ function DosenPage({ token, base_url, role, app }) {
                                                                                 )}
                                                                             </div>
                                                                             <div className="flex justify-end w-full sm:w-fit">
-                                                                                {item[
-                                                                                    "kontrak_kuliah"
-                                                                                ] ? (
-                                                                                    item[
-                                                                                        "kelas_dibuka"
-                                                                                    ] ? (
+                                                                                {item['kontrak_kuliah']
+                                                                                    ? item['kelas_dibuka']
+                                                                                    ? (
                                                                                         <div className="flex items-center gap-4 w-full sm:w-fit">
-                                                                                            <Button
-                                                                                                variant="outlined"
-                                                                                                size="small"
-                                                                                                onClick={() =>
-                                                                                                    aksi.kelas.absen.init(
-                                                                                                        item[
-                                                                                                            "data_kelas"
-                                                                                                        ][
-                                                                                                            "kelas_kuliah_id"
-                                                                                                        ],
-                                                                                                    )
-                                                                                                }
-                                                                                                disabled={
-                                                                                                    listData
-                                                                                                        .kelas
-                                                                                                        .loading
-                                                                                                        .buka ||
-                                                                                                    listData
-                                                                                                        .kelas
-                                                                                                        .absen
-                                                                                                        .loading
-                                                                                                        .refresh
-                                                                                                }
-                                                                                                className="text-xs w-full sm:w-fit"
-                                                                                            >
-                                                                                                <p className="font-jakarta text-xs">
-                                                                                                    {listData
-                                                                                                        .kelas
-                                                                                                        .loading
-                                                                                                        .buka ||
-                                                                                                    listData
-                                                                                                        .kelas
-                                                                                                        .absen
-                                                                                                        .loading
-                                                                                                        .refresh
-                                                                                                        ? "Loading..."
-                                                                                                        : "Absensi"}
-                                                                                                </p>
-                                                                                            </Button>
-                                                                                            <Button
-                                                                                                variant="contained"
-                                                                                                disabled={
-                                                                                                    listData
-                                                                                                        .kelas
-                                                                                                        .loading
-                                                                                                        .buka ||
-                                                                                                    listData
-                                                                                                        .kelas
-                                                                                                        .absen
-                                                                                                        .loading
-                                                                                                        .refresh
-                                                                                                }
-                                                                                                onClick={() =>
-                                                                                                    aksi.kelas.tutup.init(item['data_kelas']['kelas_kuliah_id'])
-                                                                                                }
-                                                                                                size="small"
-                                                                                                className="text-xs w-full sm:w-fit"
-                                                                                            >
-                                                                                                <p className="font-jakarta text-xs">
-                                                                                                    {listData
-                                                                                                        .kelas
-                                                                                                        .loading
-                                                                                                        .buka ||
-                                                                                                    listData
-                                                                                                        .kelas
-                                                                                                        .absen
-                                                                                                        .loading
-                                                                                                        .refresh
-                                                                                                        ? "Loading..."
-                                                                                                        : "Tutup Kelas"}
+                                                                                            <CustomDropdown 
+                                                                                                buttonComponent={(
+                                                                                                    <Button variant="outlined" size="small"  disabled={listData.kelas.loading.buka || listData.kelas.absen.loading.refresh} className="text-xs w-full sm:w-fit" startIcon={<MoreHoriz />} loading={listData.kelas.loading.buka || listData.kelas.absen.loading.refresh} loadingPosition="start">
+                                                                                                        <p className="font-jakarta text-xs">
+                                                                                                            Lainnya
+                                                                                                        </p>
+                                                                                                    </Button>
+                                                                                                )}
+                                                                                                menuItems={[
+                                                                                                    {
+                                                                                                        label: 'Cek Absensi Kehadiran',
+                                                                                                        onClick: () => aksi.kelas.absen.init(item['data_kelas']['kelas_kuliah_id']),
+                                                                                                        render: true
+                                                                                                    },
+                                                                                                    {
+                                                                                                        label: 'Berita Acara Perkuliahan',
+                                                                                                        sublabel: 'Rekap Berita Acara Perkuliahan',
+                                                                                                        render: true,
+                                                                                                        onClick: () => aksi.kelas.bap(item['data_kelas']['kelas_kuliah_id'])
+                                                                                                    }
+                                                                                                ]}
+                                                                                            />
+                                                                                            <Button variant="contained" disabled={listData.kelas.loading.buka || listData.kelas.absen.loading.refresh} onClick={() => aksi.kelas.tutup.init(item['data_kelas']['kelas_kuliah_id'])} size="small" className="text-xs w-full sm:w-fit">
+                                                                                            <p className="font-jakarta text-xs">
+                                                                                                    {(listData.kelas.loading.buka || listData.kelas.absen.loading.refresh)
+                                                                                                        ? 'Loading...'
+                                                                                                        : 'Tutup Kelas'
+                                                                                                    }
                                                                                                 </p>
                                                                                             </Button>
                                                                                         </div>
-                                                                                    ) : (
-                                                                                        <Button
-                                                                                            variant="contained"
-                                                                                            disabled={
-                                                                                                listData
-                                                                                                    .jadwal
-                                                                                                    .loading
-                                                                                                    .fetch ||
-                                                                                                aksi.jadwal.kelas_lain_dibuka()
-                                                                                            }
-                                                                                            onClick={() =>
-                                                                                                aksi.kelas.buka(
-                                                                                                    item[
-                                                                                                        "data_kelas"
-                                                                                                    ][
-                                                                                                        "kelas_kuliah_id"
-                                                                                                    ],
-                                                                                                )
-                                                                                            }
-                                                                                            size="small"
-                                                                                            className="text-xs w-full sm:w-fit"
-                                                                                        >
-                                                                                            <p className="font-jakarta text-xs">
-                                                                                                {aksi.jadwal.kelas_lain_dibuka()
-                                                                                                    ? "Kelas lain sedang dibuka"
-                                                                                                    : "Buka kelas"}
-                                                                                            </p>
-                                                                                        </Button>
                                                                                     )
-                                                                                ) : (
-                                                                                    <CustomUpload
-                                                                                        buttonProps={{
-                                                                                            size: "small",
-                                                                                            variant:
-                                                                                                "contained",
-                                                                                        }}
-                                                                                        text="upload kontrak/silabus"
-                                                                                        onUploaded={(files) => aksi.kelas.kontrak.upload(files[0], item['data_kelas']['kelas_kuliah_id'])} startIcon={<Upload />} loading={listData.kelas.loading.upload_kontrak}
-                                                                                    />
-                                                                                )}
+                                                                                    : (
+                                                                                        <>
+                                                                                            
+                                                                                            <div className="flex items-center gap-4">
+                                                                                                <CustomDropdown 
+                                                                                                    buttonComponent={(
+                                                                                                        <Button variant="outlined" size="small"  disabled={listData.kelas.loading.buka || listData.kelas.absen.loading.refresh} className="text-xs w-full sm:w-fit" startIcon={<MoreHoriz />} loading={listData.kelas.loading.buka || listData.kelas.absen.loading.refresh} loadingPosition="start">
+                                                                                                            <p className="font-jakarta text-xs">
+                                                                                                                Lainnya
+                                                                                                            </p>
+                                                                                                        </Button>
+                                                                                                    )}
+                                                                                                    menuItems={[
+                                                                                                        {
+                                                                                                            label: 'Berita Acara Perkuliahan',
+                                                                                                            sublabel: 'Rekap Berita Acara Perkuliahan',
+                                                                                                            render: true,
+                                                                                                            onClick: () => aksi.kelas.bap(item['data_kelas']['kelas_kuliah_id'])
+                                                                                                        }
+                                                                                                    ]}
+                                                                                                />
+                                                                                                <Button variant="contained" disabled={listData.jadwal.loading.fetch} onClick={() => aksi.kelas.buka(item['data_kelas']['kelas_kuliah_id'])} size="small" className="text-xs w-full sm:w-fit">
+                                                                                                    <p className="font-jakarta text-xs">
+                                                                                                        Buka Kelas
+                                                                                                    </p>
+                                                                                                </Button>
+                                                                                            </div>
+                                                                                        </>
+                                                                                    )
+                                                                                    : (
+                                                                                        <CustomUpload buttonProps={{ size: 'small', variant: 'contained' }} text="upload kontrak/silabus" onUploaded={(files) => aksi.kelas.kontrak.upload(files[0], item['data_kelas']['kelas_kuliah_id'])} startIcon={<Upload />} loading={listData.kelas.loading.upload_kontrak} />
+                                                                                    )
+                                                                                }
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -5339,7 +5289,7 @@ function DosenPagePengumumanKelas({ token, base_url, role }) {
                             image: null
                         }
                         
-                        console.log(payload)
+                        // console.log(payload)
 
                         if(!payload.target) {
                             aksi.formData.pengumuman.set('error', 'Kelas belum dipilih!')
@@ -5573,10 +5523,252 @@ function DosenPagePengumumanKelas({ token, base_url, role }) {
     )
 }
 
-function AdminPage({ token, base_url, role, app }) {
-    const { setShowSidebar } = useSidebar();
+function AdminPage_MinimalPersentasePresensi({ token, base_url, role }) {
 
-    const { userdata, loadingUserdata } = useUser();
+    const [listData, setListData] = useState({
+        tahun_ajaran: {
+            data: [],
+            loading: false,
+            error: null,
+            select: null
+        },
+        persentase: {
+            loading: {
+                fetch: false,
+                submit: false
+            }
+        }
+    })
+
+    const [formData, setFormData] = useState({
+        persentase: 0
+    })
+
+    const aksi = {
+        tahun_ajaran: {
+            get: async () => {
+                try {
+                    aksi.tahun_ajaran.loading('fetch')
+
+                    const response = await api_handler.get({
+                        url: 'rekap/presensi/filter/tahun-ajaran',
+                        base_url,
+                        token
+                    })
+
+                    aksi.tahun_ajaran.loading('fetch')
+
+                    if (response?.success) {
+                        aksi.tahun_ajaran.set('data', response?.data?.tahun_ajaran)                        
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            set: (column, value) => {
+                setListData({
+                    ...listData,
+                    tahun_ajaran: {
+                        ...listData.tahun_ajaran,
+                        [column]: value
+                    }
+                })
+            },
+            loading: (column) => {
+                setListData({
+                    ...listData,
+                    tahun_ajaran: {
+                        ...listData.tahun_ajaran,
+                        loading: {
+                            ...listData.tahun_ajaran.loading,
+                            [column]: !listData.tahun_ajaran.loading[column]
+                        }
+                    }
+                })
+            },
+            select: async (value) => {
+                // aksi.dosen.set('data', [])
+                aksi.tahun_ajaran.set('select', value)
+                if(value) {
+                    aksi.persentase.get(value['tahun_id'])
+                }else{
+                    aksi.formData.persentase.set(0)
+                }
+            }
+        },
+        persentase: {
+            get: async (tahun_id) => {
+                try {
+                    aksi.persentase.loading('fetch')
+
+                    const response = await api_handler.get({
+                        base_url,
+                        token,
+                        url: `kelas-kuliah/minimal-presensi/admin/tahun_id/${tahun_id}`
+                    })
+
+                    aksi.persentase.loading('fetch')
+
+                    // console.log(response)
+                    if(response?.success) {
+                        aksi.formData.persentase.set(response?.data?.persentase)
+                    }else{
+                        aksi.formData.persentase.set(0)
+                        customSwal.toast.error({
+                            message: response?.message
+                        })
+                    }
+                } catch (error) {
+                    customSwal.toast.error({
+                        message: error?.message
+                    })
+                }
+            },
+            loading: (column) => {
+                setListData(state => ({
+                    ...state,
+                    persentase: {
+                        ...state.persentase,
+                        loading: {
+                            ...state.persentase.loading,
+                            [column]: !state.persentase.loading[column]
+                        }
+                    }
+                }))
+            }
+        },
+        formData: {
+            persentase: {
+                set: (value) => {
+                    setFormData(state => ({
+                        ...state,
+                        persentase: value
+                    }))
+                },
+                submit: async (e) => {
+                    e.preventDefault()
+
+                    const payload = {
+                        fk_tahun_ajaran: listData.tahun_ajaran.select?.tahun_id,
+                        persentase: formData.persentase
+                    }
+
+                    aksi.persentase.loading('submit')
+
+                    const response = await api_handler.post({
+                        url: 'kelas-kuliah/minimal-presensi/admin',
+                        base_url,
+                        token,
+                        payload
+                    })
+
+                    aksi.persentase.loading('submit')
+
+                    if(response?.success) {
+                        aksi.persentase.get(listData.tahun_ajaran.select?.tahun_id)
+                        customSwal.toast.success({
+                            message: 'Berhasil menambahkan minimal persentase tersebut.'
+                        })
+                    }else{
+                        customSwal.toast.error({
+                            message: response?.message
+                        })   
+                    }
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        aksi.tahun_ajaran.get()
+    }, [])
+
+    return (
+        <div className="divide-y divide-zinc-300">
+            <form 
+                onSubmit={aksi.formData.persentase.submit} 
+            >
+                <div className="p-4 space-y-4 max-w-2xl">
+
+                    <CustomSelect 
+                        label="Cari dan Pilih Tahun Ajaran"
+                        placeholder="2024/2025"
+                        loading={listData.tahun_ajaran.loading}
+                        loadingText="Loading.."
+                        optionLabel="uraian"
+                        options={listData.tahun_ajaran.data}
+                        value={listData.tahun_ajaran.select}
+                        onChange={(e, value) => aksi.tahun_ajaran.select(value)}
+                        disabled={listData.tahun_ajaran.loading}
+                    />
+                    <TextField 
+                        label="Minimal Persentase"
+                        placeholder="0% - 100%"
+                        required
+                        loading={listData.persentase.loading.fetch}
+                        size="small"
+                        type="number"
+                        value={formData.persentase}
+                        onChange={e => aksi.formData.persentase.set(e.target.value)}
+                        disabled={!listData.tahun_ajaran.select || listData.persentase.loading.fetch}
+                        slotProps={{
+                            input: {
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        %
+                                    </InputAdornment>
+                                ),
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        {listData.persentase.loading.fetch && (
+                                            <CircularProgress size={20} className="grayscale" />
+                                        )}
+                                    </InputAdornment>
+                                )
+                            }
+                        }}
+                    />
+                    <div className="pt-4">
+                        <Button type="submit" variant="contained" loading={listData.persentase.loading.submit || listData.persentase.loading.refresh} disabled={!listData.tahun_ajaran.select} loadingPosition="start" startIcon={<SaveOutlined />}>
+                            <p className=" font-medium">
+                                Simpan
+                            </p>
+                        </Button>
+                    </div>
+                </div>
+            </form>
+            {/* <div className="p-2">
+                <CustomDataTable 
+                    columns={[
+                        {
+                            field: 'thn_ajaran',
+                            headerName: 'Tahun Ajaran',
+                            minWidth: 300
+                        },
+                        {
+                            field: 'persentase',
+                            headerName: 'Persentase (%)',
+                            minWidth: 200,
+                            headerAlign: 'center',
+                            align: 'center'
+                        }
+                    ]}
+                />
+            </div> */}
+        </div>
+    )
+}
+
+function AdminPage({ token, base_url, role, app }) {
+    const { setShowSidebar } = useSidebar()
+
+    const { userdata, loadingUserdata } = useUser()
 
     const [listData, setListData] = useState({
         pengumuman: {
@@ -5986,6 +6178,12 @@ function AdminPage({ token, base_url, role, app }) {
                                     </div>
                                 </div>
                             </div>
+                        </CustomTabItem>
+                        <CustomTabItem label="Rekap Pertemuan">
+                            <ProdiPage_Rekap_Pertemuan token={token} base_url={base_url} role={role} />
+                        </CustomTabItem>
+                        <CustomTabItem label="Persentase Presensi">
+                            <AdminPage_MinimalPersentasePresensi token={token} base_url={base_url} role={role} />
                         </CustomTabItem>
                     </CustomTabs>
 

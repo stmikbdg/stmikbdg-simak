@@ -40,6 +40,9 @@ class AuthController extends Controller
             $user = $userService->getMyProfile()->getData('data')['data'];
             $userProfile = $user['profile'];
             $userAccount = $user['account'];
+            if($role === 'is_mhs') {
+                $keuangan = $user['keuangan'];
+            }
 
             // verify role
             if ($userAccount[$role]) {
@@ -51,6 +54,9 @@ class AuthController extends Controller
             // save user data to session
             Session::put('account', $userAccount);
             Session::put('profile', $userProfile);
+            if($role === 'is_mhs') {
+                Session::put('keuangan', $keuangan);
+            }
             Session::put('user_image', $user['account']['image']);
             Session::put('user_email', $user['account']['email']);
 
@@ -71,6 +77,7 @@ class AuthController extends Controller
             Session::remove('profile');
             Session::remove('user_image');
             Session::remove('user_email');
+            Session::remove('keuangan');
         }
 
         return self::redirectToLogout();

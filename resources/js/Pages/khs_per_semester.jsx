@@ -1,8 +1,8 @@
 import { useSidebar } from "../context/SidebarContext"
 import { useRedirect } from "../context/RedirectContext"
 import MainLayout from "../layouts/MainLayout"
-import { Button, IconButton } from "@mui/material"
-import { DownloadOutlined, MenuOutlined, West } from "@mui/icons-material"
+import { IconButton } from "@mui/material"
+import { MenuOutlined, West } from "@mui/icons-material"
 import CustomDataTable from "../components/CustomDataTable"
 import CustomLoading from "../components/CustomLoading"
 import { useUser } from "../context/UserContext"
@@ -90,34 +90,13 @@ export default function KHSPerSemester({ semester, token, base_url, role }) {
 
                     {/* Content */}
                     <div className="p-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <div className="flex items-center gap-4">
-                                <IconButton color="primary" onClick={() => goTo('/khs')}>
-                                    <West fontSize="small" />
-                                </IconButton>
-                                <h1 className=" text-lg">
-                                    Semester {semester}
-                                </h1>
-                            </div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <Button
-                                    size="small"
-                                    variant="outlined"
-                                    disabled={listData.khs.loading || !listData.khs.data?.matakuliah?.length}
-                                    onClick={() => window.open(`/khs/preview/semester/${semester}`, '_blank', 'noopener,noreferrer')}
-                                >
-                                    <p className="font-jakarta text-xs">Preview</p>
-                                </Button>
-                                <Button
-                                    size="small"
-                                    variant="contained"
-                                    startIcon={<DownloadOutlined fontSize="small" />}
-                                    disabled={listData.khs.loading || !listData.khs.data?.matakuliah?.length}
-                                    onClick={() => window.location.href = `/khs/download/semester/${semester}`}
-                                >
-                                    <p className="font-jakarta text-xs">Unduh PDF</p>
-                                </Button>
-                            </div>
+                        <div className="flex items-center gap-4">
+                            <IconButton color="primary" onClick={() => goTo('/khs')}>
+                                <West fontSize="small" />
+                            </IconButton>
+                            <h1 className=" text-lg">
+                                Semester {semester}
+                            </h1>
                         </div>
                     </div>
 

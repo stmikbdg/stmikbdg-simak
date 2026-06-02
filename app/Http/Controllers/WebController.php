@@ -189,139 +189,11 @@ class WebController extends Controller {
         return $this->render('krs', [], true, true);
     }
 
-    private function pdfLogoPath(): ?string {
-        $logoPath = public_path('images/stmik.png');
-
-        return file_exists($logoPath) ? $logoPath : null;
-    }
-
     public function krs_approve_by_dosen_wali(Int $mhs_id, Int $krs_id) {
         return $this->render('krs_approve_by_dosen_wali', [
             'mhs_id' => $mhs_id,
             'krs_id' => $krs_id
         ]);
-    }
-
-    private function khsDownloadViewData($image) {
-
-        $user = Session::get('profile');
-
-        Carbon::setLocale('id');
-
-        $summaryResponse = $this->service->get(null, 'krs/ip/semester')->getData('data');
-
-        if($summaryResponse['status'] != 'success') {
-            return abort(404);
-        }
-
-        $summary = $summaryResponse['data'];
-
-        if(! $summary) {
-            return abort(404);
-        }
-
-        $semesters = [];
-
-        for($semester = 1; $semester <= 8; $semester++) {
-            $detailResponse = $this->service->get(null, 'krs/ip/semester?s='.$semester)->getData('data');
-
-            if($detailResponse['status'] != 'success') {
-                continue;
-            }
-
-            $detail = $detailResponse['data'];
-            $matakuliah = $detail['matakuliah'] ?? [];
-
-            if($detail && count($matakuliah) > 0) {
-                $detail['matakuliah'] = $matakuliah;
-                $semesters[] = $detail;
-            }
-        }
-
-        if(count($semesters) < 1) {
-            return abort(404);
-        }
-
-        return [
-            'nim' => $user['nim'] ?? '-',
-            'nama' => $user['nama'] ?? '-',
-            'dosen_wali' => $user['dosen_wali'] ?? '-',
-            'summary' => $summary,
-            'semesters' => $semesters,
-            'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
-            'image' => $image
-        ];
-    }
-
-    private function khsSemesterViewData(int $semester, $image) {
-
-        if($semester < 1 || $semester > 8) {
-            return abort(404);
-        }
-
-        $user = Session::get('profile');
-
-        Carbon::setLocale('id');
-
-        $response = $this->service->get(null, 'krs/ip/semester?s='.$semester)->getData('data');
-
-        if($response['status'] != 'success') {
-            return abort(404);
-        }
-
-        $response_data = $response['data'];
-        $matakuliah = $response_data['matakuliah'] ?? [];
-
-        if(! $response_data || count($matakuliah) < 1) {
-            return abort(404);
-        }
-
-        return [
-            'nim' => $user['nim'] ?? '-',
-            'nama' => $user['nama'] ?? '-',
-            'dosen_wali' => $user['dosen_wali'] ?? '-',
-            'semester' => $semester,
-            'total_sks' => $response_data['total_sks'] ?? 0,
-            'total_ip' => $response_data['total_ip'] ?? 0,
-            'total_nilai_a' => $response_data['total_nilai_a'] ?? 0,
-            'total_nilai_b' => $response_data['total_nilai_b'] ?? 0,
-            'total_nilai_c' => $response_data['total_nilai_c'] ?? 0,
-            'total_nilai_d' => $response_data['total_nilai_d'] ?? 0,
-            'total_nilai_e' => $response_data['total_nilai_e'] ?? 0,
-            'matakuliah' => $matakuliah,
-            'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
-            'image' => $image
-        ];
-    }
-
-    public function khs_download() {
-
-        $data = $this->khsDownloadViewData($this->pdfLogoPath());
-
-        $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
-        return $pdf->stream('Kartu Hasil Studi - '.$data['nim'].' - '.$data['nama'].'.pdf');
-    }
-
-    public function khs_download_per_semester(int $semester) {
-
-        $data = $this->khsSemesterViewData($semester, $this->pdfLogoPath());
-
-        $pdf = Pdf::loadView('pdf/khs-semester-download', $data)->setPaper('A4', 'portrait');
-        return $pdf->stream('Kartu Hasil Studi - '.$data['nim'].' - '.$data['nama'].' - Semester '.$semester.'.pdf');
-    }
-
-    public function khs_preview() {
-
-        $data = $this->khsDownloadViewData(asset('images/stmik.png'));
-
-        return view('pdf/khs-download', $data);
-    }
-
-    public function khs_preview_per_semester(int $semester) {
-
-        $data = $this->khsSemesterViewData($semester, asset('images/stmik.png'));
-
-        return view('pdf/khs-semester-download', $data);
     }
 
     public function surat() {
@@ -354,32 +226,26 @@ class WebController extends Controller {
 
         // dd($response_data);
 
-        $krs_matkul = $response_data['krs_matkul'] ?? [];
-
-        if(count($krs_matkul) < 1) {
-            return abort(404);
-        }
-
+        $krs_matkul = $response_data['krs_matkul'];
         $total_sks = 0;
         foreach ($krs_matkul as $item) {
-            $total_sks += $item['mata_kuliah']['sks'] ?? 0;
+            $total_sks += $item['mata_kuliah']['sks'];
         }
 
         $data = [
-            'nim' => $user['nim'] ?? '-',
-            'nama' => $user['nama'] ?? '-',
-            'dosen_wali' => $user['dosen_wali'] ?? '-',
-            'semester' => $response_data['semester'] ?? '-',
+            'nim' => $user['nim'],
+            'nama' => $user['nama'],
+            'dosen_wali' => $user['dosen_wali'],
             'matakuliah' => array_map(function($item) {
-                return $item['mata_kuliah'] ?? [];
+                return $item['mata_kuliah'];
             }, $krs_matkul),
             'total_sks' => $total_sks,
             'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
-            'image' => $this->pdfLogoPath()
+            'image' => public_path('images/stmik.png')
         ];
 
         $pdf = Pdf::loadView('pdf/ksm-download', $data)->setPaper('A4', 'portrait');
-        return $pdf->stream('Kartu Studi Mahasiswa - '.($user['nim'] ?? '-').' - '.($user['nama'] ?? '-').' - Semester '.($response_data['semester'] ?? '-').'.pdf');
+        return $pdf->stream('Kartu Studi Mahasiswa - '.$user['nim'].' - '.$user['nama'].' - Semester '.$response_data['semester'].'.pdf');
     }
 
     public function ksm_preview_per_semester(int $semester) {
@@ -762,3 +628,4 @@ class WebController extends Controller {
 }
 
 ?>
+

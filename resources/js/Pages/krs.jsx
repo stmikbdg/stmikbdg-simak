@@ -868,18 +868,16 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                                                     }
                                                     
                                                     <div className="flex items-center gap-2 *:grow *:sm:grow-0">
-                                                        {listData.krs.data?.krs?.krs_id && listData.krs.data?.krs?.sts_krs === 'S' && (
-                                                            <Button
-                                                                startIcon={<DownloadOutlined fontSize="small" />}
-                                                                variant="outlined"
-                                                                size="small"
-                                                                onClick={() => window.location.href = `/ksm/download/krs_id/${listData.krs.data?.krs?.krs_id}`}
-                                                            >
-                                                                <p className="font-jakarta text-xs">
-                                                                    Unduh KSM
-                                                                </p>
-                                                            </Button>
-                                                        )}
+                                                        {/* {aksi.krs.is_aktif() && (
+                                                            <>
+
+                                                                <Button startIcon={<DownloadOutlined />} variant="contained" size="small">
+                                                                    <p className="font-jakarta text-xs">
+                                                                        Unduh KSM
+                                                                    </p>
+                                                                </Button>
+                                                            </>
+                                                        )} */}
                                                         <Button disabled={aksi.krs.pengajuan.is_disabled()} onClick={() => modal.show('modal_pengajuan_krs')} startIcon={<SendOutlined />} variant="contained" size="small">
                                                             <p className="font-jakarta text-xs">
                                                                 Ajukan
@@ -1160,13 +1158,11 @@ function Mahasiswa_KRSPage_Riwayat({ token, base_url, role }) {
                                         <Visibility fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
-                                {row?.sts_krs === 'S' && (
-                                    <Tooltip arrow title="Unduh KSM">
-                                        <IconButton size="small" color="primary" onClick={() => window.location.href = `/ksm/download/krs_id/${row?.krs_id}`}>
-                                            <Download fontSize="small" />
-                                        </IconButton>
-                                    </Tooltip>
-                                )}
+                                <Tooltip arrow title="Unduh KSM">
+                                    <IconButton size="small" color="primary" >
+                                        <Download fontSize="small" onClick={() => window.location.href = `/ksm/download/krs_id/${row?.krs_id}`} />
+                                    </IconButton>
+                                </Tooltip>
                             </div>
                         )
                     }
@@ -1432,17 +1428,6 @@ function KHSPage({ token, base_url, role}) {
         <div className="divide-y divide-zinc-300">
             <div className="p-4">
                 <CustomLoading loading={loadingUserdata} renderIf={userdata}>
-                    <div className="flex justify-end mb-4">
-                        <Button
-                            size="small"
-                            variant="contained"
-                            startIcon={<DownloadOutlined fontSize="small" />}
-                            disabled={listData.khs.loading || !listData.khs.data?.ip_per_semester?.length}
-                            onClick={() => window.location.href = '/khs/download'}
-                        >
-                            <p className="font-jakarta text-xs">Unduh KHS PDF</p>
-                        </Button>
-                    </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div className="grid sm:grid-cols-2 gap-4">
                             <CustomLoading loading={listData.khs.loading} renderIf={listData.khs.data}>

@@ -633,6 +633,19 @@ function SidebarContent({ showSidebar, setShowSidebar, mobile = false, role, men
                             </button>
                         </div>
                     </div>
+                    {menuFor('Dosen Wali') && (
+                        <div className="relative overflow-visible w-full">
+                            <div className={`absolute top-0 left-0 w-2 rounded-md h-full bg-blue-500 ${pathname === '/khs-mahasiswa' ? 'opacity-100' : 'opacity-0'}`}></div>
+                            <div className="px-5">
+                                <button onClick={() => goTo('/khs-mahasiswa')} disabled={pathname === '/khs-mahasiswa'} className={`p-2 w-full rounded-md ${pathname === '/khs-mahasiswa' ? 'border border-zinc-300 bg-white' : 'hover:bg-zinc-200 ease-out duration-100'} flex items-center gap-3 `}>
+                                    <MenuBookTwoTone color={pathname === '/khs-mahasiswa' ? 'primary' : ''} fontSize="small" />
+                                    <p className="font-medium">
+                                        KHS Mahasiswa
+                                    </p>
+                                </button>
+                            </div>
+                        </div>
+                    )}
                     {menuFor('Mahasiswa') && (
                         <div className="relative overflow-visible w-full">
                             <div className={`absolute top-0 left-0 w-2 rounded-md h-full bg-blue-500 ${pathname === '/absenqr' ? 'opacity-100' : 'opacity-0'}`}></div>

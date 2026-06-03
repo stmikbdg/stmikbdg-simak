@@ -287,9 +287,10 @@ export default function KHSMahasiswa({ token, base_url, role }) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/zip'
+                    'X-CSRF-TOKEN': csrfToken || '',
+                    'Accept': 'application/zip, application/json'
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify({
                     mhs_ids: selectedMhsIds,
                     semesters: payload
@@ -313,9 +314,18 @@ export default function KHSMahasiswa({ token, base_url, role }) {
                     message: 'Berhasil mengunduh KHS'
                 });
             } else {
-                const errorData = await response.json();
+                const contentType = response.headers.get('content-type') || '';
+                let errorMessage = 'Gagal mengunduh KHS';
+
+                if (response.status === 419) {
+                    errorMessage = 'Sesi keamanan berakhir. Silakan refresh halaman lalu coba lagi.';
+                } else if (contentType.includes('application/json')) {
+                    const errorData = await response.json();
+                    errorMessage = errorData?.message || errorMessage;
+                }
+
                 customSwal.toast.error({
-                    message: errorData?.message || 'Gagal mengunduh KHS'
+                    message: errorMessage
                 });
             }
         } catch (error) {

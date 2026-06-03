@@ -558,11 +558,20 @@ class WebController extends Controller {
     // Bulk ZIP download
     public function khs_mahasiswa_download_bulk(Request $request) {
         $this->abortIfNotDosenWali();
+        
+        // Set timeout for bulk operation - 50 PDFs could take time
+        set_time_limit(300); // 5 minutes for max 50 students
 
         $validated = $request->validate([
             'mhs_ids' => 'required|array|min:1|max:50',
-            'mhs_ids.*' => 'required|integer',
+            'mhs_ids.*' => 'required|integer|distinct',
             'semesters' => 'required|string'
+        ], [
+            'mhs_ids.required' => 'Pilih minimal 1 mahasiswa',
+            'mhs_ids.max' => 'Maksimal 50 mahasiswa dapat diunduh sekaligus',
+            'mhs_ids.*.distinct' => 'Terdapat mahasiswa yang dipilih lebih dari sekali',
+            'mhs_ids.*.integer' => 'ID mahasiswa tidak valid',
+            'semesters.required' => 'Pilih semester yang akan diunduh'
         ]);
 
         $mhsIds = $validated['mhs_ids'];
@@ -573,7 +582,8 @@ class WebController extends Controller {
             mkdir($tempDir, 0755, true);
         }
 
-        $zipFilename = 'KHS-Mahasiswa-' . date('Y-m-d-His') . '-' . $this->getSemesterModeLabel($semesters) . '.zip';
+        $randomSuffix = substr(md5(uniqid(mt_rand(), true)), 0, 8);
+        $zipFilename = 'KHS-Mahasiswa-' . date('Y-m-d-His') . '-' . $randomSuffix . '-' . $this->getSemesterModeLabel($semesters) . '.zip';
         $zipPath = $tempDir . '/' . $zipFilename;
 
         $zip = new \ZipArchive();
@@ -582,30 +592,39 @@ class WebController extends Controller {
         }
 
         $successCount = 0;
-        foreach ($mhsIds as $mhsId) {
-            try {
-                $apiData = $this->fetchDosenWaliKHS($mhsId, $semesters);
-                
-                if (!$apiData) {
+        $usedFilenames = [];
+        
+        try {
+            foreach ($mhsIds as $mhsId) {
+                try {
+                    $apiData = $this->fetchDosenWaliKHS($mhsId, $semesters);
+                    
+                    if (!$apiData) {
+                        continue;
+                    }
+
+                    $data = $this->khsMahasiswaDosenWaliViewData($apiData, $semesters, $this->pdfLogoPath());
+
+                    $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
+                    
+                    $baseFilename = $this->generateKhsFilename($data['nim'], $data['nama'], $semesters);
+                    $filename = $this->ensureUniqueFilename($baseFilename, $usedFilenames);
+                    
+                    $pdfContent = $pdf->output();
+                    $zip->addFromString($filename, $pdfContent);
+                    
+                    $successCount++;
+                } catch (\Exception $e) {
                     continue;
                 }
-
-                $data = $this->khsMahasiswaDosenWaliViewData($apiData, $semesters, $this->pdfLogoPath());
-
-                $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
-                
-                $filename = $this->generateKhsFilename($data['nim'], $data['nama'], $semesters);
-                
-                $pdfContent = $pdf->output();
-                $zip->addFromString($filename, $pdfContent);
-                
-                $successCount++;
-            } catch (\Exception $e) {
-                continue;
             }
-        }
 
-        $zip->close();
+            $zip->close();
+        } catch (\Exception $e) {
+            $zip->close();
+            @unlink($zipPath);
+            abort(500, 'Gagal membuat file ZIP: ' . $e->getMessage());
+        }
 
         if ($successCount === 0) {
             @unlink($zipPath);
@@ -707,12 +726,36 @@ class WebController extends Controller {
     }
 
     private function sanitizeFilename(string $name): string {
+        // Prevent path traversal explicitly
+        $name = str_replace(['../', '..\\', './'], '', $name);
+        $name = basename($name); // Extra safety - removes any path component
+        
+        // Remove non-alphanumeric except spaces and dash
         $name = preg_replace('/[^a-zA-Z0-9\s\-]/', '', $name);
+        // Replace multiple spaces with single dash
         $name = preg_replace('/\s+/', '-', trim($name));
+        // Replace multiple dashes with single dash
         $name = preg_replace('/-+/', '-', $name);
+        // Trim leading/trailing dashes
         $name = trim($name, '-');
         
-        return $name;
+        return $name ?: 'Mahasiswa'; // Fallback if empty after sanitization
+    }
+
+    private function ensureUniqueFilename(string $filename, array &$usedFilenames): string {
+        $originalFilename = $filename;
+        $counter = 1;
+        
+        while (in_array($filename, $usedFilenames)) {
+            $counter++;
+            $pathInfo = pathinfo($originalFilename);
+            $basename = $pathInfo['filename'];
+            $extension = isset($pathInfo['extension']) ? '.' . $pathInfo['extension'] : '';
+            $filename = $basename . '-' . $counter . $extension;
+        }
+        
+        $usedFilenames[] = $filename;
+        return $filename;
     }
 }
 

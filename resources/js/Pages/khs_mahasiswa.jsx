@@ -21,7 +21,11 @@ import {
     RadioGroup,
     FormLabel,
     Alert,
-    CircularProgress
+    CircularProgress,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from '@mui/material';
 import {
     DownloadOutlined,
@@ -47,13 +51,16 @@ export default function KHSMahasiswa({ token, base_url, role }) {
     const [semesterMode, setSemesterMode] = useState('all');
     const [selectedSemesters, setSelectedSemesters] = useState([]);
     const [selectedMhsIds, setSelectedMhsIds] = useState([]);
+    const [downloadDialog, setDownloadDialog] = useState({ open: false, type: null, mhsId: null });
+    const [downloadScope, setDownloadScope] = useState('filtered');
     
     const [listData, setListData] = useState({
         rows: [],
         filters_options: {
             status: [],
             angkatan: [],
-            jenis: []
+            jenis: [],
+            semesters: []
         },
         meta: {
             current_page: 1,
@@ -64,6 +71,10 @@ export default function KHSMahasiswa({ token, base_url, role }) {
         loading: false,
         exporting: false
     });
+    const semesterOptions = (listData.filters_options.semesters?.length
+        ? listData.filters_options.semesters
+        : [1, 2, 3, 4, 5, 6, 7, 8]
+    ).map(semester => parseInt(semester, 10)).filter(Boolean);
 
     const fetchList = async () => {
         try {
@@ -75,6 +86,10 @@ export default function KHSMahasiswa({ token, base_url, role }) {
             if (filters.angkatan) params.append('angkatan', filters.angkatan);
             if (filters.jns_mhs) params.append('jns_mhs', filters.jns_mhs);
             if (filters.khs) params.append('khs', filters.khs);
+            const semesterFilterPayload = getSemesterPayload();
+            if (semesterFilterPayload && semesterFilterPayload !== 'all') {
+                params.append('semesters', semesterFilterPayload);
+            }
             params.append('page', filters.page);
             params.append('per_page', filters.per_page);
             
@@ -108,13 +123,13 @@ export default function KHSMahasiswa({ token, base_url, role }) {
 
     useEffect(() => {
         fetchList();
-    }, [filters.page, filters.per_page]);
+    }, [filters.page, filters.per_page, semesterMode, selectedSemesters]);
 
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({
             ...prev,
             [key]: value,
-            page: 1
+            page: key === 'page' ? value : 1
         }));
     };
 
@@ -131,17 +146,19 @@ export default function KHSMahasiswa({ token, base_url, role }) {
     const handleSemesterModeChange = (mode) => {
         setSemesterMode(mode);
         setSelectedSemesters([]);
+        setSelectedMhsIds([]);
+        setFilters(prev => ({ ...prev, page: 1 }));
     };
 
     const handleSemesterSelect = (semester) => {
-        if (semesterMode === 'single') {
-            setSelectedSemesters([semester]);
-        } else if (semesterMode === 'multiple') {
+        if (semesterMode === 'multiple') {
             setSelectedSemesters(prev => 
                 prev.includes(semester) 
                     ? prev.filter(s => s !== semester)
                     : [...prev, semester]
             );
+            setSelectedMhsIds([]);
+            setFilters(prev => ({ ...prev, page: 1 }));
         }
     };
 
@@ -164,12 +181,22 @@ export default function KHSMahasiswa({ token, base_url, role }) {
     const getSemesterPayload = () => {
         if (semesterMode === 'all') {
             return 'all';
-        } else if (semesterMode === 'single') {
-            return selectedSemesters[0] || '';
         } else if (semesterMode === 'multiple') {
-            return selectedSemesters.join(',');
+            return [...selectedSemesters].sort((a, b) => a - b).join(',');
         }
         return '';
+    };
+
+    const hasActiveSemesterFilter = () => {
+        const payload = getSemesterPayload();
+        return payload && payload !== 'all';
+    };
+
+    const getSemesterFilterLabel = () => {
+        const payload = getSemesterPayload();
+        if (!payload || payload === 'all') return 'Semua Semester';
+        const semesters = payload.split(',');
+        return semesters.length === 1 ? 'Semester ' + semesters[0] : 'Semester ' + semesters.join(', ');
     };
 
     const handleSingleDownload = (mhs_id) => {
@@ -180,18 +207,50 @@ export default function KHSMahasiswa({ token, base_url, role }) {
             });
             return;
         }
-        
-        window.location.href = `/khs-mahasiswa/download/${mhs_id}?semesters=${payload}`;
+
+        setDownloadScope(hasActiveSemesterFilter() ? 'filtered' : 'all');
+        setDownloadDialog({ open: true, type: 'single', mhsId: mhs_id });
     };
 
-    const handleBulkDownload = async () => {
+    const closeDownloadDialog = () => {
+        setDownloadDialog({ open: false, type: null, mhsId: null });
+    };
+
+    const getDownloadPayload = () => {
+        return downloadScope === 'all' ? 'all' : getSemesterPayload();
+    };
+
+    const handleConfirmDownload = async () => {
+        const payload = getDownloadPayload();
+
+        if (!payload) {
+            customSwal.toast.error({
+                message: 'Silakan pilih semester terlebih dahulu'
+            });
+            return;
+        }
+
+        if (downloadDialog.type === 'single') {
+            const mhsId = downloadDialog.mhsId;
+            closeDownloadDialog();
+            window.location.href = '/khs-mahasiswa/download/' + mhsId + '?semesters=' + payload;
+            return;
+        }
+
+        if (downloadDialog.type === 'bulk') {
+            closeDownloadDialog();
+            await performBulkDownload(payload);
+        }
+    };
+
+    const handleBulkDownload = () => {
         if (selectedMhsIds.length === 0) {
             customSwal.toast.error({
                 message: 'Silakan pilih mahasiswa terlebih dahulu'
             });
             return;
         }
-        
+
         const payload = getSemesterPayload();
         if (!payload) {
             customSwal.toast.error({
@@ -199,7 +258,26 @@ export default function KHSMahasiswa({ token, base_url, role }) {
             });
             return;
         }
+
+        setDownloadScope(hasActiveSemesterFilter() ? 'filtered' : 'all');
+        setDownloadDialog({ open: true, type: 'bulk', mhsId: null });
+    };
+
+    const performBulkDownload = async (payload) => {
+        if (selectedMhsIds.length === 0) {
+            customSwal.toast.error({
+                message: 'Silakan pilih mahasiswa terlebih dahulu'
+            });
+            return;
+        }
         
+        if (!payload) {
+            customSwal.toast.error({
+                message: 'Silakan pilih semester terlebih dahulu'
+            });
+            return;
+        }
+
         try {
             setListData(prev => ({ ...prev, exporting: true }));
             
@@ -344,6 +422,45 @@ export default function KHSMahasiswa({ token, base_url, role }) {
 
     return (
         <MainLayout token={token} base_url={base_url} role={role}>
+            <div className="space-y-3">
+            <Dialog open={downloadDialog.open} onClose={closeDownloadDialog} maxWidth="xs" fullWidth>
+                <DialogTitle>Download KHS</DialogTitle>
+                <DialogContent>
+                    <div className="space-y-3">
+                        <p className="text-sm text-zinc-600">
+                            {downloadDialog.type === 'bulk'
+                                ? selectedMhsIds.length + ' mahasiswa dipilih.'
+                                : 'Pilih isi dokumen yang akan diunduh.'}
+                        </p>
+                        <p className="text-sm text-zinc-600">
+                            Filter semester aktif: <span className="font-semibold text-zinc-800">{getSemesterFilterLabel()}</span>
+                        </p>
+                        <RadioGroup
+                            value={downloadScope}
+                            onChange={(e) => setDownloadScope(e.target.value)}
+                        >
+                            {hasActiveSemesterFilter() && (
+                                <FormControlLabel
+                                    value="filtered"
+                                    control={<Radio size="small" />}
+                                    label={'Hanya ' + getSemesterFilterLabel()}
+                                />
+                            )}
+                            <FormControlLabel
+                                value="all"
+                                control={<Radio size="small" />}
+                                label="Semua semester yang dimiliki mahasiswa"
+                            />
+                        </RadioGroup>
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeDownloadDialog}>Batal</Button>
+                    <Button variant="contained" onClick={handleConfirmDownload}>
+                        {downloadDialog.type === 'bulk' ? 'Download ZIP' : 'Download PDF'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <div className="bg-white w-full rounded-lg border border-zinc-300 shadow-md">
                 <div className="divide-y divide-zinc-300">
                     
@@ -367,7 +484,7 @@ export default function KHSMahasiswa({ token, base_url, role }) {
                     <div className="p-4">
                         <Alert severity="info" icon={<PictureAsPdfOutlined />}>
                             Anda dapat mengunduh KHS mahasiswa secara individual atau bulk (maksimal 50 mahasiswa). 
-                            Pilih semester yang diinginkan sebelum mengunduh.
+                            Gunakan filter semester untuk menampilkan mahasiswa yang memiliki KHS pada semester terkait.
                         </Alert>
                     </div>
 
@@ -477,7 +594,7 @@ export default function KHSMahasiswa({ token, base_url, role }) {
                     {/* Semester Selector */}
                     <div className="p-4 bg-zinc-50">
                         <FormLabel component="legend" className="mb-2">
-                            Pilih Semester untuk Download
+                            Filter Semester KHS
                         </FormLabel>
                         
                         <RadioGroup
@@ -492,37 +609,15 @@ export default function KHSMahasiswa({ token, base_url, role }) {
                                 label="Semua Semester" 
                             />
                             <FormControlLabel 
-                                value="single" 
-                                control={<Radio size="small" />} 
-                                label="Semester Tertentu" 
-                            />
-                            <FormControlLabel 
                                 value="multiple" 
                                 control={<Radio size="small" />} 
-                                label="Beberapa Semester" 
+                                label="Pilih Semester" 
                             />
                         </RadioGroup>
 
-                        {semesterMode === 'single' && (
-                            <FormControl size="small" style={{ minWidth: 200 }}>
-                                <InputLabel>Pilih Semester</InputLabel>
-                                <Select
-                                    value={selectedSemesters[0] || ''}
-                                    label="Pilih Semester"
-                                    onChange={(e) => setSelectedSemesters([e.target.value])}
-                                >
-                                    {[1, 2, 3, 4, 5, 6, 7, 8].map(sem => (
-                                        <MenuItem key={sem} value={sem}>
-                                            Semester {sem}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        )}
-
                         {semesterMode === 'multiple' && (
                             <div className="flex flex-wrap gap-2">
-                                {[1, 2, 3, 4, 5, 6, 7, 8].map(sem => (
+                                {semesterOptions.map(sem => (
                                     <FormControlLabel
                                         key={sem}
                                         control={
@@ -602,7 +697,6 @@ export default function KHSMahasiswa({ token, base_url, role }) {
                                         <MenuItem value={10}>10</MenuItem>
                                         <MenuItem value={25}>25</MenuItem>
                                         <MenuItem value={50}>50</MenuItem>
-                                        <MenuItem value={100}>100</MenuItem>
                                     </Select>
                                 </FormControl>
                                 
@@ -631,6 +725,7 @@ export default function KHSMahasiswa({ token, base_url, role }) {
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </MainLayout>
     );

@@ -662,7 +662,7 @@ class WebController extends Controller {
 
         $semesterArray = array_map('intval', explode(',', $semesters));
         $semesterArray = array_filter($semesterArray, function($s) {
-            return $s >= 1 && $s <= 8;
+            return $s >= 1;
         });
         $semesterArray = array_unique($semesterArray);
         sort($semesterArray);
@@ -692,10 +692,12 @@ class WebController extends Controller {
     private function khsMahasiswaDosenWaliViewData(array $apiData, string $semesters, $image) {
         Carbon::setLocale('id');
 
+        $mahasiswa = $apiData['mahasiswa'] ?? [];
+
         return [
-            'nim' => $apiData['nim'] ?? '-',
-            'nama' => $apiData['nama'] ?? '-',
-            'dosen_wali' => $apiData['dosen_wali'] ?? '-',
+            'nim' => $mahasiswa['nim'] ?? '-',
+            'nama' => $mahasiswa['nama'] ?? '-',
+            'dosen_wali' => $mahasiswa['dosen_wali'] ?? '-',
             'summary' => $apiData['summary'] ?? [],
             'semesters' => $apiData['semesters'] ?? [],
             'mode_semester_label' => $this->getSemesterModeLabel($semesters),

@@ -78,6 +78,9 @@
         }
 
         .profile-table {
+            width: auto;
+            min-width: 360px;
+            table-layout: auto;
             margin-top: 4px;
             margin-bottom: 9px;
         }
@@ -85,6 +88,20 @@
         .profile-table td {
             border: none;
             padding: 1.5px 3px;
+        }
+
+        .profile-label {
+            width: 76px;
+            white-space: nowrap;
+        }
+
+        .profile-separator {
+            width: 8px;
+            text-align: center;
+        }
+
+        .profile-value {
+            width: 250px;
         }
 
         .summary-table {
@@ -140,19 +157,19 @@
     <table class="profile-table">
         <tbody>
             <tr>
-                <td style="width: 92px"><strong>NIM</strong></td>
-                <td style="width: 8px">:</td>
-                <td>{{ filled($nim ?? null) ? $nim : '-' }}</td>
+                <td class="profile-label"><strong>NIM</strong></td>
+                <td class="profile-separator">:</td>
+                <td class="profile-value">{{ filled($nim ?? null) ? $nim : '-' }}</td>
             </tr>
             <tr>
-                <td><strong>NAMA</strong></td>
-                <td>:</td>
-                <td>{{ filled($nama ?? null) ? $nama : '-' }}</td>
+                <td class="profile-label"><strong>NAMA</strong></td>
+                <td class="profile-separator">:</td>
+                <td class="profile-value">{{ filled($nama ?? null) ? $nama : '-' }}</td>
             </tr>
             <tr>
-                <td><strong>DOSEN WALI</strong></td>
-                <td>:</td>
-                <td>{{ filled($dosen_wali ?? null) ? $dosen_wali : '-' }}</td>
+                <td class="profile-label"><strong>DOSEN WALI</strong></td>
+                <td class="profile-separator">:</td>
+                <td class="profile-value">{{ filled($dosen_wali ?? null) ? $dosen_wali : '-' }}</td>
             </tr>
         </tbody>
     </table>

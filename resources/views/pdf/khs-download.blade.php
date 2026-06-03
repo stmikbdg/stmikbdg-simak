@@ -162,6 +162,12 @@
         <h1>KARTU HASIL STUDI</h1>
     </div>
 
+    @if(!empty($mode_semester_label))
+    <div style="text-align:center; margin-top:-4px; margin-bottom:6px; font-size:9px; color:#555;">
+        ({{ $mode_semester_label }})
+    </div>
+    @endif
+
     <table class="profile-table">
         <tbody>
             <tr>

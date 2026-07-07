@@ -23,5 +23,6 @@ return [
         'pendaftaran' => env('PENDAFTARAN_BASE_URL', null),
         'pengajuan' => env('PENGAJUAN_BASE_URL', null),
         'journal' => env('JOURNAL_BASE_URL', null),
+        'arsip_digital' => env('ARSIP_DIGITAL_BASE_URL', null),
     ]
 ];

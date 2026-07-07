@@ -113,6 +113,13 @@ class WebController extends Controller {
                 'icon' => 'FeedTwoTone',
                 'color' => 'violet'
             ],
+            [
+                'name' => 'Arsip Digital',
+                'deskripsi' => 'Sistem arsip digital kampus',
+                'label' => 'arsip_digital',
+                'icon' => 'FolderCopyTwoTone',
+                'color' => 'blue'
+            ],
             // [
             //     'name' => 'Kuesioner',
             //     'deskripsi' => 'Survei dan evaluasi layanan atau pembelajaran',

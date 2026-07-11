@@ -75,14 +75,17 @@
             "
         >
 
-            <table style="border: none">
+            <table style="border: none; width: 62%; margin-top: 0">
                 <tbody style="border: none">
                     <tr style="border: none">
-                        <td style="border: none; width: 100px">
+                        <td style="border: none; width: 90px">
                             <strong>NIM</strong> 
                         </td>
+                        <td style="border: none; width: 8px; text-align: center">
+                            :
+                        </td>
                         <td style="border: none">
-                            : {{ $nim }}
+                            {{ $nim }}
                         </td>
                         
                     </tr>
@@ -90,16 +93,22 @@
                         <td style="border: none">
                             <strong>NAMA</strong> 
                         </td>
+                        <td style="border: none; text-align: center">
+                            :
+                        </td>
                         <td style="border: none">
-                            : {{ $nama }}
+                            {{ $nama }}
                         </td>
                     </tr>
                     <tr style="border: none">
                         <td style="border: none">
                             <strong>DOSEN WALI</strong> 
                         </td>
+                        <td style="border: none; text-align: center">
+                            :
+                        </td>
                         <td style="border: none">
-                            : {{ $dosen_wali }}
+                            {{ $dosen_wali }}
                         </td>
                     </tr>
                 </tbody>
@@ -133,7 +142,7 @@
             </tbody>
         </table>
 
-        <div style="position: relative; margin-top: 12px; width: 100%;">
+        <div style="position: relative; margin-top: 12px; width: 100%; min-height: 145px;">
 
             <div
                 style="

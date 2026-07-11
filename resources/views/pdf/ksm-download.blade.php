@@ -80,11 +80,22 @@
 
         .no-border {
             margin-top: 8px;
+            width: 62%;
+            table-layout: auto;
         }
 
         .no-border td {
             border: none;
             padding: 2px 4px;
+        }
+
+        .profile-label {
+            width: 90px;
+        }
+
+        .profile-separator {
+            width: 8px;
+            text-align: center;
         }
 
         .course-table {
@@ -103,6 +114,7 @@
             position: relative;
             margin-top: 12px;
             width: 100%;
+            min-height: 145px;
         }
 
         .note {
@@ -144,8 +156,8 @@
         <table class="no-border">
             <tbody>
                 <tr>
-                    <td style="width: 90px"><strong>NIM</strong></td>
-                    <td style="width: 8px">:</td>
+                    <td class="profile-label"><strong>NIM</strong></td>
+                    <td class="profile-separator">:</td>
                     <td>{{ filled($nim ?? null) ? $nim : '-' }}</td>
                 </tr>
                 <tr>

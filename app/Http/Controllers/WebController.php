@@ -202,6 +202,20 @@ class WebController extends Controller {
         return file_exists($logoPath) ? $logoPath : null;
     }
 
+    private function pengesahanProdiName(?string $prodi): string {
+        $prodi = strtoupper($prodi ?? '');
+
+        if (str_contains($prodi, 'TEKNIK INFORMATIKA')) {
+            return 'Mina Ismu Rahayu, M.T';
+        }
+
+        if (str_contains($prodi, 'SISTEM INFORMASI')) {
+            return 'Dani Pradana Kartaputra, S.Si., M.T';
+        }
+
+        return '';
+    }
+
     public function krs_approve_by_dosen_wali(Int $mhs_id, Int $krs_id) {
         return $this->render('krs_approve_by_dosen_wali', [
             'mhs_id' => $mhs_id,
@@ -252,6 +266,8 @@ class WebController extends Controller {
         return [
             'nim' => $user['nim'] ?? '-',
             'nama' => $user['nama'] ?? '-',
+            'prodi' => trim($user['nama_jurusan'] ?? '-'),
+            'pengesahan_prodi' => $this->pengesahanProdiName($user['nama_jurusan'] ?? null),
             'dosen_wali' => $user['dosen_wali'] ?? '-',
             'summary' => $summary,
             'semesters' => $semesters,
@@ -286,6 +302,8 @@ class WebController extends Controller {
         return [
             'nim' => $user['nim'] ?? '-',
             'nama' => $user['nama'] ?? '-',
+            'prodi' => trim($user['nama_jurusan'] ?? '-'),
+            'pengesahan_prodi' => $this->pengesahanProdiName($user['nama_jurusan'] ?? null),
             'dosen_wali' => $user['dosen_wali'] ?? '-',
             'semester' => $semester,
             'total_sks' => $response_data['total_sks'] ?? 0,
@@ -704,6 +722,8 @@ class WebController extends Controller {
         return [
             'nim' => $mahasiswa['nim'] ?? '-',
             'nama' => $mahasiswa['nama'] ?? '-',
+            'prodi' => trim($mahasiswa['prodi'] ?? '-'),
+            'pengesahan_prodi' => $this->pengesahanProdiName($mahasiswa['prodi'] ?? null),
             'dosen_wali' => $mahasiswa['dosen_wali'] ?? '-',
             'summary' => $apiData['summary'] ?? [],
             'semesters' => $apiData['semesters'] ?? [],

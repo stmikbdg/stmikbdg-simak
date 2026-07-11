@@ -147,9 +147,27 @@
             font-weight: bold;
         }
 
-        .footer {
+        .signature-section {
+            position: relative;
             margin-top: 12px;
-            text-align: right;
+            width: 100%;
+            min-height: 92px;
+        }
+
+        .note {
+            border: 1px solid #000;
+            padding: 8px;
+            font-size: 9px;
+            text-align: justify;
+            width: 42%;
+        }
+
+        .signature {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 36%;
+            text-align: left;
             line-height: 1.35;
         }
 
@@ -316,9 +334,16 @@
     </div>
     @endforeach
 
-    <div class="footer">
-        Bandung, {{ filled($tanggal ?? null) ? $tanggal : '-' }}<br>
-        Dicetak melalui SIMAK STMIK Bandung
+    <div class="signature-section">
+        <div class="note">
+            Kartu Hasil Studi (KHS) ini merupakan bukti hasil studi mahasiswa yang sah. Apabila terdapat perbedaan antara KHS dengan data yang terdapat di SIMAK, maka data yang digunakan sebagai acuan adalah data yang terdapat di SIMAK.
+        </div>
+        <div class="signature">
+            Print KHS, {{ filled($tanggal ?? null) ? $tanggal : '-' }}<br><br>
+            Pengesahan Prodi<br>
+            {{ filled($prodi ?? null) ? $prodi : '-' }}<br><br><br><br>
+            <strong>{{ filled($pengesahan_prodi ?? null) ? $pengesahan_prodi : '________________________' }}</strong>
+        </div>
     </div>
 </body>
 </html>

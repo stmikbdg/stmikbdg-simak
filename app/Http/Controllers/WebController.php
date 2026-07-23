@@ -772,6 +772,20 @@ class WebController extends Controller
         return implode(',', $semesterArray);
     }
 
+    public function krs_dosen_wali_export_pdf(Request $request)
+    {
+        $this->abortIfNotDosenWali();
+        $query = http_build_query(array_merge($request->only(['sts_krs', 'jns_mhs', 'sts_mhs', 'masuk_tahun', 'semester']), ['format' => 'data']));
+        $response = $this->service->get(null, 'krs/mahasiswa/export?'.$query)->getData('data');
+        abort_unless(($response['status'] ?? null) === 'success', 404, 'Data KRS tidak ditemukan');
+        $data = $response['data'];
+        $data['image'] = $this->pdfLogoPath();
+        $data['generated_at'] = Carbon::now()->format('d-m-Y H:i:s');
+        $filename = preg_replace('/[^A-Za-z0-9_-]/', '-', 'Rekap-KRS-'.$data['status_label'].'-'.$request->query('sts_krs')).'.pdf';
+
+        return Pdf::loadView('pdf/krs-dosen-wali-export', $data)->setPaper('A4', 'landscape')->download($filename);
+    }
+
     private function fetchDosenWaliKHS(int $mhsId, string $semesters)
     {
         try {

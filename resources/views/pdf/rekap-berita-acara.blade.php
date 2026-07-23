@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <title>{{ $judul }}</title>
     <style>
-        @page { margin: 12mm 12mm 14mm; }
+        @page { margin: 12mm 12mm 18mm; }
         body { font-family: Arial, sans-serif; font-size: 9px; color: #111; margin: 0; }
         table { border-collapse: collapse; width: 100%; table-layout: fixed; }
         th, td { border: 0.7px solid #222; padding: 3px 4px; vertical-align: top; word-wrap: break-word; }
         th { background: #eef2f6; font-weight: bold; text-align: center; }
-        thead { display: table-header-group; }
-        tbody tr { page-break-inside: avoid; }
+        .data-table thead { display: table-header-group; }
+        .data-table tbody tr, .intro { page-break-inside: avoid; }
+        .data-table tbody tr.allow-split { page-break-inside: auto; }
         .header-container { position: relative; min-height: 54px; border-bottom: 1.5px solid #111; margin-bottom: 8px; padding-bottom: 7px; }
         .logo { position: absolute; top: 0; left: 0; width: 68px; }
         .header { margin-left: 78px; text-align: right; line-height: 1.25; }
@@ -30,6 +31,7 @@
 </head>
 <body>
     <div class="footer"><span>Dibuat {{ $dibuat }}</span><span class="page-number"></span></div>
+    <div class="intro">
     <div class="header-container">
         @if($image)
         <img src="{{ $image }}" alt="STMIK Bandung" class="logo">
@@ -48,11 +50,12 @@
         <tr><td class="meta-label">Mata Kuliah</td><td class="meta-separator">:</td><td>{{ $matakuliah['nm_mk'] ?? '-' }}</td></tr>
         <tr><td class="meta-label">Periode</td><td class="meta-separator">:</td><td>{{ \Carbon\Carbon::parse($from)->translatedFormat('d F Y') }} s.d. {{ \Carbon\Carbon::parse($to)->translatedFormat('d F Y') }}</td></tr>
     </table>
-    <table>
+    </div>
+    <table class="data-table">
         <thead><tr><th style="width: 28px">No</th><th style="width: 88px">Tanggal</th><th>Berita Acara</th><th style="width: 60px">Hadir</th><th style="width: 70px">Tidak Hadir</th><th style="width: 80px">Jumlah Mahasiswa</th></tr></thead>
         <tbody>
             @foreach($berita_acara as $item)
-            <tr><td class="text-center nowrap">{{ $loop->iteration }}</td><td class="text-center nowrap">{{ \Carbon\Carbon::parse($item['created_at'])->translatedFormat('d F Y') }}</td><td>{{ $item['berita_acara'] }}</td><td class="text-center">{{ $item['mhs_hdr'] }}</td><td class="text-center">{{ $item['mhs_tdk_hdr'] }}</td><td class="text-center">{{ $item['jml_mhs'] }}</td></tr>
+            <tr @class(['allow-split' => mb_strlen($item['berita_acara'] ?? '') > 2500])><td class="text-center nowrap">{{ $loop->iteration }}</td><td class="text-center nowrap">{{ \Carbon\Carbon::parse($item['created_at'])->translatedFormat('d F Y') }}</td><td>{{ $item['berita_acara'] }}</td><td class="text-center">{{ $item['mhs_hdr'] }}</td><td class="text-center">{{ $item['mhs_tdk_hdr'] }}</td><td class="text-center">{{ $item['jml_mhs'] }}</td></tr>
             @endforeach
         </tbody>
     </table>

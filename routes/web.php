@@ -35,6 +35,7 @@ Route::middleware(['auth.token'])
         Route::get('/notfound', 'index');
         Route::get('/krs', 'krs');
         Route::get('/krs/approve/{mhs_id}/{krs_id}', 'krs_approve_by_dosen_wali');
+        Route::get('/krs/dosen-wali/export/pdf', 'krs_dosen_wali_export_pdf');
         Route::get('/surat/detail/{id}', 'surat_detail_by_id');
         Route::get('/ksm/download/krs_id/{krs_id}', 'ksm_download_per_krs_id');
         Route::get('/ksm/preview/krs_id/{krs_id}', 'ksm_preview_per_krs_id');

@@ -6,6 +6,7 @@
     <title>Kartu Studi Mahasiswa</title>
     <style>
         @page {
+            size: A4 portrait;
             margin: 18mm 14mm;
         }
 
@@ -36,9 +37,18 @@
             font-weight: bold;
         }
 
-        .container {
-            border: 1px solid #000;
-            padding: 18px;
+        thead {
+            display: table-header-group;
+        }
+
+        tfoot {
+            display: table-footer-group;
+        }
+
+        .course-table tbody tr,
+        .course-table tfoot tr,
+        .signature-section {
+            page-break-inside: avoid;
         }
 
         .header-container {
@@ -111,10 +121,16 @@
         }
 
         .signature-section {
-            position: relative;
+            border: 0;
             margin-top: 12px;
+            table-layout: fixed;
             width: 100%;
-            min-height: 145px;
+        }
+
+        .signature-section td {
+            border: 0;
+            padding: 0;
+            vertical-align: top;
         }
 
         .note {
@@ -122,14 +138,9 @@
             padding: 8px;
             font-size: 10.5px;
             text-align: justify;
-            width: 42%;
         }
 
         .signature {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 36%;
             text-align: left;
         }
     </style>
@@ -193,28 +204,37 @@
                     {{-- <td>{{ $mk['kelas'] }}</td> --}}
                 </tr>
                 @endforeach
+            </tbody>
+            <tfoot>
                 <tr>
                     <td colspan="3" class="text-right"><strong>Jumlah SKS</strong></td>
                     <td class="text-center"><strong>{{ $total_sks ?? 0 }}</strong></td>
                 </tr>
-            </tbody>
+            </tfoot>
         </table>
 
-        <div class="signature-section">
-            <div class="note">
-                Kartu Studi Mahasiswa (KSM) ini merupakan
-                bukti pendaftaran dan pengambilan mata
-                kuliah yang sah. Apabila terdapat perbedaan
-                antara KSM dengan data yang terdapat di
-                SIMAK, maka data yang digunakan sebagai
-                acuan adalah data yang terdapat di SIMAK
-            </div>
-            <div class="signature">
-                Print FRS, {{ filled($tanggal ?? null) ? $tanggal : '-' }}<br><br>
-                Wakil Ketua Bidang Akademik<br><br><br><br><br>
-                <strong>Dani Pradana Kartaputra, M.T.</strong>
-            </div>
-        </div>
+        <table class="signature-section">
+            <tr>
+                <td style="width: 42%">
+                    <div class="note">
+                        Kartu Studi Mahasiswa (KSM) ini merupakan
+                        bukti pendaftaran dan pengambilan mata
+                        kuliah yang sah. Apabila terdapat perbedaan
+                        antara KSM dengan data yang terdapat di
+                        SIMAK, maka data yang digunakan sebagai
+                        acuan adalah data yang terdapat di SIMAK
+                    </div>
+                </td>
+                <td style="width: 22%"></td>
+                <td style="width: 36%">
+                    <div class="signature">
+                        Print FRS, {{ filled($tanggal ?? null) ? $tanggal : '-' }}<br><br>
+                        Wakil Ketua Bidang Akademik<br><br><br><br><br>
+                        <strong>Dani Pradana Kartaputra, M.T.</strong>
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>

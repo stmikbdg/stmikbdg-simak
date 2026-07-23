@@ -2933,7 +2933,8 @@ function DosenWaliPage({ token, base_url, role, app }) {
         krs: {
             data: [],
             loading: {
-                fetch: false
+                fetch: false,
+                export: false
             },
             detail: {
                 data: []
@@ -3067,10 +3068,10 @@ function DosenWaliPage({ token, base_url, role, app }) {
                                 })
                             }
 
-                            if(sts_mhs === 'TA') {
+                            if(sts_mhs === 'N') {
                                 data.push({
                                     label: 'Tidak Aktif',
-                                    value: 'TA'
+                                    value: 'N'
                                 })
                             }
 
@@ -3113,6 +3114,32 @@ function DosenWaliPage({ token, base_url, role, app }) {
                         }
                     }))
                 }
+            },
+            export: async (status) => {
+                const params = new URLSearchParams({ sts_krs: status })
+                Object.entries(listData.krs.filter).forEach(([key, value]) => value?.value !== undefined && params.set(key, value.value))
+                try {
+                    aksi.krs.loading('export')
+                    const response = await fetch(`${base_url}krs/mahasiswa/export?${params}`, { headers: { Authorization: `Bearer ${token}` } })
+                    if (!response.ok) throw new Error('Export Excel gagal diunduh')
+                    const blob = await response.blob()
+                    const disposition = response.headers.get('content-disposition') || ''
+                    const filename = disposition.match(/filename="?([^";]+)"?/)?.[1] || `Rekap-KRS-${status}.xlsx`
+                    const link = document.createElement('a')
+                    link.href = URL.createObjectURL(blob)
+                    link.download = filename
+                    link.click()
+                    URL.revokeObjectURL(link.href)
+                } catch (error) {
+                    customSwal.toast.error({ message: error.message })
+                } finally {
+                    aksi.krs.loading('export')
+                }
+            },
+            exportPdf: (status) => {
+                const params = new URLSearchParams({ sts_krs: status })
+                Object.entries(listData.krs.filter).forEach(([key, value]) => value?.value !== undefined && params.set(key, value.value))
+                window.open(`/krs/dosen-wali/export/pdf?${params}`, '_blank', 'noopener,noreferrer')
             },
             filtered: {
                 hari_ini: () => {
@@ -3308,12 +3335,19 @@ function DosenWaliPage({ token, base_url, role, app }) {
 }
 
 function DosenWaliPage_KRSTab({ token, base_url, role, aksi, listData }) {
+    const ExportButtons = ({ status, label }) => aksi.krs.filtered.sts_krs(status).length > 0 && (
+        <div className="flex gap-2 mb-3">
+            <Button size="small" variant="contained" startIcon={listData.krs.loading.export ? <CircularProgress size={14} color="inherit" /> : <Download />} disabled={listData.krs.loading.export} onClick={() => aksi.krs.export(status)}>{listData.krs.loading.export ? 'Mengunduh...' : `Excel ${label}`}</Button>
+            <Button size="small" variant="outlined" startIcon={<Download />} disabled={listData.krs.loading.export} onClick={() => aksi.krs.exportPdf(status)}>PDF {label}</Button>
+        </div>
+    )
 
     return (
         <CustomTabs>
             <CustomTabItem label="Pengajuan">
                 <div className="divide-y divide-zinc-300">
                     <div className="p-4">
+                        <ExportButtons status="P" label="Pengajuan" />
                         <CustomDataTable 
                             getRowId={(row) => row.mhs_id}
                             loading={listData.krs.loading.fetch}
@@ -3364,6 +3398,7 @@ function DosenWaliPage_KRSTab({ token, base_url, role, aksi, listData }) {
             <CustomTabItem label="Draft / Ditolak">
                 <div className="divide-y divide-zinc-300">
                     <div className="p-4">
+                        <ExportButtons status="D" label="Draft / Ditolak" />
                         <CustomDataTable 
                             getRowId={(row) => row.mhs_id}
                             loading={listData.krs.loading.fetch}
@@ -3411,9 +3446,10 @@ function DosenWaliPage_KRSTab({ token, base_url, role, aksi, listData }) {
                     </div>
                 </div>
             </CustomTabItem>
-            <CustomTabItem label="Di setujui">
+            <CustomTabItem label="Disetujui">
                 <div className="divide-y divide-zinc-300">
                     <div className="p-4">
+                        <ExportButtons status="S" label="Disetujui" />
                         <CustomDataTable 
                             getRowId={(row) => row.mhs_id}
                             loading={listData.krs.loading.fetch}

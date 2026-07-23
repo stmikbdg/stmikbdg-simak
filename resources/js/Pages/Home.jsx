@@ -97,21 +97,21 @@ export default function Home({ token, base_url, role, app, apps }) {
 
     const { showBackdrop, setShowBackdrop } = useBackdrop()
 
-    const arsipDigitalRole = role?.admin?.enable
-        ? 'is_admin'
-        : role?.mahasiswa?.enable
-            ? 'is_mhs'
-            : role?.dosen?.enable || role?.dosen_wali?.enable || role?.prodi?.enable
-                ? 'is_dosen'
-                : null
+    const activeRole = Object.entries({
+        is_admin: role?.admin?.enable,
+        is_mhs: role?.mahasiswa?.enable,
+        is_dosen: role?.dosen?.enable,
+        is_doswal: role?.dosen_wali?.enable,
+        is_prodi: role?.prodi?.enable,
+    }).find(([, enabled]) => enabled)?.[0] ?? null
 
     const applicationUrl = (item) => {
         if (item['label'] === 'pembelajaran') return '/dashboard'
-        if (item['label'] !== 'arsip_digital' || !arsipDigitalRole) return app[item['label']]
+        if (item['label'] !== 'arsip_digital' || !activeRole) return app[item['label']]
 
         const url = new URL(app[item['label']], window.location.origin)
         url.searchParams.set('token', token)
-        url.searchParams.set('role', arsipDigitalRole)
+        url.searchParams.set('role', activeRole)
         return url.toString()
     }
 

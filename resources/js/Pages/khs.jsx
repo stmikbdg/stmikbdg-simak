@@ -99,7 +99,7 @@ export default function KHS({ token, base_url, role }) {
                                     variant="contained"
                                     startIcon={<DownloadOutlined fontSize="small" />}
                                     disabled={listData.khs.loading || !listData.khs.data?.ip_per_semester?.length}
-                                    onClick={() => window.location.href = '/khs/download'}
+                                    onClick={() => window.open('/khs/download', '_blank', 'noopener,noreferrer')}
                                 >
                                     <p className="font-jakarta text-xs">Unduh KHS PDF</p>
                                 </Button>

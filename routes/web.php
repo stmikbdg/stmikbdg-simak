@@ -40,6 +40,8 @@ Route::middleware(['auth.token'])
         Route::get('/ksm/preview/krs_id/{krs_id}', 'ksm_preview_per_krs_id');
         Route::get('/rekap/pertemuan/{options}/{pengajar_id}/{tahun_id}/{from}/{to}', 'rekap_pertemuan');
         Route::get('/berita-acara/{kelas_kuliah_id}', 'bap_dosen_rekap');
+        Route::get('/rekap/presensi/pdf/{kelas_kuliah_id}', 'rekap_presensi_pdf');
+        Route::get('/rekap/berita-acara/pdf/{kelas_kuliah_id}', 'rekap_berita_acara_pdf');
         Route::get('/khs-mahasiswa', 'khs_mahasiswa');
         Route::get('/khs-mahasiswa/download/{mhs_id}', 'khs_mahasiswa_download');
         Route::post('/khs-mahasiswa/download/bulk', 'khs_mahasiswa_download_bulk');

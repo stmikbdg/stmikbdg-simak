@@ -1,22 +1,25 @@
-<?php 
+<?php
+
 namespace App\Http\Controllers;
 
 use App\Models\WebService;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Session;
+use Inertia\Inertia;
 
-class WebController extends Controller {
-
+class WebController extends Controller
+{
     protected $service;
+
     public function __construct()
     {
         $this->service = new WebService();
     }
 
-    private function render(string $component, array $props = [], $cekMahasiswaActive = false, $cekKeuangan = false) {
+    private function render(string $component, array $props = [], $cekMahasiswaActive = false, $cekKeuangan = false)
+    {
         $token = Session::get('token');
         $role = Session::get('role');
 
@@ -28,28 +31,28 @@ class WebController extends Controller {
         $props['role'] = [
             'dosen' => [
                 'enable' => $role['is_dosen'] ?? false,
-                'label' => 'Dosen'
+                'label' => 'Dosen',
             ],
             'admin' => [
                 'enable' => $role['is_admin'] ?? false,
-                'label' => 'Admin'
+                'label' => 'Admin',
             ],
             'mahasiswa' => [
                 'enable' => $role['is_mhs'] ?? false,
-                'label' => 'Mahasiswa'
+                'label' => 'Mahasiswa',
             ],
             'developer' => [
                 'enable' => $role['is_dev'] ?? false,
-                'label' => 'Developer'
+                'label' => 'Developer',
             ],
             'dosen_wali' => [
                 'enable' => $role['is_doswal'] ?? false,
-                'label' => 'Dosen Wali'
+                'label' => 'Dosen Wali',
             ],
             'prodi' => [
                 'enable' => $role['is_prodi'] ?? false,
-                'label' => 'Prodi'
-            ]
+                'label' => 'Prodi',
+            ],
         ];
         $props['base_url'] = config('myconfig.api.base_url');
 
@@ -62,7 +65,7 @@ class WebController extends Controller {
                 'deskripsi' => 'Sistem pembelajaran daring kampus',
                 'label' => 'pembelajaran',
                 'icon' => 'SchoolTwoTone',
-                'color' => 'indigo'
+                'color' => 'indigo',
             ],
             // [
             //     'name' => 'Keuangan',
@@ -76,7 +79,7 @@ class WebController extends Controller {
                 'deskripsi' => 'Sistem Pembelajaran dan Ujian Daring (Learning Management System)',
                 'label' => 'lms',
                 'icon' => 'AssignmentTwoTone',
-                'color' => 'green'
+                'color' => 'green',
             ],
             // [
             //     'name' => 'Journal',
@@ -97,28 +100,28 @@ class WebController extends Controller {
                 'deskripsi' => 'Sistem Informasi dan Layanan pembimbingan akademik',
                 'label' => 'bimbingan',
                 'icon' => 'CallSplitTwoTone',
-                'color' => 'teal'
+                'color' => 'teal',
             ],
             [
                 'name' => 'Pendaftaran',
                 'deskripsi' => 'Pendaftaran sidang skripsi atau kerja praktek',
                 'label' => 'pendaftaran_sidang_skripsi_kp',
                 'icon' => 'SchoolTwoTone',
-                'color' => 'orange'
+                'color' => 'orange',
             ],
             [
                 'name' => 'Pengajuan',
                 'deskripsi' => 'Pengelolaan berbagai jenis permohonan akademik',
                 'label' => 'pengajuan',
                 'icon' => 'FeedTwoTone',
-                'color' => 'violet'
+                'color' => 'violet',
             ],
             [
                 'name' => 'Arsip Digital',
                 'deskripsi' => 'Sistem arsip digital kampus',
                 'label' => 'arsip_digital',
                 'icon' => 'FolderCopyTwoTone',
-                'color' => 'blue'
+                'color' => 'blue',
             ],
             // [
             //     'name' => 'Kuesioner',
@@ -126,15 +129,15 @@ class WebController extends Controller {
             //     'label' => 'kuesioner',
             //     'icon' => 'PollTwoTone',
             //     'color' => 'red'
-            // ],            
+            // ],
         ];
 
-        if($cekMahasiswaActive) {
-            if(strpos($account['kd_user'], "MHS-") !== false) {
-                if(isset($account['is_mhs'])) {
-                    if($account['is_mhs']) {
-                        if($role['is_mhs']) {
-                            if($profile['sts_mhs'] != 'A') {
+        if ($cekMahasiswaActive) {
+            if (strpos($account['kd_user'], 'MHS-') !== false) {
+                if (isset($account['is_mhs'])) {
+                    if ($account['is_mhs']) {
+                        if ($role['is_mhs']) {
+                            if ($profile['sts_mhs'] != 'A') {
                                 return Inertia::render('NotMahasiswaActive', $props);
                             }
                         }
@@ -162,47 +165,57 @@ class WebController extends Controller {
         return Inertia::render($component, $props);
     }
 
-    public function index() {
+    public function index()
+    {
         return $this->render('Home');
     }
 
-    public function dashboard() {
+    public function dashboard()
+    {
         return $this->render('dashboard', [], true, true);
     }
 
-    public function absenqr() {
+    public function absenqr()
+    {
         return $this->render('absenqr', [], true, true);
     }
 
-    public function khs() {
+    public function khs()
+    {
         return $this->render('khs', [], true, true);
     }
 
-    public function khs_per_semester(string $semester) {
+    public function khs_per_semester(string $semester)
+    {
         return $this->render('khs_per_semester', [
-            'semester' => $semester
+            'semester' => $semester,
         ], true, true);
     }
 
-    public function profil() {
+    public function profil()
+    {
         return $this->render('profil', [], true, true);
     }
 
-    public function jadwal() {
+    public function jadwal()
+    {
         return $this->render('jadwal', [], true, true);
     }
 
-    public function krs() {
+    public function krs()
+    {
         return $this->render('krs', [], true, true);
     }
 
-    private function pdfLogoPath(): ?string {
+    private function pdfLogoPath(): ?string
+    {
         $logoPath = public_path('images/stmik.png');
 
         return file_exists($logoPath) ? $logoPath : null;
     }
 
-    private function pengesahanProdiName(?string $prodi): string {
+    private function pengesahanProdiName(?string $prodi): string
+    {
         $prodi = strtoupper($prodi ?? '');
 
         if (str_contains($prodi, 'TEKNIK INFORMATIKA')) {
@@ -216,14 +229,16 @@ class WebController extends Controller {
         return '';
     }
 
-    public function krs_approve_by_dosen_wali(Int $mhs_id, Int $krs_id) {
+    public function krs_approve_by_dosen_wali(int $mhs_id, int $krs_id)
+    {
         return $this->render('krs_approve_by_dosen_wali', [
             'mhs_id' => $mhs_id,
-            'krs_id' => $krs_id
+            'krs_id' => $krs_id,
         ]);
     }
 
-    private function khsDownloadViewData($image) {
+    private function khsDownloadViewData($image)
+    {
 
         $user = Session::get('profile');
 
@@ -231,35 +246,35 @@ class WebController extends Controller {
 
         $summaryResponse = $this->service->get(null, 'krs/ip/semester')->getData('data');
 
-        if($summaryResponse['status'] != 'success') {
+        if ($summaryResponse['status'] != 'success') {
             return abort(404);
         }
 
         $summary = $summaryResponse['data'];
 
-        if(! $summary) {
+        if (! $summary) {
             return abort(404);
         }
 
         $semesters = [];
 
-        for($semester = 1; $semester <= 8; $semester++) {
+        for ($semester = 1; $semester <= 8; $semester++) {
             $detailResponse = $this->service->get(null, 'krs/ip/semester?s='.$semester)->getData('data');
 
-            if($detailResponse['status'] != 'success') {
+            if ($detailResponse['status'] != 'success') {
                 continue;
             }
 
             $detail = $detailResponse['data'];
             $matakuliah = $detail['matakuliah'] ?? [];
 
-            if($detail && count($matakuliah) > 0) {
+            if ($detail && count($matakuliah) > 0) {
                 $detail['matakuliah'] = $matakuliah;
                 $semesters[] = $detail;
             }
         }
 
-        if(count($semesters) < 1) {
+        if (count($semesters) < 1) {
             return abort(404);
         }
 
@@ -272,13 +287,14 @@ class WebController extends Controller {
             'summary' => $summary,
             'semesters' => $semesters,
             'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
-            'image' => $image
+            'image' => $image,
         ];
     }
 
-    private function khsSemesterViewData(int $semester, $image) {
+    private function khsSemesterViewData(int $semester, $image)
+    {
 
-        if($semester < 1 || $semester > 8) {
+        if ($semester < 1 || $semester > 8) {
             return abort(404);
         }
 
@@ -288,14 +304,14 @@ class WebController extends Controller {
 
         $response = $this->service->get(null, 'krs/ip/semester?s='.$semester)->getData('data');
 
-        if($response['status'] != 'success') {
+        if ($response['status'] != 'success') {
             return abort(404);
         }
 
         $response_data = $response['data'];
         $matakuliah = $response_data['matakuliah'] ?? [];
 
-        if(! $response_data || count($matakuliah) < 1) {
+        if (! $response_data || count($matakuliah) < 1) {
             return abort(404);
         }
 
@@ -315,51 +331,60 @@ class WebController extends Controller {
             'total_nilai_e' => $response_data['total_nilai_e'] ?? 0,
             'matakuliah' => $matakuliah,
             'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
-            'image' => $image
+            'image' => $image,
         ];
     }
 
-    public function khs_download() {
+    public function khs_download()
+    {
 
         $data = $this->khsDownloadViewData($this->pdfLogoPath());
 
         $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
+
         return $pdf->stream('Kartu Hasil Studi - '.$data['nim'].' - '.$data['nama'].'.pdf');
     }
 
-    public function khs_download_per_semester(int $semester) {
+    public function khs_download_per_semester(int $semester)
+    {
 
         $data = $this->khsSemesterViewData($semester, $this->pdfLogoPath());
 
         $pdf = Pdf::loadView('pdf/khs-semester-download', $data)->setPaper('A4', 'portrait');
+
         return $pdf->stream('Kartu Hasil Studi - '.$data['nim'].' - '.$data['nama'].' - Semester '.$semester.'.pdf');
     }
 
-    public function khs_preview() {
+    public function khs_preview()
+    {
 
         $data = $this->khsDownloadViewData(asset('images/stmik.png'));
 
         return view('pdf/khs-download', $data);
     }
 
-    public function khs_preview_per_semester(int $semester) {
+    public function khs_preview_per_semester(int $semester)
+    {
 
         $data = $this->khsSemesterViewData($semester, asset('images/stmik.png'));
 
         return view('pdf/khs-semester-download', $data);
     }
 
-    public function surat() {
+    public function surat()
+    {
         return $this->render('surat', []);
     }
 
-    public function surat_detail_by_id(Int $id) {
+    public function surat_detail_by_id(int $id)
+    {
         return $this->render('surat_detail_by_id', [
-            'id' => $id
+            'id' => $id,
         ]);
     }
 
-    public function ksm_download_per_krs_id(int $krs_id) {
+    public function ksm_download_per_krs_id(int $krs_id)
+    {
 
         $user = Session::get('profile');
 
@@ -367,7 +392,7 @@ class WebController extends Controller {
 
         $response = $this->service->get(null, 'krs/riwayat?krs_id='.$krs_id)->getData('data');
 
-        if($response['status'] != 'success') {
+        if ($response['status'] != 'success') {
             return abort(404);
         }
 
@@ -381,7 +406,7 @@ class WebController extends Controller {
 
         $krs_matkul = $response_data['krs_matkul'] ?? [];
 
-        if(count($krs_matkul) < 1) {
+        if (count($krs_matkul) < 1) {
             return abort(404);
         }
 
@@ -395,19 +420,21 @@ class WebController extends Controller {
             'nama' => $user['nama'] ?? '-',
             'dosen_wali' => $user['dosen_wali'] ?? '-',
             'semester' => $response_data['semester'] ?? '-',
-            'matakuliah' => array_map(function($item) {
+            'matakuliah' => array_map(function ($item) {
                 return $item['mata_kuliah'] ?? [];
             }, $krs_matkul),
             'total_sks' => $total_sks,
             'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
-            'image' => $this->pdfLogoPath()
+            'image' => $this->pdfLogoPath(),
         ];
 
         $pdf = Pdf::loadView('pdf/ksm-download', $data)->setPaper('A4', 'portrait');
+
         return $pdf->stream('Kartu Studi Mahasiswa - '.($user['nim'] ?? '-').' - '.($user['nama'] ?? '-').' - Semester '.($response_data['semester'] ?? '-').'.pdf');
     }
 
-    public function ksm_preview_per_semester(int $semester) {
+    public function ksm_preview_per_semester(int $semester)
+    {
 
         $user = Session::get('profile');
 
@@ -415,11 +442,11 @@ class WebController extends Controller {
 
         $response = $this->service->get(null, 'krs/ip/semester?s='.$semester)->getData('data');
 
-        if($response['status'] != 'success') {
+        if ($response['status'] != 'success') {
             return abort(404);
         }
 
-        if(!isset($response['data']['matakuliah'])) {
+        if (! isset($response['data']['matakuliah'])) {
             return $this->render('NotFound');
         }
 
@@ -429,20 +456,21 @@ class WebController extends Controller {
             'nim' => $user['nim'],
             'nama' => $user['nama'],
             'dosen_wali' => $user['dosen_wali'],
-            'matakuliah' => array_map(function($item) {
+            'matakuliah' => array_map(function ($item) {
                 $item['kelas'] = '-';
 
                 return $item;
             }, $response_data['matakuliah']),
             'total_sks' => $response_data['total_sks'],
             'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
-            'image' => asset('images/stmik.png')
+            'image' => asset('images/stmik.png'),
         ];
 
         return view('pdf/ksm-preview', $data);
     }
 
-    public function rekap_pertemuan(string $options, int $pengajar_id, int $tahun_id, string $from, string $to) {
+    public function rekap_pertemuan(string $options, int $pengajar_id, int $tahun_id, string $from, string $to)
+    {
 
         $user = Session::get('profile');
 
@@ -452,7 +480,7 @@ class WebController extends Controller {
 
         // dd($response);
 
-        if($response['status'] != 'success') {
+        if ($response['status'] != 'success') {
             return abort(404);
         }
 
@@ -477,12 +505,12 @@ class WebController extends Controller {
         foreach ($dataPertemuan as $item) {
             $raw = $item['tanggal']; // keep original for sorting
             $kehadiran[] = [
-                'tanggal'      => Carbon::parse($raw)->format('d/m/Y'),
-                'tanggal_raw'  => $raw, // <-- add this
-                'sks'          => $item['kelas_kuliah']['matakuliah']['sks'],
-                'program'      => $item['kelas_kuliah']['jns_mhs'],
-                'kegiatan'     => $item['kelas_kuliah']['kelas_kuliah'],
-                'kelas'        => $item['kelas_kuliah']['matakuliah']['nm_mk'],
+                'tanggal' => Carbon::parse($raw)->format('d/m/Y'),
+                'tanggal_raw' => $raw, // <-- add this
+                'sks' => $item['kelas_kuliah']['matakuliah']['sks'],
+                'program' => $item['kelas_kuliah']['jns_mhs'],
+                'kegiatan' => $item['kelas_kuliah']['kelas_kuliah'],
+                'kelas' => $item['kelas_kuliah']['matakuliah']['nm_mk'],
             ];
 
             $totalSks += $item['kelas_kuliah']['matakuliah']['sks'];
@@ -491,7 +519,9 @@ class WebController extends Controller {
         // sort by kegiatan (A→Z), then by tanggal (oldest→newest)
         usort($kehadiran, function ($a, $b) {
             $cmp = strcmp($a['kelas'], $b['kelas']);
-            if ($cmp !== 0) return $cmp;
+            if ($cmp !== 0) {
+                return $cmp;
+            }
 
             return Carbon::parse($a['tanggal_raw'])->timestamp <=> Carbon::parse($b['tanggal_raw'])->timestamp;
         });
@@ -499,9 +529,10 @@ class WebController extends Controller {
         // clean up helper field
         $kehadiran = array_map(function ($item) {
             unset($item['tanggal_raw']);
+
             return $item;
         }, $kehadiran);
-        
+
         $data = [
             'dosen' => $dosenNama,
             'matakuliah' => $matakuliahNama,
@@ -518,18 +549,54 @@ class WebController extends Controller {
             // 'jenis_kelas' => '',
         ];
 
-        if($options === 'download') {
+        if ($options === 'download') {
             $pdf = Pdf::loadView('pdf/rekap-pertemuan', $data)->setPaper('a4', 'portrait');
+
             return $pdf->stream('REKAP PERTEMUAN DOSEN - '.$dosenNama.' - '.$from.' to '.$to.'.pdf');
-        }else{
+        } else {
             return view('pdf.rekap-pertemuan', $data);
         }
     }
 
-    public function bap_dosen_rekap(int $kelas_kuliah_id) {
+    public function bap_dosen_rekap(int $kelas_kuliah_id)
+    {
         return $this->render('berita_acara', [
-            'kelas_kuliah_id' => $kelas_kuliah_id
+            'kelas_kuliah_id' => $kelas_kuliah_id,
         ]);
+    }
+
+    public function rekap_presensi_pdf(int $kelas_kuliah_id)
+    {
+        $response = $this->service->get(null, 'rekap/presensi?kelas_kuliah_id='.$kelas_kuliah_id)->getData(true);
+        abort_unless(($response['status'] ?? null) === 'success', 404);
+        $data = $response['data']['rekap_presensi'];
+        abort_if(empty($data['kehadiran_mahasiswa']), 404);
+        $data['judul'] = 'REKAP PRESENSI';
+        $data['dibuat'] = now()->translatedFormat('d F Y H:i');
+        $data['image'] = public_path('images/stmik.png');
+        $name = preg_replace('/[^A-Za-z0-9_-]+/', '-', 'rekap-presensi-'.($data['matakuliah']['nm_mk'] ?? $kelas_kuliah_id));
+
+        return Pdf::loadView('pdf.rekap-presensi', $data)->setPaper('A4', 'landscape')->download(trim($name, '-').'.pdf');
+    }
+
+    public function rekap_berita_acara_pdf(Request $request, int $kelas_kuliah_id)
+    {
+        $request->validate(['from' => 'required|date', 'to' => 'required|date|after_or_equal:from']);
+        $query = '?kelas_kuliah_id='.$kelas_kuliah_id.'&from='.$request->query('from').'&to='.$request->query('to');
+        $response = $this->service->get(null, 'rekap/berita-acara'.$query)->getData(true);
+        $meta = $this->service->get(null, 'rekap/presensi?kelas_kuliah_id='.$kelas_kuliah_id)->getData(true);
+        abort_unless(($response['status'] ?? null) === 'success' && ($meta['status'] ?? null) === 'success', 404);
+        $data = $meta['data']['rekap_presensi'];
+        $data['berita_acara'] = $response['data']['berita_acara'];
+        abort_if(empty($data['berita_acara']), 404);
+        $data['judul'] = 'REKAP BERITA ACARA';
+        $data['from'] = $request->query('from');
+        $data['to'] = $request->query('to');
+        $data['dibuat'] = now()->translatedFormat('d F Y H:i');
+        $data['image'] = public_path('images/stmik.png');
+        $name = preg_replace('/[^A-Za-z0-9_-]+/', '-', 'rekap-berita-acara-'.($data['matakuliah']['nm_mk'] ?? $kelas_kuliah_id).'-'.$data['from'].'-'.$data['to']);
+
+        return Pdf::loadView('pdf.rekap-berita-acara', $data)->setPaper('A4', 'landscape')->download(trim($name, '-').'.pdf');
     }
 
     /**
@@ -537,41 +604,45 @@ class WebController extends Controller {
      */
 
     // Main page render
-    public function khs_mahasiswa() {
+    public function khs_mahasiswa()
+    {
         $this->abortIfNotDosenWali();
+
         return $this->render('khs_mahasiswa', [], false, false);
     }
 
     // Single PDF download
-    public function khs_mahasiswa_download(Request $request, int $mhs_id) {
+    public function khs_mahasiswa_download(Request $request, int $mhs_id)
+    {
         $this->abortIfNotDosenWali();
 
         $semesters = $this->normalizeSemesterSelection($request->query('semesters', 'all'));
-        
+
         $apiData = $this->fetchDosenWaliKHS($mhs_id, $semesters);
-        
-        if (!$apiData) {
+
+        if (! $apiData) {
             abort(404, 'Data KHS tidak ditemukan');
         }
 
         $data = $this->khsMahasiswaDosenWaliViewData($apiData, $semesters, $this->pdfLogoPath());
 
         $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
-        
+
         $filename = $this->generateKhsFilename($data['nim'], $data['nama'], $semesters);
-        
+
         return $pdf->stream($filename);
     }
 
     // HTML preview
-    public function khs_mahasiswa_preview(Request $request, int $mhs_id) {
+    public function khs_mahasiswa_preview(Request $request, int $mhs_id)
+    {
         $this->abortIfNotDosenWali();
 
         $semesters = $this->normalizeSemesterSelection($request->query('semesters', 'all'));
-        
+
         $apiData = $this->fetchDosenWaliKHS($mhs_id, $semesters);
-        
-        if (!$apiData) {
+
+        if (! $apiData) {
             abort(404, 'Data KHS tidak ditemukan');
         }
 
@@ -581,35 +652,36 @@ class WebController extends Controller {
     }
 
     // Bulk ZIP download
-    public function khs_mahasiswa_download_bulk(Request $request) {
+    public function khs_mahasiswa_download_bulk(Request $request)
+    {
         $this->abortIfNotDosenWali();
-        
+
         // Set timeout for bulk operation - 50 PDFs could take time
         set_time_limit(300); // 5 minutes for max 50 students
 
         $validated = $request->validate([
             'mhs_ids' => 'required|array|min:1|max:50',
             'mhs_ids.*' => 'required|integer|distinct',
-            'semesters' => 'required|string'
+            'semesters' => 'required|string',
         ], [
             'mhs_ids.required' => 'Pilih minimal 1 mahasiswa',
             'mhs_ids.max' => 'Maksimal 50 mahasiswa dapat diunduh sekaligus',
             'mhs_ids.*.distinct' => 'Terdapat mahasiswa yang dipilih lebih dari sekali',
             'mhs_ids.*.integer' => 'ID mahasiswa tidak valid',
-            'semesters.required' => 'Pilih semester yang akan diunduh'
+            'semesters.required' => 'Pilih semester yang akan diunduh',
         ]);
 
         $mhsIds = $validated['mhs_ids'];
         $semesters = $this->normalizeSemesterSelection($validated['semesters']);
 
         $tempDir = storage_path('app/khs-exports');
-        if (!file_exists($tempDir)) {
+        if (! file_exists($tempDir)) {
             mkdir($tempDir, 0755, true);
         }
 
         $randomSuffix = substr(md5(uniqid(mt_rand(), true)), 0, 8);
-        $zipFilename = 'KHS-Mahasiswa-' . date('Y-m-d-His') . '-' . $randomSuffix . '-' . $this->getSemesterModeLabel($semesters) . '.zip';
-        $zipPath = $tempDir . '/' . $zipFilename;
+        $zipFilename = 'KHS-Mahasiswa-'.date('Y-m-d-His').'-'.$randomSuffix.'-'.$this->getSemesterModeLabel($semesters).'.zip';
+        $zipPath = $tempDir.'/'.$zipFilename;
 
         $zip = new \ZipArchive();
         if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
@@ -618,26 +690,26 @@ class WebController extends Controller {
 
         $successCount = 0;
         $usedFilenames = [];
-        
+
         try {
             foreach ($mhsIds as $mhsId) {
                 try {
                     $apiData = $this->fetchDosenWaliKHS($mhsId, $semesters);
-                    
-                    if (!$apiData) {
+
+                    if (! $apiData) {
                         continue;
                     }
 
                     $data = $this->khsMahasiswaDosenWaliViewData($apiData, $semesters, $this->pdfLogoPath());
 
                     $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
-                    
+
                     $baseFilename = $this->generateKhsFilename($data['nim'], $data['nama'], $semesters);
                     $filename = $this->ensureUniqueFilename($baseFilename, $usedFilenames);
-                    
+
                     $pdfContent = $pdf->output();
                     $zip->addFromString($filename, $pdfContent);
-                    
+
                     $successCount++;
                 } catch (\Exception $e) {
                     continue;
@@ -648,7 +720,7 @@ class WebController extends Controller {
         } catch (\Exception $e) {
             $zip->close();
             @unlink($zipPath);
-            abort(500, 'Gagal membuat file ZIP: ' . $e->getMessage());
+            abort(500, 'Gagal membuat file ZIP: '.$e->getMessage());
         }
 
         if ($successCount === 0) {
@@ -662,15 +734,16 @@ class WebController extends Controller {
     /**
      * Helper Methods for KHS Mahasiswa Dosen Wali
      */
-
-    private function abortIfNotDosenWali() {
+    private function abortIfNotDosenWali()
+    {
         $role = Session::get('role');
-        if (!isset($role['is_doswal']) || !$role['is_doswal']) {
+        if (! isset($role['is_doswal']) || ! $role['is_doswal']) {
             abort(403, 'Akses ditolak. Hanya dosen wali yang dapat mengakses halaman ini.');
         }
     }
 
-    private function normalizeSemesterSelection($semesters) {
+    private function normalizeSemesterSelection($semesters)
+    {
         if ($semesters === 'all' || $semesters === 'semua') {
             return 'all';
         }
@@ -680,13 +753,13 @@ class WebController extends Controller {
         }
 
         $semesters = trim($semesters);
-        
+
         if (empty($semesters)) {
             return 'all';
         }
 
         $semesterArray = array_map('intval', explode(',', $semesters));
-        $semesterArray = array_filter($semesterArray, function($s) {
+        $semesterArray = array_filter($semesterArray, function ($s) {
             return $s >= 1;
         });
         $semesterArray = array_unique($semesterArray);
@@ -699,12 +772,13 @@ class WebController extends Controller {
         return implode(',', $semesterArray);
     }
 
-    private function fetchDosenWaliKHS(int $mhsId, string $semesters) {
+    private function fetchDosenWaliKHS(int $mhsId, string $semesters)
+    {
         try {
-            $endpoint = 'krs/mahasiswa/' . $mhsId . '/khs?semesters=' . $semesters;
+            $endpoint = 'krs/mahasiswa/'.$mhsId.'/khs?semesters='.$semesters;
             $response = $this->service->get(null, $endpoint)->getData('data');
 
-            if (!isset($response['status']) || $response['status'] !== 'success') {
+            if (! isset($response['status']) || $response['status'] !== 'success') {
                 return null;
             }
 
@@ -714,7 +788,8 @@ class WebController extends Controller {
         }
     }
 
-    private function khsMahasiswaDosenWaliViewData(array $apiData, string $semesters, $image) {
+    private function khsMahasiswaDosenWaliViewData(array $apiData, string $semesters, $image)
+    {
         Carbon::setLocale('id');
 
         $mahasiswa = $apiData['mahasiswa'] ?? [];
@@ -729,36 +804,39 @@ class WebController extends Controller {
             'semesters' => $apiData['semesters'] ?? [],
             'mode_semester_label' => $this->getSemesterModeLabel($semesters),
             'tanggal' => Carbon::now()->translatedFormat('d F Y'),
-            'image' => $image
+            'image' => $image,
         ];
     }
 
-    private function getSemesterModeLabel(string $semesters): string {
+    private function getSemesterModeLabel(string $semesters): string
+    {
         if ($semesters === 'all') {
             return 'Semua-Semester';
         }
 
         $semesterArray = explode(',', $semesters);
-        
+
         if (count($semesterArray) === 1) {
-            return 'Semester-' . $semesterArray[0];
+            return 'Semester-'.$semesterArray[0];
         }
 
-        return 'Semester-' . str_replace(',', '-', $semesters);
+        return 'Semester-'.str_replace(',', '-', $semesters);
     }
 
-    private function generateKhsFilename(string $nim, string $nama, string $semesters): string {
+    private function generateKhsFilename(string $nim, string $nama, string $semesters): string
+    {
         $namaSlug = $this->sanitizeFilename($nama);
         $semesterLabel = $this->getSemesterModeLabel($semesters);
-        
-        return $nim . '-' . $namaSlug . '-' . $semesterLabel . '.pdf';
+
+        return $nim.'-'.$namaSlug.'-'.$semesterLabel.'.pdf';
     }
 
-    private function sanitizeFilename(string $name): string {
+    private function sanitizeFilename(string $name): string
+    {
         // Prevent path traversal explicitly
         $name = str_replace(['../', '..\\', './'], '', $name);
         $name = basename($name); // Extra safety - removes any path component
-        
+
         // Remove non-alphanumeric except spaces and dash
         $name = preg_replace('/[^a-zA-Z0-9\s\-]/', '', $name);
         // Replace multiple spaces with single dash
@@ -767,25 +845,25 @@ class WebController extends Controller {
         $name = preg_replace('/-+/', '-', $name);
         // Trim leading/trailing dashes
         $name = trim($name, '-');
-        
+
         return $name ?: 'Mahasiswa'; // Fallback if empty after sanitization
     }
 
-    private function ensureUniqueFilename(string $filename, array &$usedFilenames): string {
+    private function ensureUniqueFilename(string $filename, array &$usedFilenames): string
+    {
         $originalFilename = $filename;
         $counter = 1;
-        
+
         while (in_array($filename, $usedFilenames)) {
             $counter++;
             $pathInfo = pathinfo($originalFilename);
             $basename = $pathInfo['filename'];
-            $extension = isset($pathInfo['extension']) ? '.' . $pathInfo['extension'] : '';
-            $filename = $basename . '-' . $counter . $extension;
+            $extension = isset($pathInfo['extension']) ? '.'.$pathInfo['extension'] : '';
+            $filename = $basename.'-'.$counter.$extension;
         }
-        
+
         $usedFilenames[] = $filename;
+
         return $filename;
     }
 }
-
-?>

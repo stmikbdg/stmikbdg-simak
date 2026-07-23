@@ -233,7 +233,7 @@ export default function KHSMahasiswa({ token, base_url, role }) {
         if (downloadDialog.type === 'single') {
             const mhsId = downloadDialog.mhsId;
             closeDownloadDialog();
-            window.location.href = '/khs-mahasiswa/download/' + mhsId + '?semesters=' + payload;
+            window.open('/khs-mahasiswa/download/' + mhsId + '?semesters=' + payload, '_blank', 'noopener,noreferrer');
             return;
         }
 

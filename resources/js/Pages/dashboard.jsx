@@ -84,6 +84,28 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { useBackdrop } from "../context/BackdropContext";
 import CustomDropdown from "../components/CustomDropdown";
 
+async function downloadRekap(url, token, setLoading) {
+    try {
+        setLoading(true)
+        const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+        if (!response.ok) throw new Error('Export gagal diunduh')
+        const blob = await response.blob()
+        const disposition = response.headers.get('content-disposition') || ''
+        const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1]
+        const plainName = disposition.match(/filename="([^"]+)"|filename=([^;]+)/i)
+        const name = encodedName ? decodeURIComponent(encodedName) : (plainName?.[1] || plainName?.[2]?.trim() || 'rekap.xlsx')
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = name
+        link.click()
+        URL.revokeObjectURL(link.href)
+    } catch (error) {
+        customSwal.toast.error({ message: error.message })
+    } finally {
+        setLoading(false)
+    }
+}
+
 export default function Home({ token, base_url, role, app }) {
 
     if (role.mahasiswa.enable) {
@@ -108,6 +130,7 @@ export default function Home({ token, base_url, role, app }) {
 }
 
 function ProdiPage_Rekap_BeritaAcara({ token, base_url, role }) {
+    const [exportLoading, setExportLoading] = useState(false)
     const [listData, setListData] = useState({
         tahun_ajaran: {
             data: [],
@@ -454,6 +477,8 @@ function ProdiPage_Rekap_BeritaAcara({ token, base_url, role }) {
                     </div>
                 )
                 : (
+                    <div>
+                    {!!listData.detail.data?.berita_acara?.length && <div className="p-4 flex gap-2"><Button variant="contained" startIcon={<Download />} disabled={exportLoading} onClick={() => downloadRekap(`${base_url}rekap/berita-acara/export?kelas_kuliah_id=${listData.matkul.select.kelas_kuliah_id}&from=${dayjs(listData.tanggal.from).format('YYYY-MM-DD')}&to=${dayjs(listData.tanggal.to).format('YYYY-MM-DD')}`, token, setExportLoading)}>{exportLoading ? 'Mengunduh...' : 'Excel'}</Button><Button variant="outlined" startIcon={<Download />} disabled={exportLoading} onClick={() => window.location.href = `/rekap/berita-acara/pdf/${listData.matkul.select.kelas_kuliah_id}?from=${dayjs(listData.tanggal.from).format('YYYY-MM-DD')}&to=${dayjs(listData.tanggal.to).format('YYYY-MM-DD')}`}>PDF</Button></div>}
                     <CustomDataTable 
                         loading={listData.detail.loading}
                         rows={listData.detail.data?.berita_acara || []}
@@ -486,6 +511,7 @@ function ProdiPage_Rekap_BeritaAcara({ token, base_url, role }) {
                             }
                         ]}
                     />
+                    </div>
                 )
             } 
         </div>
@@ -1091,6 +1117,7 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
 
 function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
 
+    const [exportLoading, setExportLoading] = useState(false)
     const [listData, setListData] = useState({
         tahun_ajaran: {
             data: [],
@@ -1148,25 +1175,25 @@ function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
                 }
             },
             set: (column, value) => {
-                setListData({
-                    ...listData,
+                setListData(state => ({
+                    ...state,
                     tahun_ajaran: {
-                        ...listData.tahun_ajaran,
+                        ...state.tahun_ajaran,
                         [column]: value
                     }
-                })
+                }))
             },
             loading: (column) => {
-                setListData({
-                    ...listData,
+                setListData(state => ({
+                    ...state,
                     tahun_ajaran: {
-                        ...listData.tahun_ajaran,
+                        ...state.tahun_ajaran,
                         loading: {
-                            ...listData.tahun_ajaran.loading,
-                            [column]: !listData.tahun_ajaran.loading[column]
+                            ...state.tahun_ajaran.loading,
+                            [column]: !state.tahun_ajaran.loading[column]
                         }
                     }
-                })
+                }))
             },
             select: async (value) => {
                 // aksi.dosen.set('data', [])
@@ -1379,6 +1406,8 @@ function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
                     </div>
                 )
                 : (
+                    <div>
+                    {!!listData.detail.data?.kehadiran_mahasiswa?.length && <div className="p-4 flex gap-2"><Button variant="contained" startIcon={<Download />} disabled={exportLoading} onClick={() => downloadRekap(`${base_url}rekap/presensi/export?kelas_kuliah_id=${listData.matkul.select.kelas_kuliah_id}`, token, setExportLoading)}>{exportLoading ? 'Mengunduh...' : 'Excel'}</Button><Button variant="outlined" startIcon={<Download />} disabled={exportLoading} onClick={() => window.location.href = `/rekap/presensi/pdf/${listData.matkul.select.kelas_kuliah_id}`}>PDF</Button></div>}
                     <CustomDataTable 
                         loading={listData.detail.loading}
                         rows={listData.detail.data?.kehadiran_mahasiswa || []}
@@ -1406,10 +1435,11 @@ function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
                                 field: 'persentase_kehadiran',
                                 headerName: 'Persentase Kehadiran',
                                 minWidth: 250,
-                                valueGetter: (value, row) => `${value}%`
+                                valueGetter: (value, row) => `${Number(value || 0).toFixed(2).replace(/\.00$/, '')}%`
                             }
                         ]}
                     />
+                    </div>
                 )
             }
             {/* <CustomTabs>

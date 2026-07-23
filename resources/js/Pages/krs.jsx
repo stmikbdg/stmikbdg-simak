@@ -873,7 +873,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                                                                 startIcon={<DownloadOutlined fontSize="small" />}
                                                                 variant="outlined"
                                                                 size="small"
-                                                                onClick={() => window.location.href = `/ksm/download/krs_id/${listData.krs.data?.krs?.krs_id}`}
+                                                                onClick={() => window.open(`/ksm/download/krs_id/${listData.krs.data?.krs?.krs_id}`, '_blank', 'noopener,noreferrer')}
                                                             >
                                                                 <p className="font-jakarta text-xs">
                                                                     Unduh KSM
@@ -1162,7 +1162,7 @@ function Mahasiswa_KRSPage_Riwayat({ token, base_url, role }) {
                                 </Tooltip>
                                 {row?.sts_krs === 'S' && (
                                     <Tooltip arrow title="Unduh KSM">
-                                        <IconButton size="small" color="primary" onClick={() => window.location.href = `/ksm/download/krs_id/${row?.krs_id}`}>
+                                        <IconButton size="small" color="primary" onClick={() => window.open(`/ksm/download/krs_id/${row?.krs_id}`, '_blank', 'noopener,noreferrer')}>
                                             <Download fontSize="small" />
                                         </IconButton>
                                     </Tooltip>
@@ -1438,7 +1438,7 @@ function KHSPage({ token, base_url, role}) {
                             variant="contained"
                             startIcon={<DownloadOutlined fontSize="small" />}
                             disabled={listData.khs.loading || !listData.khs.data?.ip_per_semester?.length}
-                            onClick={() => window.location.href = '/khs/download'}
+                            onClick={() => window.open('/khs/download', '_blank', 'noopener,noreferrer')}
                         >
                             <p className="font-jakarta text-xs">Unduh KHS PDF</p>
                         </Button>
@@ -1528,7 +1528,7 @@ function KHSPage({ token, base_url, role}) {
             <Modal modalId="detail_semester" title="Detail Semester" modalBoxClassname="max-w-3xl">
                 <div className="divide-y divide-zinc-300">
                     {/* <div className="p-4">
-                        <Button variant="contained" onClick={() => window.open(`/ksm/download/semester/${listData.semester.data?.semester}`)} startIcon={<DownloadTwoTone />} fullWidth>
+                        <Button variant="contained" onClick={() => window.open(`/ksm/download/semester/${listData.semester.data?.semester}`, '_blank', 'noopener,noreferrer')} startIcon={<DownloadTwoTone />} fullWidth>
                             <p className="font-jakarta font-medium">  
                                 Unduh KSM
                             </p>

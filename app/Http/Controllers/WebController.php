@@ -342,7 +342,7 @@ class WebController extends Controller
 
         $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
 
-        return $pdf->stream('Kartu Hasil Studi - '.$data['nim'].' - '.$data['nama'].'.pdf');
+        return $pdf->download($this->generateKhsFilename($data['nim'], $data['nama'], 'all'));
     }
 
     public function khs_download_per_semester(int $semester)
@@ -352,7 +352,7 @@ class WebController extends Controller
 
         $pdf = Pdf::loadView('pdf/khs-semester-download', $data)->setPaper('A4', 'portrait');
 
-        return $pdf->stream('Kartu Hasil Studi - '.$data['nim'].' - '.$data['nama'].' - Semester '.$semester.'.pdf');
+        return $pdf->download($this->generateKhsFilename($data['nim'], $data['nama'], (string) $semester));
     }
 
     public function khs_preview()
@@ -430,7 +430,9 @@ class WebController extends Controller
 
         $pdf = Pdf::loadView('pdf/ksm-download', $data)->setPaper('A4', 'portrait');
 
-        return $pdf->stream('Kartu Studi Mahasiswa - '.($user['nim'] ?? '-').' - '.($user['nama'] ?? '-').' - Semester '.($response_data['semester'] ?? '-').'.pdf');
+        $filename = 'KSM-'.$this->sanitizeFilename($user['nim'] ?? '-').'-'.$this->sanitizeFilename($user['nama'] ?? '-').'-Semester-'.$this->sanitizeFilename((string) ($response_data['semester'] ?? '-')).'.pdf';
+
+        return $pdf->download($filename);
     }
 
     public function ksm_preview_per_semester(int $semester)
@@ -552,7 +554,9 @@ class WebController extends Controller
         if ($options === 'download') {
             $pdf = Pdf::loadView('pdf/rekap-pertemuan', $data)->setPaper('a4', 'portrait');
 
-            return $pdf->stream('REKAP PERTEMUAN DOSEN - '.$dosenNama.' - '.$from.' to '.$to.'.pdf');
+            $filename = 'Rekap-'.$this->sanitizeFilename($dosenNama).'-'.$this->sanitizeFilename($from).'-'.$this->sanitizeFilename($to).'.pdf';
+
+            return $pdf->download($filename);
         } else {
             return view('pdf.rekap-pertemuan', $data);
         }
@@ -630,7 +634,7 @@ class WebController extends Controller
 
         $filename = $this->generateKhsFilename($data['nim'], $data['nama'], $semesters);
 
-        return $pdf->stream($filename);
+        return $pdf->download($filename);
     }
 
     // HTML preview
@@ -842,7 +846,7 @@ class WebController extends Controller
         $namaSlug = $this->sanitizeFilename($nama);
         $semesterLabel = $this->getSemesterModeLabel($semesters);
 
-        return $nim.'-'.$namaSlug.'-'.$semesterLabel.'.pdf';
+        return 'KHS-'.$this->sanitizeFilename($nim).'-'.$namaSlug.'-'.$semesterLabel.'.pdf';
     }
 
     private function sanitizeFilename(string $name): string

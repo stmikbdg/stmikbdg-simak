@@ -873,7 +873,7 @@ function Mahasiswa_KRSPage({ token, base_url, role }) {
                                                                 startIcon={<DownloadOutlined fontSize="small" />}
                                                                 variant="outlined"
                                                                 size="small"
-                                                                onClick={() => window.open(`/ksm/download/krs_id/${listData.krs.data?.krs?.krs_id}`, '_blank', 'noopener,noreferrer')}
+                                                                onClick={() => window.location.assign(`/ksm/download/krs_id/${listData.krs.data?.krs?.krs_id}`)}
                                                             >
                                                                 <p className="font-jakarta text-xs">
                                                                     Unduh KSM
@@ -1162,7 +1162,7 @@ function Mahasiswa_KRSPage_Riwayat({ token, base_url, role }) {
                                 </Tooltip>
                                 {row?.sts_krs === 'S' && (
                                     <Tooltip arrow title="Unduh KSM">
-                                        <IconButton size="small" color="primary" onClick={() => window.open(`/ksm/download/krs_id/${row?.krs_id}`, '_blank', 'noopener,noreferrer')}>
+                                        <IconButton size="small" color="primary" onClick={() => window.location.assign(`/ksm/download/krs_id/${row?.krs_id}`)}>
                                             <Download fontSize="small" />
                                         </IconButton>
                                     </Tooltip>
@@ -1438,7 +1438,7 @@ function KHSPage({ token, base_url, role}) {
                             variant="contained"
                             startIcon={<DownloadOutlined fontSize="small" />}
                             disabled={listData.khs.loading || !listData.khs.data?.ip_per_semester?.length}
-                            onClick={() => window.open('/khs/download', '_blank', 'noopener,noreferrer')}
+                            onClick={() => window.location.assign('/khs/download')}
                         >
                             <p className="font-jakarta text-xs">Unduh KHS PDF</p>
                         </Button>

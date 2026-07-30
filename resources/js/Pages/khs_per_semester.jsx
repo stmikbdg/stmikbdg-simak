@@ -113,7 +113,7 @@ export default function KHSPerSemester({ semester, token, base_url, role }) {
                                     variant="contained"
                                     startIcon={<DownloadOutlined fontSize="small" />}
                                     disabled={listData.khs.loading || !listData.khs.data?.matakuliah?.length}
-                                    onClick={() => window.open(`/khs/download/semester/${semester}`, '_blank', 'noopener,noreferrer')}
+                                    onClick={() => window.location.assign(`/khs/download/semester/${semester}`)}
                                 >
                                     <p className="font-jakarta text-xs">Unduh PDF</p>
                                 </Button>

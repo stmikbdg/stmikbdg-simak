@@ -339,26 +339,29 @@ class WebController extends Controller
     {
 
         $data = $this->khsDownloadViewData($this->pdfLogoPath());
+        $data['is_draft'] = true;
 
         $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
 
-        return $pdf->download($this->generateKhsFilename($data['nim'], $data['nama'], 'all'));
+        return $pdf->download($this->generateDraftKhsFilename($data['nim'], $data['nama'], 'all'));
     }
 
     public function khs_download_per_semester(int $semester)
     {
 
         $data = $this->khsSemesterViewData($semester, $this->pdfLogoPath());
+        $data['is_draft'] = true;
 
         $pdf = Pdf::loadView('pdf/khs-semester-download', $data)->setPaper('A4', 'portrait');
 
-        return $pdf->download($this->generateKhsFilename($data['nim'], $data['nama'], (string) $semester));
+        return $pdf->download($this->generateDraftKhsFilename($data['nim'], $data['nama'], (string) $semester));
     }
 
     public function khs_preview()
     {
 
         $data = $this->khsDownloadViewData(asset('images/stmik.png'));
+        $data['is_draft'] = true;
 
         return view('pdf/khs-download', $data);
     }
@@ -367,6 +370,7 @@ class WebController extends Controller
     {
 
         $data = $this->khsSemesterViewData($semester, asset('images/stmik.png'));
+        $data['is_draft'] = true;
 
         return view('pdf/khs-semester-download', $data);
     }
@@ -426,11 +430,12 @@ class WebController extends Controller
             'total_sks' => $total_sks,
             'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
             'image' => $this->pdfLogoPath(),
+            'is_draft' => true,
         ];
 
         $pdf = Pdf::loadView('pdf/ksm-download', $data)->setPaper('A4', 'portrait');
 
-        $filename = 'KSM-'.$this->sanitizeFilename($user['nim'] ?? '-').'-'.$this->sanitizeFilename($user['nama'] ?? '-').'-Semester-'.$this->sanitizeFilename((string) ($response_data['semester'] ?? '-')).'.pdf';
+        $filename = 'DRAFT-KSM-'.$this->sanitizeFilename($user['nim'] ?? '-').'-'.$this->sanitizeFilename($user['nama'] ?? '-').'-Semester-'.$this->sanitizeFilename((string) ($response_data['semester'] ?? '-')).'.pdf';
 
         return $pdf->download($filename);
     }
@@ -466,6 +471,7 @@ class WebController extends Controller
             'total_sks' => $response_data['total_sks'],
             'tanggal' => Carbon::parse(Carbon::now())->translatedFormat('d F Y'),
             'image' => asset('images/stmik.png'),
+            'is_draft' => true,
         ];
 
         return view('pdf/ksm-preview', $data);
@@ -847,6 +853,11 @@ class WebController extends Controller
         $semesterLabel = $this->getSemesterModeLabel($semesters);
 
         return 'KHS-'.$this->sanitizeFilename($nim).'-'.$namaSlug.'-'.$semesterLabel.'.pdf';
+    }
+
+    private function generateDraftKhsFilename(string $nim, string $nama, string $semesters): string
+    {
+        return 'DRAFT-'.$this->generateKhsFilename($nim, $nama, $semesters);
     }
 
     private function sanitizeFilename(string $name): string

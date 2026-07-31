@@ -60,6 +60,29 @@
             text-align: left;
         }
 
+        .draft-watermark {
+            position: fixed;
+            top: 42%;
+            left: 12%;
+            width: 76%;
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: #b91c1c;
+            opacity: 0.16;
+            transform: rotate(-28deg);
+        }
+
+        .draft-banner {
+            border: 1px solid #b91c1c;
+            color: #b91c1c;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            padding: 5px;
+            margin-bottom: 8px;
+        }
+
         .header-container {
             display: flex;
             justify-content: space-between;
@@ -84,6 +107,10 @@
     </style>
 </head>
 <body>
+    @if(!empty($is_draft))
+    <div class="draft-watermark">DRAFT</div>
+    <div class="draft-banner">DRAFT — TIDAK BERLAKU SEBAGAI DOKUMEN RESMI</div>
+    @endif
     <div class="container">
         <div class="header-container">
             <img src="{{ $image }}" alt="STMIK Bandung" style="width: 100px; position: absolute; top: 0; left: 0;" />
@@ -171,6 +198,7 @@
             </tfoot>
         </table>
 
+        @if(empty($is_draft))
         <table class="signature-section">
             <tr>
                 <td style="width: 35%">
@@ -193,6 +221,7 @@
                 </td>
             </tr>
         </table>
+        @endif
     </div>
 </body>
 </html>

@@ -2,27 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
-
-// ? Services
 use App\Models\AuthService;
 use App\Models\UserService;
+// ? Services
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
     protected $service;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->service = new AuthService();
     }
 
-    public function checkToken(Request $request) {
+    public function checkToken(Request $request)
+    {
         if ($request->query('token') and $request->query('role')) {
             $token = $request->query('token');
             $role = $request->query('role');
 
-            if (!$token) {
+            if (! $token) {
                 return self::redirectToLogin();
             }
 
@@ -40,7 +41,7 @@ class AuthController extends Controller
             $user = $userService->getMyProfile()->getData('data')['data'];
             $userProfile = $user['profile'];
             $userAccount = $user['account'];
-            if($role === 'is_mhs') {
+            if ($role === 'is_mhs') {
                 $keuangan = $user['keuangan'];
             }
 
@@ -54,7 +55,7 @@ class AuthController extends Controller
             // save user data to session
             Session::put('account', $userAccount);
             Session::put('profile', $userProfile);
-            if($role === 'is_mhs') {
+            if ($role === 'is_mhs') {
                 Session::put('keuangan', $keuangan);
             }
             Session::put('user_image', $user['account']['image']);
@@ -64,13 +65,15 @@ class AuthController extends Controller
         } else {
             if (Session::has('role') and Session::has('token')) {
                 return redirect()->route('home');
+
             }
 
             return self::redirectToVerifyPage();
         }
     }
 
-    public function logout() {
+    public function logout()
+    {
         if (Session::exists('token')) {
             Session::remove('token');
             Session::remove('role');
@@ -83,7 +86,8 @@ class AuthController extends Controller
         return self::redirectToLogout();
     }
 
-    public function changeUserRole() {
+    public function changeUserRole()
+    {
         $tempSessionRole = Session::get('account');
         $data = [
             'roles' => array_filter($tempSessionRole, function ($item) {
@@ -94,21 +98,24 @@ class AuthController extends Controller
         return view('auth.roles', $data);
     }
 
-    private function redirectToVerifyPage() {
+    private function redirectToVerifyPage()
+    {
         return redirect()->away(
-            config('myconfig.login.base_url') . 'verify?site=' . config('app.url')
+            config('myconfig.login.base_url').'verify?site='.config('app.url')
         );
     }
 
-    private function redirectToLogin() {
+    private function redirectToLogin()
+    {
         return redirect()->away(
-            config('myconfig.login.base_url') . 'login?site=' . config('app.url')
+            config('myconfig.login.base_url').'login?site='.config('app.url')
         );
     }
 
-    private function redirectToLogout() {
+    private function redirectToLogout()
+    {
         return redirect()->away(
-            config('myconfig.login.base_url') . 'logout?site=' .  config('app.url')
+            config('myconfig.login.base_url').'logout?site='.config('app.url')
         );
     }
 }

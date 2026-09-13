@@ -84,6 +84,28 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { useBackdrop } from "../context/BackdropContext";
 import CustomDropdown from "../components/CustomDropdown";
 
+async function downloadRekap(url, token, setLoading) {
+    try {
+        setLoading(true)
+        const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+        if (!response.ok) throw new Error('Export gagal diunduh')
+        const blob = await response.blob()
+        const disposition = response.headers.get('content-disposition') || ''
+        const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1]
+        const plainName = disposition.match(/filename="([^"]+)"|filename=([^;]+)/i)
+        const name = encodedName ? decodeURIComponent(encodedName) : (plainName?.[1] || plainName?.[2]?.trim() || 'rekap.xlsx')
+        const link = document.createElement('a')
+        link.href = URL.createObjectURL(blob)
+        link.download = name
+        link.click()
+        URL.revokeObjectURL(link.href)
+    } catch (error) {
+        customSwal.toast.error({ message: error.message })
+    } finally {
+        setLoading(false)
+    }
+}
+
 export default function Home({ token, base_url, role, app }) {
 
     if (role.mahasiswa.enable) {
@@ -108,6 +130,7 @@ export default function Home({ token, base_url, role, app }) {
 }
 
 function ProdiPage_Rekap_BeritaAcara({ token, base_url, role }) {
+    const [exportLoading, setExportLoading] = useState(false)
     const [listData, setListData] = useState({
         tahun_ajaran: {
             data: [],
@@ -454,6 +477,8 @@ function ProdiPage_Rekap_BeritaAcara({ token, base_url, role }) {
                     </div>
                 )
                 : (
+                    <div>
+                    {!!listData.detail.data?.berita_acara?.length && <div className="p-4 flex gap-2"><Button variant="contained" startIcon={<Download />} disabled={exportLoading} onClick={() => downloadRekap(`${base_url}rekap/berita-acara/export?kelas_kuliah_id=${listData.matkul.select.kelas_kuliah_id}&from=${dayjs(listData.tanggal.from).format('YYYY-MM-DD')}&to=${dayjs(listData.tanggal.to).format('YYYY-MM-DD')}`, token, setExportLoading)}>{exportLoading ? 'Mengunduh...' : 'Excel'}</Button><Button variant="outlined" startIcon={<Download />} disabled={exportLoading} onClick={() => window.location.href = `/rekap/berita-acara/pdf/${listData.matkul.select.kelas_kuliah_id}?from=${dayjs(listData.tanggal.from).format('YYYY-MM-DD')}&to=${dayjs(listData.tanggal.to).format('YYYY-MM-DD')}`}>PDF</Button></div>}
                     <CustomDataTable 
                         loading={listData.detail.loading}
                         rows={listData.detail.data?.berita_acara || []}
@@ -486,6 +511,7 @@ function ProdiPage_Rekap_BeritaAcara({ token, base_url, role }) {
                             }
                         ]}
                     />
+                    </div>
                 )
             } 
         </div>
@@ -1091,6 +1117,7 @@ function ProdiPage_Rekap_Pertemuan({ token, base_url, role }) {
 
 function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
 
+    const [exportLoading, setExportLoading] = useState(false)
     const [listData, setListData] = useState({
         tahun_ajaran: {
             data: [],
@@ -1148,25 +1175,25 @@ function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
                 }
             },
             set: (column, value) => {
-                setListData({
-                    ...listData,
+                setListData(state => ({
+                    ...state,
                     tahun_ajaran: {
-                        ...listData.tahun_ajaran,
+                        ...state.tahun_ajaran,
                         [column]: value
                     }
-                })
+                }))
             },
             loading: (column) => {
-                setListData({
-                    ...listData,
+                setListData(state => ({
+                    ...state,
                     tahun_ajaran: {
-                        ...listData.tahun_ajaran,
+                        ...state.tahun_ajaran,
                         loading: {
-                            ...listData.tahun_ajaran.loading,
-                            [column]: !listData.tahun_ajaran.loading[column]
+                            ...state.tahun_ajaran.loading,
+                            [column]: !state.tahun_ajaran.loading[column]
                         }
                     }
-                })
+                }))
             },
             select: async (value) => {
                 // aksi.dosen.set('data', [])
@@ -1379,6 +1406,8 @@ function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
                     </div>
                 )
                 : (
+                    <div>
+                    {!!listData.detail.data?.kehadiran_mahasiswa?.length && <div className="p-4 flex gap-2"><Button variant="contained" startIcon={<Download />} disabled={exportLoading} onClick={() => downloadRekap(`${base_url}rekap/presensi/export?kelas_kuliah_id=${listData.matkul.select.kelas_kuliah_id}`, token, setExportLoading)}>{exportLoading ? 'Mengunduh...' : 'Excel'}</Button><Button variant="outlined" startIcon={<Download />} disabled={exportLoading} onClick={() => window.location.href = `/rekap/presensi/pdf/${listData.matkul.select.kelas_kuliah_id}`}>PDF</Button></div>}
                     <CustomDataTable 
                         loading={listData.detail.loading}
                         rows={listData.detail.data?.kehadiran_mahasiswa || []}
@@ -1406,10 +1435,11 @@ function ProdiPage_Rekap_Presensi({ token, base_url, role }) {
                                 field: 'persentase_kehadiran',
                                 headerName: 'Persentase Kehadiran',
                                 minWidth: 250,
-                                valueGetter: (value, row) => `${value}%`
+                                valueGetter: (value, row) => `${Number(value || 0).toFixed(2).replace(/\.00$/, '')}%`
                             }
                         ]}
                     />
+                    </div>
                 )
             }
             {/* <CustomTabs>
@@ -2903,7 +2933,8 @@ function DosenWaliPage({ token, base_url, role, app }) {
         krs: {
             data: [],
             loading: {
-                fetch: false
+                fetch: false,
+                export: false
             },
             detail: {
                 data: []
@@ -3037,10 +3068,10 @@ function DosenWaliPage({ token, base_url, role, app }) {
                                 })
                             }
 
-                            if(sts_mhs === 'TA') {
+                            if(sts_mhs === 'N') {
                                 data.push({
                                     label: 'Tidak Aktif',
-                                    value: 'TA'
+                                    value: 'N'
                                 })
                             }
 
@@ -3083,6 +3114,32 @@ function DosenWaliPage({ token, base_url, role, app }) {
                         }
                     }))
                 }
+            },
+            export: async (status) => {
+                const params = new URLSearchParams({ sts_krs: status })
+                Object.entries(listData.krs.filter).forEach(([key, value]) => value?.value !== undefined && params.set(key, value.value))
+                try {
+                    aksi.krs.loading('export')
+                    const response = await fetch(`${base_url}krs/mahasiswa/export?${params}`, { headers: { Authorization: `Bearer ${token}` } })
+                    if (!response.ok) throw new Error('Export Excel gagal diunduh')
+                    const blob = await response.blob()
+                    const disposition = response.headers.get('content-disposition') || ''
+                    const filename = disposition.match(/filename="?([^";]+)"?/)?.[1] || `Rekap-KRS-${status}.xlsx`
+                    const link = document.createElement('a')
+                    link.href = URL.createObjectURL(blob)
+                    link.download = filename
+                    link.click()
+                    URL.revokeObjectURL(link.href)
+                } catch (error) {
+                    customSwal.toast.error({ message: error.message })
+                } finally {
+                    aksi.krs.loading('export')
+                }
+            },
+            exportPdf: (status) => {
+                const params = new URLSearchParams({ sts_krs: status })
+                Object.entries(listData.krs.filter).forEach(([key, value]) => value?.value !== undefined && params.set(key, value.value))
+                window.open(`/krs/dosen-wali/export/pdf?${params}`, '_blank', 'noopener,noreferrer')
             },
             filtered: {
                 hari_ini: () => {
@@ -3278,12 +3335,19 @@ function DosenWaliPage({ token, base_url, role, app }) {
 }
 
 function DosenWaliPage_KRSTab({ token, base_url, role, aksi, listData }) {
+    const ExportButtons = ({ status, label }) => aksi.krs.filtered.sts_krs(status).length > 0 && (
+        <div className="flex gap-2 mb-3">
+            <Button size="small" variant="contained" startIcon={listData.krs.loading.export ? <CircularProgress size={14} color="inherit" /> : <Download />} disabled={listData.krs.loading.export} onClick={() => aksi.krs.export(status)}>{listData.krs.loading.export ? 'Mengunduh...' : `Excel ${label}`}</Button>
+            <Button size="small" variant="outlined" startIcon={<Download />} disabled={listData.krs.loading.export} onClick={() => aksi.krs.exportPdf(status)}>PDF {label}</Button>
+        </div>
+    )
 
     return (
         <CustomTabs>
             <CustomTabItem label="Pengajuan">
                 <div className="divide-y divide-zinc-300">
                     <div className="p-4">
+                        <ExportButtons status="P" label="Pengajuan" />
                         <CustomDataTable 
                             getRowId={(row) => row.mhs_id}
                             loading={listData.krs.loading.fetch}
@@ -3334,6 +3398,7 @@ function DosenWaliPage_KRSTab({ token, base_url, role, aksi, listData }) {
             <CustomTabItem label="Draft / Ditolak">
                 <div className="divide-y divide-zinc-300">
                     <div className="p-4">
+                        <ExportButtons status="D" label="Draft / Ditolak" />
                         <CustomDataTable 
                             getRowId={(row) => row.mhs_id}
                             loading={listData.krs.loading.fetch}
@@ -3381,9 +3446,10 @@ function DosenWaliPage_KRSTab({ token, base_url, role, aksi, listData }) {
                     </div>
                 </div>
             </CustomTabItem>
-            <CustomTabItem label="Di setujui">
+            <CustomTabItem label="Disetujui">
                 <div className="divide-y divide-zinc-300">
                     <div className="p-4">
+                        <ExportButtons status="S" label="Disetujui" />
                         <CustomDataTable 
                             getRowId={(row) => row.mhs_id}
                             loading={listData.krs.loading.fetch}

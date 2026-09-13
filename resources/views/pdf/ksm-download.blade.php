@@ -6,6 +6,7 @@
     <title>Kartu Studi Mahasiswa</title>
     <style>
         @page {
+            size: A4 portrait;
             margin: 18mm 14mm;
         }
 
@@ -36,9 +37,18 @@
             font-weight: bold;
         }
 
-        .container {
-            border: 1px solid #000;
-            padding: 18px;
+        thead {
+            display: table-header-group;
+        }
+
+        tfoot {
+            display: table-footer-group;
+        }
+
+        .course-table tbody tr,
+        .course-table tfoot tr,
+        .signature-section {
+            page-break-inside: avoid;
         }
 
         .header-container {
@@ -80,11 +90,22 @@
 
         .no-border {
             margin-top: 8px;
+            width: 62%;
+            table-layout: auto;
         }
 
         .no-border td {
             border: none;
             padding: 2px 4px;
+        }
+
+        .profile-label {
+            width: 90px;
+        }
+
+        .profile-separator {
+            width: 8px;
+            text-align: center;
         }
 
         .course-table {
@@ -100,9 +121,16 @@
         }
 
         .signature-section {
-            position: relative;
+            border: 0;
             margin-top: 12px;
+            table-layout: fixed;
             width: 100%;
+        }
+
+        .signature-section td {
+            border: 0;
+            padding: 0;
+            vertical-align: top;
         }
 
         .note {
@@ -110,19 +138,41 @@
             padding: 8px;
             font-size: 10.5px;
             text-align: justify;
-            width: 42%;
         }
 
         .signature {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 36%;
             text-align: left;
+        }
+
+        .draft-watermark {
+            position: fixed;
+            top: 42%;
+            left: 12%;
+            width: 76%;
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: #b91c1c;
+            opacity: 0.16;
+            transform: rotate(-28deg);
+        }
+
+        .draft-banner {
+            border: 1px solid #b91c1c;
+            color: #b91c1c;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            padding: 5px;
+            margin-bottom: 8px;
         }
     </style>
 </head>
 <body>
+    @if(!empty($is_draft))
+    <div class="draft-watermark">DRAFT</div>
+    <div class="draft-banner">DRAFT — TIDAK BERLAKU SEBAGAI DOKUMEN RESMI</div>
+    @endif
     <div class="container">
         <div class="header-container">
             @if($image)
@@ -144,8 +194,8 @@
         <table class="no-border">
             <tbody>
                 <tr>
-                    <td style="width: 90px"><strong>NIM</strong></td>
-                    <td style="width: 8px">:</td>
+                    <td class="profile-label"><strong>NIM</strong></td>
+                    <td class="profile-separator">:</td>
                     <td>{{ filled($nim ?? null) ? $nim : '-' }}</td>
                 </tr>
                 <tr>
@@ -181,28 +231,39 @@
                     {{-- <td>{{ $mk['kelas'] }}</td> --}}
                 </tr>
                 @endforeach
+            </tbody>
+            <tfoot>
                 <tr>
                     <td colspan="3" class="text-right"><strong>Jumlah SKS</strong></td>
                     <td class="text-center"><strong>{{ $total_sks ?? 0 }}</strong></td>
                 </tr>
-            </tbody>
+            </tfoot>
         </table>
 
-        <div class="signature-section">
-            <div class="note">
-                Kartu Studi Mahasiswa (KSM) ini merupakan
-                bukti pendaftaran dan pengambilan mata
-                kuliah yang sah. Apabila terdapat perbedaan
-                antara KSM dengan data yang terdapat di
-                SIMAK, maka data yang digunakan sebagai
-                acuan adalah data yang terdapat di SIMAK
-            </div>
-            <div class="signature">
-                Print FRS, {{ filled($tanggal ?? null) ? $tanggal : '-' }}<br><br>
-                Wakil Ketua Bidang Akademik<br><br><br><br><br>
-                <strong>Dani Pradana Kartaputra, M.T.</strong>
-            </div>
-        </div>
+        @if(empty($is_draft))
+        <table class="signature-section">
+            <tr>
+                <td style="width: 42%">
+                    <div class="note">
+                        Kartu Studi Mahasiswa (KSM) ini merupakan
+                        bukti pendaftaran dan pengambilan mata
+                        kuliah yang sah. Apabila terdapat perbedaan
+                        antara KSM dengan data yang terdapat di
+                        SIMAK, maka data yang digunakan sebagai
+                        acuan adalah data yang terdapat di SIMAK
+                    </div>
+                </td>
+                <td style="width: 22%"></td>
+                <td style="width: 36%">
+                    <div class="signature">
+                        Print FRS, {{ filled($tanggal ?? null) ? $tanggal : '-' }}<br><br>
+                        Wakil Ketua Bidang Akademik<br><br><br><br><br>
+                        <strong>Dani Pradana Kartaputra, M.T.</strong>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        @endif
     </div>
 </body>
 </html>

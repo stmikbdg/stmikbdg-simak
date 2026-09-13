@@ -109,7 +109,7 @@ const CustomDataTable = ({
       rows={rows}
       columns={columns}
       {...(pagination && {
-        pageSizeOptions: [5, 10, 25, 50, 100],
+        pageSizeOptions: [5, 10, 25, 50],
         pagination: true,
         initialState: {
           pagination: {
@@ -119,6 +119,7 @@ const CustomDataTable = ({
       })}
       autosizeOnMount={loading}
       disableColumnMenu
+      hideFooter={!pagination}
       disableRowSelectionOnClick
       checkboxSelection={checkbox}
       loading={loading}

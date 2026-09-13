@@ -506,6 +506,259 @@ class WebController extends Controller {
             'kelas_kuliah_id' => $kelas_kuliah_id
         ]);
     }
+
+    /**
+     * KHS Mahasiswa - Dosen Wali Feature (Phase 3)
+     */
+
+    // Main page render
+    public function khs_mahasiswa() {
+        $this->abortIfNotDosenWali();
+        return $this->render('khs_mahasiswa', [], false, false);
+    }
+
+    // Single PDF download
+    public function khs_mahasiswa_download(Request $request, int $mhs_id) {
+        $this->abortIfNotDosenWali();
+
+        $semesters = $this->normalizeSemesterSelection($request->query('semesters', 'all'));
+        
+        $apiData = $this->fetchDosenWaliKHS($mhs_id, $semesters);
+        
+        if (!$apiData) {
+            abort(404, 'Data KHS tidak ditemukan');
+        }
+
+        $data = $this->khsMahasiswaDosenWaliViewData($apiData, $semesters, $this->pdfLogoPath());
+
+        $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
+        
+        $filename = $this->generateKhsFilename($data['nim'], $data['nama'], $semesters);
+        
+        return $pdf->stream($filename);
+    }
+
+    // HTML preview
+    public function khs_mahasiswa_preview(Request $request, int $mhs_id) {
+        $this->abortIfNotDosenWali();
+
+        $semesters = $this->normalizeSemesterSelection($request->query('semesters', 'all'));
+        
+        $apiData = $this->fetchDosenWaliKHS($mhs_id, $semesters);
+        
+        if (!$apiData) {
+            abort(404, 'Data KHS tidak ditemukan');
+        }
+
+        $data = $this->khsMahasiswaDosenWaliViewData($apiData, $semesters, asset('images/stmik.png'));
+
+        return view('pdf/khs-download', $data);
+    }
+
+    // Bulk ZIP download
+    public function khs_mahasiswa_download_bulk(Request $request) {
+        $this->abortIfNotDosenWali();
+        
+        // Set timeout for bulk operation - 50 PDFs could take time
+        set_time_limit(300); // 5 minutes for max 50 students
+
+        $validated = $request->validate([
+            'mhs_ids' => 'required|array|min:1|max:50',
+            'mhs_ids.*' => 'required|integer|distinct',
+            'semesters' => 'required|string'
+        ], [
+            'mhs_ids.required' => 'Pilih minimal 1 mahasiswa',
+            'mhs_ids.max' => 'Maksimal 50 mahasiswa dapat diunduh sekaligus',
+            'mhs_ids.*.distinct' => 'Terdapat mahasiswa yang dipilih lebih dari sekali',
+            'mhs_ids.*.integer' => 'ID mahasiswa tidak valid',
+            'semesters.required' => 'Pilih semester yang akan diunduh'
+        ]);
+
+        $mhsIds = $validated['mhs_ids'];
+        $semesters = $this->normalizeSemesterSelection($validated['semesters']);
+
+        $tempDir = storage_path('app/khs-exports');
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $randomSuffix = substr(md5(uniqid(mt_rand(), true)), 0, 8);
+        $zipFilename = 'KHS-Mahasiswa-' . date('Y-m-d-His') . '-' . $randomSuffix . '-' . $this->getSemesterModeLabel($semesters) . '.zip';
+        $zipPath = $tempDir . '/' . $zipFilename;
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Gagal membuat file ZIP');
+        }
+
+        $successCount = 0;
+        $usedFilenames = [];
+        
+        try {
+            foreach ($mhsIds as $mhsId) {
+                try {
+                    $apiData = $this->fetchDosenWaliKHS($mhsId, $semesters);
+                    
+                    if (!$apiData) {
+                        continue;
+                    }
+
+                    $data = $this->khsMahasiswaDosenWaliViewData($apiData, $semesters, $this->pdfLogoPath());
+
+                    $pdf = Pdf::loadView('pdf/khs-download', $data)->setPaper('A4', 'portrait');
+                    
+                    $baseFilename = $this->generateKhsFilename($data['nim'], $data['nama'], $semesters);
+                    $filename = $this->ensureUniqueFilename($baseFilename, $usedFilenames);
+                    
+                    $pdfContent = $pdf->output();
+                    $zip->addFromString($filename, $pdfContent);
+                    
+                    $successCount++;
+                } catch (\Exception $e) {
+                    continue;
+                }
+            }
+
+            $zip->close();
+        } catch (\Exception $e) {
+            $zip->close();
+            @unlink($zipPath);
+            abort(500, 'Gagal membuat file ZIP: ' . $e->getMessage());
+        }
+
+        if ($successCount === 0) {
+            @unlink($zipPath);
+            abort(404, 'Tidak ada data KHS yang berhasil diunduh');
+        }
+
+        return response()->download($zipPath, $zipFilename)->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Helper Methods for KHS Mahasiswa Dosen Wali
+     */
+
+    private function abortIfNotDosenWali() {
+        $role = Session::get('role');
+        if (!isset($role['is_doswal']) || !$role['is_doswal']) {
+            abort(403, 'Akses ditolak. Hanya dosen wali yang dapat mengakses halaman ini.');
+        }
+    }
+
+    private function normalizeSemesterSelection($semesters) {
+        if ($semesters === 'all' || $semesters === 'semua') {
+            return 'all';
+        }
+
+        if (is_array($semesters)) {
+            $semesters = implode(',', $semesters);
+        }
+
+        $semesters = trim($semesters);
+        
+        if (empty($semesters)) {
+            return 'all';
+        }
+
+        $semesterArray = array_map('intval', explode(',', $semesters));
+        $semesterArray = array_filter($semesterArray, function($s) {
+            return $s >= 1;
+        });
+        $semesterArray = array_unique($semesterArray);
+        sort($semesterArray);
+
+        if (empty($semesterArray)) {
+            return 'all';
+        }
+
+        return implode(',', $semesterArray);
+    }
+
+    private function fetchDosenWaliKHS(int $mhsId, string $semesters) {
+        try {
+            $endpoint = 'krs/mahasiswa/' . $mhsId . '/khs?semesters=' . $semesters;
+            $response = $this->service->get(null, $endpoint)->getData('data');
+
+            if (!isset($response['status']) || $response['status'] !== 'success') {
+                return null;
+            }
+
+            return $response['data'] ?? null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    private function khsMahasiswaDosenWaliViewData(array $apiData, string $semesters, $image) {
+        Carbon::setLocale('id');
+
+        $mahasiswa = $apiData['mahasiswa'] ?? [];
+
+        return [
+            'nim' => $mahasiswa['nim'] ?? '-',
+            'nama' => $mahasiswa['nama'] ?? '-',
+            'dosen_wali' => $mahasiswa['dosen_wali'] ?? '-',
+            'summary' => $apiData['summary'] ?? [],
+            'semesters' => $apiData['semesters'] ?? [],
+            'mode_semester_label' => $this->getSemesterModeLabel($semesters),
+            'tanggal' => Carbon::now()->translatedFormat('d F Y'),
+            'image' => $image
+        ];
+    }
+
+    private function getSemesterModeLabel(string $semesters): string {
+        if ($semesters === 'all') {
+            return 'Semua-Semester';
+        }
+
+        $semesterArray = explode(',', $semesters);
+        
+        if (count($semesterArray) === 1) {
+            return 'Semester-' . $semesterArray[0];
+        }
+
+        return 'Semester-' . str_replace(',', '-', $semesters);
+    }
+
+    private function generateKhsFilename(string $nim, string $nama, string $semesters): string {
+        $namaSlug = $this->sanitizeFilename($nama);
+        $semesterLabel = $this->getSemesterModeLabel($semesters);
+        
+        return $nim . '-' . $namaSlug . '-' . $semesterLabel . '.pdf';
+    }
+
+    private function sanitizeFilename(string $name): string {
+        // Prevent path traversal explicitly
+        $name = str_replace(['../', '..\\', './'], '', $name);
+        $name = basename($name); // Extra safety - removes any path component
+        
+        // Remove non-alphanumeric except spaces and dash
+        $name = preg_replace('/[^a-zA-Z0-9\s\-]/', '', $name);
+        // Replace multiple spaces with single dash
+        $name = preg_replace('/\s+/', '-', trim($name));
+        // Replace multiple dashes with single dash
+        $name = preg_replace('/-+/', '-', $name);
+        // Trim leading/trailing dashes
+        $name = trim($name, '-');
+        
+        return $name ?: 'Mahasiswa'; // Fallback if empty after sanitization
+    }
+
+    private function ensureUniqueFilename(string $filename, array &$usedFilenames): string {
+        $originalFilename = $filename;
+        $counter = 1;
+        
+        while (in_array($filename, $usedFilenames)) {
+            $counter++;
+            $pathInfo = pathinfo($originalFilename);
+            $basename = $pathInfo['filename'];
+            $extension = isset($pathInfo['extension']) ? '.' . $pathInfo['extension'] : '';
+            $filename = $basename . '-' . $counter . $extension;
+        }
+        
+        $usedFilenames[] = $filename;
+        return $filename;
+    }
 }
 
 ?>
